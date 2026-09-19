@@ -55,6 +55,16 @@ class TelephonyChannelService {
     } catch (_) {}
   }
 
+  /// Launch Android Package Installer for downloaded APK
+  Future<bool> installApk(String filePath) async {
+    try {
+      final res = await _methodChannel.invokeMethod<bool>('installApk', {'filePath': filePath});
+      return res ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   void stopListening() {
     _subscription?.cancel();
     _subscription = null;

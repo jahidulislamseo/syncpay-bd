@@ -52,6 +52,46 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(true)
                 }
+                "installApk" -> {
+                    try {
+                        val filePath = call.argument<String>("filePath")
+                        if (filePath == null) {
+                            result.error("ARGUMENT_ERROR", "filePath is required", null)
+                            return@setMethodCallHandler
+                        }
+
+                        val file = java.io.File(filePath)
+                        if (!file.exists()) {
+                            result.error("FILE_NOT_FOUND", "APK file not found at $filePath", null)
+                            return@setMethodCallHandler
+                        }
+
+                        // Check Unknown Sources Permission for Android 8.0 (API 26+)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            if (!packageManager.canRequestPackageInstalls()) {
+                                val permissionIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                                    data = Uri.parse("package:$packageName")
+                                }
+                                startActivity(permissionIntent)
+                            }
+                        }
+
+                        val apkUri = androidx.core.content.FileProvider.getUriForFile(
+                            this,
+                            "$packageName.fileprovider",
+                            file
+                        )
+
+                        val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(apkUri, "application/vnd.android.package-archive")
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }
+                        startActivity(installIntent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("INSTALL_ERROR", e.localizedMessage, null)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }

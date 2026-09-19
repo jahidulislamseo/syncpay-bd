@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../services/biometric_service.dart';
 import '../../../services/csv_export_service.dart';
+import '../../../services/update_service.dart';
 import '../../dashboard/providers/agent_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -214,6 +215,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 8),
               Text('Dedicated hardware-level telephony agent ensuring zero dropped payment notifications.',
                   style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF10B981),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () {
+                    UpdateService.checkForUpdates(
+                      context,
+                      serverUrl: agentState.serverUrl,
+                      showNoUpdateToast: true,
+                    );
+                  },
+                  icon: const Icon(Icons.system_update_rounded, size: 18),
+                  label: const Text('নতুন আপডেট চেক করুন (Check Update)', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
             ]),
           )),
           const SizedBox(height: 24),

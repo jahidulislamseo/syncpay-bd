@@ -12,6 +12,7 @@ class AppConfig {
   static const String ingestEndpoint = '/api/v1/device/sms/ingest';
   static const String heartbeatEndpoint = '/api/v1/device/heartbeat';
   static const String legacySyncEndpoint = '/api/v1/device/sync';
+  static const String appVersionEndpoint = '/api/v1/app/version';
 
   // Retry Schedule (seconds)
   static const List<int> retryIntervalsSeconds = [5, 15, 30, 60, 120];

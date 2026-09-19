@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../services/update_service.dart';
 import '../../connection/presentation/connection_screen.dart';
 import '../../logs/presentation/activity_logs_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
@@ -17,6 +18,18 @@ class AgentShell extends ConsumerStatefulWidget {
 
 class _AgentShellState extends ConsumerState<AgentShell> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-check for OTA App Updates silently in the background
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final serverUrl = ref.read(agentProvider).serverUrl;
+        UpdateService.checkForUpdates(context, serverUrl: serverUrl);
+      }
+    });
+  }
 
   final List<Widget> _screens = const [
     DashboardScreen(),
