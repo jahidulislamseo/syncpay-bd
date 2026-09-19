@@ -3119,154 +3119,6 @@
     }
 
     // ==========================================
-    // PLAN AUTH & ACTIVATION MODAL CONTROLLER
-    // ==========================================
-    let selectedPlanForAuth = 'business';
-
-    function getSelectedPlanDetails(planId) {
-      const allPlans = [...primaryPlans, ...extraPlans];
-      return allPlans.find(p => p.id === planId) || primaryPlans[2];
-    }
-
-    function openPlanAuthModal(planId = 'business', preferredTab = 'login') {
-      selectedPlanForAuth = planId;
-      const plan = getSelectedPlanDetails(planId);
-      const isYearly = currentBilling === 'yearly';
-      const price = isYearly ? plan.yearly : plan.monthly;
-      const billingLabel = isYearly ? '/mo (Yearly Billing)' : '/mo (Monthly Billing)';
-
-      // Populate plan banner
-      const badgeEl = document.getElementById('modal-plan-badge');
-      const priceEl = document.getElementById('modal-plan-price');
-      const durEl = document.getElementById('modal-plan-dur');
-      const titleEl = document.getElementById('modal-plan-title');
-      const descEl = document.getElementById('modal-plan-desc');
-
-      if (badgeEl) badgeEl.textContent = `Selected Plan: ${plan.name}`;
-      if (priceEl) priceEl.textContent = `৳${price}`;
-      if (durEl) durEl.textContent = billingLabel;
-      if (titleEl) titleEl.textContent = plan.name;
-      if (descEl) descEl.textContent = `${plan.sites || '1 Website'} Integration • ${plan.bonus || 'Standard Features'} • Unlimited Transactions • Full API + Support`;
-
-      // Check current login session in localStorage
-      let session = null;
-      try {
-        session = JSON.parse(localStorage.getItem('syncpay_session'));
-      } catch (e) {}
-
-      const alreadyLoggedBox = document.getElementById('modal-already-logged');
-      const authFormsBox = document.getElementById('modal-auth-forms');
-
-      if (session && session.email) {
-        // User is ALREADY logged in
-        alreadyLoggedBox.style.display = 'block';
-        authFormsBox.style.display = 'none';
-
-        document.getElementById('modal-user-name').textContent = session.name || 'Merchant User';
-        document.getElementById('modal-user-email').textContent = session.email;
-        const initials = (session.name || 'MU').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-        document.getElementById('modal-user-avatar').textContent = initials;
-        document.getElementById('modal-current-plan').textContent = `Current: ${session.plan || 'starter'}`;
-        document.getElementById('modal-target-plan').textContent = `New: ${plan.name} (৳${price})`;
-      } else {
-        // User needs to Login or Register
-        alreadyLoggedBox.style.display = 'none';
-        authFormsBox.style.display = 'block';
-        switchModalAuthTab(preferredTab);
-      }
-
-      // Open Modal
-      const modal = document.getElementById('plan-auth-modal');
-      modal.style.display = 'flex';
-      setTimeout(() => modal.classList.add('active'), 10);
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closePlanAuthModal() {
-      const modal = document.getElementById('plan-auth-modal');
-      modal.classList.remove('active');
-      setTimeout(() => {
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-      }, 250);
-    }
-
-    function handleModalBackdropClick(e) {
-      if (e.target.id === 'plan-auth-modal') {
-        closePlanAuthModal();
-      }
-    }
-
-    function switchModalAuthTab(tab) {
-      const loginForm = document.getElementById('modal-login-form');
-      const regForm = document.getElementById('modal-reg-form');
-      const tabLogin = document.getElementById('modal-tab-btn-login');
-      const tabReg = document.getElementById('modal-tab-btn-reg');
-      const loginErr = document.getElementById('modal-login-error');
-      const regErr = document.getElementById('modal-reg-error');
-
-      if (loginErr) loginErr.style.display = 'none';
-      if (regErr) regErr.style.display = 'none';
-
-      if (tab === 'register') {
-        loginForm.style.display = 'none';
-        regForm.style.display = 'block';
-        tabLogin.classList.remove('active');
-        tabReg.classList.add('active');
-      } else {
-        loginForm.style.display = 'block';
-        regForm.style.display = 'none';
-        tabLogin.classList.add('active');
-        tabReg.classList.remove('active');
-      }
-    }
-
-    function fillModalDemo(email, password) {
-      document.getElementById('modal-login-email').value = email;
-      document.getElementById('modal-login-password').value = password;
-      switchModalAuthTab('login');
-    }
-
-    function confirmLoggedPlanUpgrade() {
-      try {
-        let session = JSON.parse(localStorage.getItem('syncpay_session'));
-        if (session) {
-          const plan = getSelectedPlanDetails(selectedPlanForAuth);
-          session.plan = selectedPlanForAuth;
-          session.billing = currentBilling;
-          session.planActivatedAt = new Date().toISOString();
-          localStorage.setItem('syncpay_session', JSON.stringify(session));
-
-          const accounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
-          const idx = accounts.findIndex(a => a.email === session.email);
-          if (idx !== -1) {
-            accounts[idx].plan = selectedPlanForAuth;
-            localStorage.setItem('syncpay_accounts', JSON.stringify(accounts));
-          }
-
-          localStorage.setItem('syncpay_toast', JSON.stringify({
-            message: `Congratulations! Your ${plan.name} plan has been activated. 🎉`,
-            type: 'success'
-          }));
-
-          window.location.href = '/dashboard';
-        }
-      } catch (e) {
-        window.location.href = '/dashboard';
-      }
-    }
-
-    function handleModalLogout() {
-      localStorage.removeItem('syncpay_session');
-      document.getElementById('modal-already-logged').style.display = 'none';
-      document.getElementById('modal-auth-forms').style.display = 'block';
-      switchModalAuthTab('login');
-    }
-
-    function handleModalLogin(e) {
-      e.preventDefault();
-      const emailInput = document.getElementById('modal-login-email').value.trim().toLowerCase();
-    // ==========================================
     // PLAN AUTH & PAYMENT ACTIVATION CONTROLLER
     // ==========================================
     let selectedPlanForAuth = 'business';
@@ -3284,12 +3136,19 @@
       const price = isYearly ? plan.yearly : plan.monthly;
       const billingLabel = isYearly ? '/mo (Yearly Billing)' : '/mo (Monthly Billing)';
 
-      // Reset views
-      document.getElementById('modal-payment-step').style.display = 'none';
-      const alreadyLoggedBox = document.getElementById('modal-already-logged');
-      const authFormsBox = document.getElementById('modal-auth-forms');
+      // Check current login session in localStorage
+      let session = null;
+      try {
+        session = JSON.parse(localStorage.getItem('syncpay_session'));
+      } catch (e) {}
 
-      // Populate plan banner
+      if (session && session.email) {
+        // User is ALREADY logged in -> Redirect straight to official hosted checkout!
+        redirectToPlanCheckout(session);
+        return;
+      }
+
+      // Populate plan banner for new / guest users
       const badgeEl = document.getElementById('modal-plan-badge');
       const priceEl = document.getElementById('modal-plan-price');
       const durEl = document.getElementById('modal-plan-dur');
@@ -3302,36 +3161,19 @@
       if (titleEl) titleEl.textContent = plan.name;
       if (descEl) descEl.textContent = `${plan.sites || '1 Website'} Integration • ${plan.bonus || 'Standard Features'} • Unlimited Transactions • Full API + Support`;
 
-      // Check current login session in localStorage
-      let session = null;
-      try {
-        session = JSON.parse(localStorage.getItem('syncpay_session'));
-      } catch (e) {}
-
-      if (session && session.email) {
-        // User is ALREADY logged in -> Show upgrade with payment step
-        alreadyLoggedBox.style.display = 'block';
-        authFormsBox.style.display = 'none';
-
-        document.getElementById('modal-user-name').textContent = session.name || 'Merchant User';
-        document.getElementById('modal-user-email').textContent = session.email;
-        const initials = (session.name || 'MU').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-        document.getElementById('modal-user-avatar').textContent = initials;
-        document.getElementById('modal-current-plan').textContent = `Current: ${session.plan || 'starter'}`;
-        document.getElementById('modal-target-plan').textContent = `New: ${plan.name} (৳${price})`;
-        pendingMerchantSession = session;
-      } else {
-        // User needs to Login or Register first
-        alreadyLoggedBox.style.display = 'none';
-        authFormsBox.style.display = 'block';
-        switchModalAuthTab(preferredTab);
-      }
+      const alreadyLoggedBox = document.getElementById('modal-already-logged');
+      const authFormsBox = document.getElementById('modal-auth-forms');
+      if (alreadyLoggedBox) alreadyLoggedBox.style.display = 'none';
+      if (authFormsBox) authFormsBox.style.display = 'block';
+      switchModalAuthTab(preferredTab);
 
       // Open Modal
       const modal = document.getElementById('plan-auth-modal');
-      modal.style.display = 'flex';
-      setTimeout(() => modal.classList.add('active'), 10);
-      document.body.style.overflow = 'hidden';
+      if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('active'), 10);
+        document.body.style.overflow = 'hidden';
+      }
     }
 
     function closePlanAuthModal() {
@@ -3379,92 +3221,20 @@
       switchModalAuthTab('login');
     }
 
-    function showPaymentStep(session) {
-      pendingMerchantSession = session;
+    function redirectToPlanCheckout(session) {
       const plan = getSelectedPlanDetails(selectedPlanForAuth);
       const isYearly = currentBilling === 'yearly';
       const price = isYearly ? plan.yearly : plan.monthly;
-      const days = isYearly ? 365 : 30;
-
-      // Hide auth and already logged boxes
-      document.getElementById('modal-auth-forms').style.display = 'none';
-      document.getElementById('modal-already-logged').style.display = 'none';
-
-      // Setup Payment Step Details
-      document.getElementById('modal-payment-step').style.display = 'block';
-      document.getElementById('pay-inv-id').textContent = 'SUB_' + Math.random().toString(36).slice(2, 8).toUpperCase();
-      document.getElementById('pay-plan-name').textContent = plan.name;
-      document.getElementById('pay-plan-dur').textContent = isYearly ? '1 Year (365 Days)' : '1 Month (30 Days)';
-      document.getElementById('pay-plan-amount').textContent = `৳${price}.00`;
-      document.getElementById('pay-merchant-name').textContent = session.name + ' (' + session.email + ')';
-      document.getElementById('modal-pay-trxid').value = '';
-      const payErr = document.getElementById('modal-pay-error');
-      if (payErr) payErr.style.display = 'none';
-    }
-
-    function fillAutoTestTrx() {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let rnd = 'BL';
-      for (let i = 0; i < 8; i++) rnd += chars.charAt(Math.floor(Math.random() * chars.length));
-      document.getElementById('modal-pay-trxid').value = rnd;
-    }
-
-    function submitSubscriptionPayment() {
-      const trxInput = document.getElementById('modal-pay-trxid').value.trim().toUpperCase();
-      const errEl = document.getElementById('modal-pay-error');
-
-      if (!trxInput || trxInput.length < 6) {
-        errEl.textContent = 'Please enter a valid TrxID or click "⚡ Auto TrxID".';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      errEl.style.display = 'none';
-      const plan = getSelectedPlanDetails(selectedPlanForAuth);
-      const isYearly = currentBilling === 'yearly';
-      const price = isYearly ? plan.yearly : plan.monthly;
-      const durationDays = isYearly ? 365 : 30;
-      const now = new Date();
-      const expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
-
-      // Activate Plan with exact 30-day expiration
-      const session = pendingMerchantSession || JSON.parse(localStorage.getItem('syncpay_session') || '{}');
-      session.plan = selectedPlanForAuth;
-      session.planStatus = 'ACTIVE';
-      session.billingCycle = currentBilling;
-      session.planPrice = price;
-      session.planActivatedAt = now.toISOString();
-      session.expiresAt = expiresAt;
-      session.lastPaidTrx = trxInput;
-      session.lastPaidAmount = price;
-
-      localStorage.setItem('syncpay_session', JSON.stringify(session));
-
-      // Update in stored accounts list
-      const accounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
-      const idx = accounts.findIndex(a => a.email === session.email);
-      if (idx !== -1) {
-        accounts[idx].plan = selectedPlanForAuth;
-        accounts[idx].planStatus = 'ACTIVE';
-        accounts[idx].expiresAt = expiresAt;
-        accounts[idx].billingCycle = currentBilling;
-        localStorage.setItem('syncpay_accounts', JSON.stringify(accounts));
-      }
-
-      // Success toast with renewal notice
-      const expDateFormatted = new Date(expiresAt).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
-      localStorage.setItem('syncpay_toast', JSON.stringify({
-        message: `Payment Verified! Your ${plan.name} plan has been activated. Expiry: ${expDateFormatted} (${durationDays} days). 🎉`,
-        type: 'success'
-      }));
-
-      window.location.href = '/dashboard';
+      const merchantEmail = encodeURIComponent((session && session.email) || '');
+      const merchantName = encodeURIComponent((session && session.name) || 'Merchant');
+      window.location.href = `/checkout?plan=${encodeURIComponent(plan.id)}&billing=${currentBilling}&amount=${price}&merchant=${merchantEmail}&name=${merchantName}`;
     }
 
     function confirmLoggedPlanUpgrade() {
-      const session = JSON.parse(localStorage.getItem('syncpay_session'));
+      let session = null;
+      try { session = JSON.parse(localStorage.getItem('syncpay_session')); } catch (e) {}
       if (session) {
-        showPaymentStep(session);
+        redirectToPlanCheckout(session);
       }
     }
 
@@ -3472,7 +3242,6 @@
       localStorage.removeItem('syncpay_session');
       pendingMerchantSession = null;
       document.getElementById('modal-already-logged').style.display = 'none';
-      document.getElementById('modal-payment-step').style.display = 'none';
       document.getElementById('modal-auth-forms').style.display = 'block';
       switchModalAuthTab('login');
     }
@@ -3486,7 +3255,7 @@
       const DEFAULT_ACCOUNTS = [
         { id: 'm_demo_101', email: 'demo@syncpaybd.xyz', password: 'demo1234', name: 'Demo Merchant', business: 'Demo Store BD', apiKey: 'live_sk_demo_99410abc' },
         { id: 'm_starter_001', email: 'starter@test.com', password: 'test1234', name: 'Starter User', business: 'My Small Shop', apiKey: 'live_sk_starter_11111' },
-        { id: 'm_ent_001', email: 'enterprise@test.com', password: 'ent1234', name: 'Enterprise Corp', business: 'BigCorp BD Ltd', apiKey: 'live_sk_ent_999abc' }
+        { id: 'm_ent_001', email: 'enterprise@test.com', password: 'test1234', name: 'Enterprise Corp', business: 'BigCorp BD Ltd', apiKey: 'live_sk_ent_999abc' }
       ];
 
       const storedAccounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
@@ -3505,7 +3274,7 @@
         return;
       }
 
-      // Step 1 Passed: Proceed to Step 2 (Subscription Payment)
+      // Login Succeeded -> Redirect to Official Checkout Page
       const session = {
         merchantId: merchant.id,
         email: merchant.email,
@@ -3519,7 +3288,7 @@
       };
       localStorage.setItem('syncpay_session', JSON.stringify(session));
 
-      showPaymentStep(session);
+      redirectToPlanCheckout(session);
     }
 
     function handleModalRegister(e) {
@@ -3576,8 +3345,8 @@
       };
       localStorage.setItem('syncpay_session', JSON.stringify(session));
 
-      // Step 1 Passed: Proceed to Step 2 (Subscription Payment)
-      showPaymentStep(session);
+      // Registration Succeeded -> Redirect to Official Checkout Page
+      redirectToPlanCheckout(session);
     }
 
     // Close on Escape key
@@ -3591,7 +3360,7 @@
     setInterval(fetchFeed, 3000);
   </script>
 
-  <!-- Plan Authentication & Activation Modal -->
+  <!-- Plan Authentication Modal -->
   <div id="plan-auth-modal" class="plan-auth-overlay" onclick="handleModalBackdropClick(event)">
     <div class="plan-auth-card">
       <button type="button" class="plan-auth-close" onclick="closePlanAuthModal()" title="Close">&times;</button>
@@ -3623,7 +3392,7 @@
             <div class="modal-logged-chip new" id="modal-target-plan">New: Business 3</div>
           </div>
           <button type="button" class="btn-modal-submit" onclick="confirmLoggedPlanUpgrade()">
-            <span>💳 Proceed to Payment & Activate Plan</span>
+            <span>💳 Proceed to Official Checkout</span>
             <span>→</span>
           </button>
         </div>
@@ -3652,7 +3421,7 @@
           </div>
           <div id="modal-login-error" class="modal-error-box"></div>
           <button type="submit" class="btn-modal-submit" id="modal-login-submit-btn">
-            <span>Next: Payment & Activation</span>
+            <span>Proceed to Official Checkout</span>
             <span>→</span>
           </button>
           
@@ -3678,67 +3447,18 @@
           </div>
           <div class="modal-form-group">
             <label>Email Address</label>
-            <input type="email" id="modal-reg-email" class="modal-input" placeholder="rahim@gmail.com" required autocomplete="email">
+            <input type="email" id="modal-reg-email" class="modal-input" placeholder="merchant@gmail.com" required autocomplete="email">
           </div>
           <div class="modal-form-group">
-            <label>Password (min 6 characters)</label>
-            <input type="password" id="modal-reg-password" class="modal-input" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+            <label>Password</label>
+            <input type="password" id="modal-reg-password" class="modal-input" placeholder="At least 6 characters" required autocomplete="new-password">
           </div>
           <div id="modal-reg-error" class="modal-error-box"></div>
           <button type="submit" class="btn-modal-submit" id="modal-reg-submit-btn">
-            <span>Create Account & Proceed to Payment</span>
+            <span>Create Account & Proceed to Checkout</span>
             <span>→</span>
           </button>
         </form>
-      </div>
-
-      <!-- PAYMENT CHECKOUT STEP (Step 2: Payment Gateway) -->
-      <div id="modal-payment-step" style="display:none;">
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:14px; text-align:left;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:12px; font-weight:700; color:#64748b;">Subscription Invoice:</span>
-            <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-weight:800; font-size:11px; padding:2px 8px; border-radius:6px;" id="pay-inv-id">SUB_INV_9921</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
-            <span style="color:#64748b;">Merchant:</span>
-            <strong id="pay-merchant-name" style="color:#0f172a;">Demo Merchant</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
-            <span style="color:#64748b;">Selected Plan:</span>
-            <strong id="pay-plan-name" style="color:#0f172a;">Business 3</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-            <span style="color:#64748b;">Duration:</span>
-            <span id="pay-plan-dur" style="color:#10b981; font-weight:700;">1 Month (30 Days)</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:15px; border-top:1px dashed #cbd5e1; padding-top:8px; margin-top:6px;">
-            <span style="font-weight:700; color:#0f172a;">Total Payable:</span>
-            <strong id="pay-plan-amount" style="color:#0284c7; font-size:18px;">৳200.00</strong>
-          </div>
-        </div>
-
-        <div style="margin-bottom:14px; font-size:12px; color:#475569; background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:10px 12px; line-height:1.5; text-align:left;">
-          📌 <strong>Payment Instructions:</strong> Send Money to <span class="mono" style="font-weight:800; color:#0f172a; background:#fef08a; padding:1px 6px; border-radius:4px;">01712345678</span> via bKash or Nagad, then enter the received <strong>TrxID</strong> below to complete verification.
-        </div>
-
-        <div class="modal-form-group">
-          <label>Transaction ID (TrxID)</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="modal-pay-trxid" class="modal-input" placeholder="e.g., BL78A4982J" style="font-family:monospace; text-transform:uppercase;">
-            <button type="button" class="modal-demo-btn" style="white-space:nowrap; padding:0 12px;" onclick="fillAutoTestTrx()">⚡ Auto TrxID</button>
-          </div>
-        </div>
-
-        <div id="modal-pay-error" class="modal-error-box"></div>
-
-        <button type="button" class="btn-modal-submit" onclick="submitSubscriptionPayment()">
-          <span>Verify & Activate Plan (30 Days)</span>
-          <span>→</span>
-        </button>
-
-        <div style="text-align:center; margin-top:12px;">
-          <button type="button" onclick="closePlanAuthModal()" style="background:none; border:none; color:#64748b; font-size:12px; cursor:pointer;">Pay Later (Cancel)</button>
-        </div>
       </div>
     </div>
   </div>

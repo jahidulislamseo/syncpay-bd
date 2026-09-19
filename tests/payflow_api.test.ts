@@ -81,7 +81,7 @@ describe('PayFlow Sandbox API v1.0 Suite', () => {
     const body = JSON.parse(res.body);
     assert.strictEqual(body.status, true);
     assert.strictEqual(body.message, 'Invoice created successfully.');
-    assert.match(body.payment_url, /\/checkout\.html\?invoice_id=PF/);
+    assert.match(body.payment_url, /\/checkout(\.html)?\?invoice_id=PF/);
   });
 
   test('POST /v1/payment/verify for pending invoice returns status PENDING', async () => {

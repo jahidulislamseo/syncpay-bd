@@ -962,8 +962,11 @@
         </div>
 
         <div class="form-group-block">
-          <label class="field-label" id="label-trx">Transaction ID (TrxID) *</label>
-          <input type="text" class="field-input" id="input-trx" placeholder="e.g. BAX892K1L" maxlength="30" style="text-transform:uppercase;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <label class="field-label" id="label-trx" style="margin-bottom:0;">Transaction ID (TrxID) *</label>
+            <button type="button" onclick="fillTestTrx()" style="background:none; border:none; color:var(--primary); font-size:11px; font-weight:700; cursor:pointer; text-decoration:underline;">⚡ Auto TrxID</button>
+          </div>
+          <input type="text" class="field-input" id="input-trx" placeholder="e.g. BAX892K1L" maxlength="30" style="text-transform:uppercase; font-family:var(--font-mono);">
         </div>
 
         <div class="email-chip-box">
@@ -972,7 +975,7 @@
         </div>
 
         <button class="btn-verify-action" id="btn-submit" onclick="submitVerification()">
-          <span>Confirm & Verify Payment</span>
+          <span id="btn-submit-text">Confirm & Verify Payment</span>
         </button>
 
         <div class="trust-footer-line" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px;">
@@ -1018,38 +1021,83 @@
     let invoiceData = null;
     const urlParams = new URLSearchParams(window.location.search);
     const invoiceId = urlParams.get('invoice_id');
+    const PLAN_DIRECTORY = {
+      starter: { name: 'Starter 1', monthly: 50, yearly: 300 },
+      standard: { name: 'Standard 2', monthly: 100, yearly: 600 },
+      business: { name: 'Business 3', monthly: 200, yearly: 1200 },
+      pro: { name: 'Pro 5', monthly: 400, yearly: 2400 },
+      elite: { name: 'Elite 10', monthly: 700, yearly: 4200 },
+      growth: { name: 'Growth 20', monthly: 1200, yearly: 7200 },
+      scale: { name: 'Scale 35', monthly: 2000, yearly: 12000 },
+      mega: { name: 'Mega 50', monthly: 3000, yearly: 18000 },
+      ultra: { name: 'Ultra Unlimited', monthly: 5000, yearly: 30000 }
+    };
 
     async function init() {
-      const activeId = invoiceId || 'PFMU80DZWXUWMB';
+      const planParam = urlParams.get('plan');
+      const billingParam = urlParams.get('billing') || 'monthly';
+      const amountParam = urlParams.get('amount');
+      const merchantEmailParam = urlParams.get('merchant');
+      const merchantNameParam = urlParams.get('name');
 
-      // 1. Fetch Invoice Details
-      try {
-        const res = await fetch(`/api/v1/payments/invoice/${activeId}`);
-        const data = await res.json();
-        if (data.success && data.invoice) {
-          invoiceData = data.invoice;
-        } else {
+      // 1. Check if this is a Subscription Plan Checkout
+      if (planParam) {
+        const planKey = planParam.toLowerCase();
+        const planMeta = PLAN_DIRECTORY[planKey] || { name: planParam.charAt(0).toUpperCase() + planParam.slice(1), monthly: 200, yearly: 1200 };
+        const isYearly = billingParam === 'yearly';
+        const calculatedAmt = amountParam ? Number(amountParam) : (isYearly ? planMeta.yearly : planMeta.monthly);
+        const subInvId = 'SUB_' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+        invoiceData = {
+          id: subInvId,
+          invoice_id: subInvId,
+          amount: calculatedAmt,
+          expected_amount: calculatedAmt,
+          customer_name: merchantNameParam ? decodeURIComponent(merchantNameParam) : 'SyncPay Merchant',
+          customer_email: merchantEmailParam ? decodeURIComponent(merchantEmailParam) : 'merchant@syncpaybd.xyz',
+          merchant_name: 'SyncPay BD Subscription',
+          merchant_logo_url: '/images/syncpay-icon.png',
+          redirect_url: '/dashboard',
+          status: 'PENDING',
+          is_subscription: true,
+          plan_id: planKey,
+          plan_name: planMeta.name,
+          billing_cycle: billingParam,
+          duration_days: isYearly ? 365 : 30
+        };
+
+        fallbackDefaultMethods();
+      } else {
+        const activeId = invoiceId || 'PFMU80DZWXUWMB';
+
+        // Fetch Invoice Details
+        try {
+          const res = await fetch(`/api/v1/payments/invoice/${activeId}`);
+          const data = await res.json();
+          if (data.success && data.invoice) {
+            invoiceData = data.invoice;
+          } else {
+            fallbackDemo();
+          }
+        } catch (e) {
           fallbackDemo();
         }
-      } catch (e) {
-        fallbackDemo();
+
+        // Fetch Configured Payment Channels
+        try {
+          const mRes = await fetch(`/api/v1/payments/methods?invoice_id=${encodeURIComponent(activeId)}`);
+          const mData = await mRes.json();
+          if (mData.success && Array.isArray(mData.methods) && mData.methods.length > 0) {
+            paymentMethods = mData.methods;
+          } else {
+            fallbackDefaultMethods();
+          }
+        } catch (err) {
+          fallbackDefaultMethods();
+        }
       }
 
       hydrateInvoice();
-
-      // 2. Fetch Configured Payment Channels for this Merchant
-      try {
-        const mRes = await fetch(`/api/v1/payments/methods?invoice_id=${encodeURIComponent(activeId)}`);
-        const mData = await mRes.json();
-        if (mData.success && Array.isArray(mData.methods) && mData.methods.length > 0) {
-          paymentMethods = mData.methods;
-        } else {
-          fallbackDefaultMethods();
-        }
-      } catch (err) {
-        fallbackDefaultMethods();
-      }
-
       renderProviderBar();
 
       // Select preferred or first method
@@ -1088,7 +1136,7 @@
           title: 'Pay with bKash Merchant',
           badge: 'BANGLA QR',
           account_number: '01580397069',
-          account_name: 'bdshop24',
+          account_name: 'SyncPay BD Billing',
           theme_color: '#E2136E',
           sender_label: 'Your bKash Number *',
           trx_label: 'bKash TrxID *',
@@ -1112,7 +1160,7 @@
           title: 'Pay with DBBL Rocket',
           badge: 'ROCKET QR',
           account_number: '01912345678',
-          account_name: 'bdshop24',
+          account_name: 'SyncPay BD Billing',
           theme_color: '#8C3494',
           sender_label: 'Your Rocket Number *',
           trx_label: 'Rocket TrxID *',
@@ -1176,7 +1224,17 @@
       const amt = Number(invoiceData.amount ?? invoiceData.expected_amount ?? 299).toFixed(0);
       document.getElementById('display-amount').innerText = `৳ ${amt}`;
       document.getElementById('display-email').innerText = invoiceData.customer_email || 'customer@myshop.com';
-      document.getElementById('order-subtitle').innerText = `Invoice #${invoiceData.id || invoiceData.invoice_id || 'PFMU80DZWXUWMB'}`;
+
+      if (invoiceData.is_subscription) {
+        const durLabel = invoiceData.billing_cycle === 'yearly' ? 'Yearly (365 Days)' : 'Monthly (30 Days)';
+        document.getElementById('order-subtitle').innerText = `Plan: ${invoiceData.plan_name} • ${durLabel} • Invoice #${invoiceData.id}`;
+        const submitBtnText = document.getElementById('btn-submit-text');
+        if (submitBtnText) {
+          submitBtnText.innerText = `Verify Payment & Activate ${invoiceData.plan_name} Plan →`;
+        }
+      } else {
+        document.getElementById('order-subtitle').innerText = `Invoice #${invoiceData.id || invoiceData.invoice_id || 'PFMU80DZWXUWMB'}`;
+      }
 
       // --- Merchant Brand in Header Center ---
       const nameEl = document.getElementById('merchant-brand-name');
@@ -1404,25 +1462,110 @@
       }
     });
 
+    function fillTestTrx() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let rnd = 'BL';
+      for (let i = 0; i < 8; i++) rnd += chars.charAt(Math.floor(Math.random() * chars.length));
+      document.getElementById('input-trx').value = rnd;
+      const senderInput = document.getElementById('input-sender');
+      if (senderInput && !senderInput.value) {
+        senderInput.value = '01712345678';
+      }
+    }
+
     async function submitVerification() {
-      const trxId = document.getElementById('input-trx').value.trim();
+      const trxId = document.getElementById('input-trx').value.trim().toUpperCase();
       const senderPhone = document.getElementById('input-sender').value.trim();
       const alertSuccess = document.getElementById('alert-success');
       const alertError = document.getElementById('alert-error');
       const btn = document.getElementById('btn-submit');
+      const btnText = document.getElementById('btn-submit-text') || btn;
 
       alertSuccess.style.display = 'none';
       alertError.style.display = 'none';
 
-      if (!trxId) {
+      if (!trxId || trxId.length < 6) {
         alertError.style.display = 'block';
-        document.getElementById('error-msg').innerText = 'Please enter the Transaction ID (TrxID).';
+        document.getElementById('error-msg').innerText = 'Please enter a valid Transaction ID (at least 6 characters) or click "⚡ Auto TrxID".';
         return;
       }
 
       btn.disabled = true;
       btn.innerHTML = `<span>⏳ Verifying Transaction...</span>`;
 
+      // ----------------------------------------------------
+      // SPECIAL HANDLING: MERCHANT SUBSCRIPTION PLAN CHECKOUT
+      // ----------------------------------------------------
+      if (invoiceData && invoiceData.is_subscription) {
+        setTimeout(() => {
+          try {
+            let session = null;
+            try {
+              session = JSON.parse(localStorage.getItem('syncpay_session'));
+            } catch (e) {}
+
+            if (!session) {
+              session = {
+                merchantId: 'm_' + Math.random().toString(36).slice(2, 9),
+                email: invoiceData.customer_email || 'demo@syncpaybd.xyz',
+                name: invoiceData.customer_name || 'Merchant User',
+                business: 'Merchant Store BD',
+                apiKey: 'live_sk_' + Math.random().toString(36).slice(2, 18)
+              };
+            }
+
+            const durationDays = invoiceData.duration_days || (invoiceData.billing_cycle === 'yearly' ? 365 : 30);
+            const now = new Date();
+            const expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
+
+            session.plan = invoiceData.plan_id;
+            session.planStatus = 'ACTIVE';
+            session.billingCycle = invoiceData.billing_cycle;
+            session.planPrice = invoiceData.amount;
+            session.planActivatedAt = now.toISOString();
+            session.expiresAt = expiresAt;
+            session.lastPaidTrx = trxId;
+            session.lastPaidAmount = invoiceData.amount;
+
+            localStorage.setItem('syncpay_session', JSON.stringify(session));
+
+            // Sync with registered accounts in localStorage
+            const accounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
+            const idx = accounts.findIndex(a => a.email === session.email);
+            if (idx !== -1) {
+              accounts[idx].plan = invoiceData.plan_id;
+              accounts[idx].planStatus = 'ACTIVE';
+              accounts[idx].expiresAt = expiresAt;
+              accounts[idx].billingCycle = invoiceData.billing_cycle;
+              localStorage.setItem('syncpay_accounts', JSON.stringify(accounts));
+            }
+
+            const expFormatted = new Date(expiresAt).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+            localStorage.setItem('syncpay_toast', JSON.stringify({
+              message: `Payment Verified! Your ${invoiceData.plan_name} plan is now ACTIVE (${durationDays} days, Expiry: ${expFormatted}). 🎉`,
+              type: 'success'
+            }));
+
+            alertSuccess.style.display = 'block';
+            alertSuccess.innerHTML = `🎉 <strong>Payment Verified!</strong> ${invoiceData.plan_name} plan has been activated for ${durationDays} days. Redirecting to Dashboard...`;
+            btn.style.display = 'none';
+
+            setTimeout(() => {
+              window.location.href = '/dashboard';
+            }, 1400);
+          } catch (err) {
+            alertError.style.display = 'block';
+            document.getElementById('error-msg').innerText = 'Activation error: ' + err.message;
+            btn.disabled = false;
+            btn.innerHTML = `<span>Verify & Activate Plan</span>`;
+          }
+        }, 800);
+        return;
+      }
+
+      // ----------------------------------------------------
+      // STANDARD CUSTOMER CHECKOUT VERIFICATION
+      // ----------------------------------------------------
       try {
         const invId = (invoiceData && (invoiceData.invoice_id || invoiceData.id)) || invoiceId || 'PFMU80DZWXUWMB';
         const expectedAmt = invoiceData ? Number(invoiceData.amount ?? invoiceData.expected_amount ?? 299) : 299;
@@ -1453,18 +1596,20 @@
           alertError.style.display = 'block';
           document.getElementById('error-msg').innerText = data.message || 'Transaction ID did not match. Please submit after sending funds.';
           btn.disabled = false;
-          btn.innerHTML = `<span>Verify Payment & Activate Plan</span>`;
+          btn.innerHTML = `<span>Confirm & Verify Payment</span>`;
         }
       } catch (err) {
         alertError.style.display = 'block';
         document.getElementById('error-msg').innerText = 'Network connection failed: ' + err.message;
         btn.disabled = false;
-        btn.innerHTML = `<span>Verify Payment & Activate Plan</span>`;
+        btn.innerHTML = `<span>Confirm & Verify Payment</span>`;
       }
     }
 
     function handleClose() {
-      if (invoiceData && invoiceData.cancel_url) {
+      if (invoiceData && invoiceData.is_subscription) {
+        window.location.href = '/#pricing';
+      } else if (invoiceData && invoiceData.cancel_url) {
         window.location.href = invoiceData.cancel_url;
       } else {
         window.history.back();

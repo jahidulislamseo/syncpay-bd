@@ -1407,12 +1407,12 @@ class PayFlowDashboardApp {
 
   downloadPlugin(pluginName) {
     const fileMap = {
-      woocommerce: { url: '/downloads/syncpay-woocommerce-v2.4.2.zip', name: 'syncpay-woocommerce-v2.4.2.zip' },
-      whmcs: { url: '/downloads/syncpay-whmcs-v1.8.0.zip', name: 'syncpay-whmcs-v1.8.0.zip' },
-      php: { url: '/downloads/syncpay-php-sdk.zip', name: 'syncpay-php-sdk.zip' },
-      nodejs: { url: '/downloads/syncpay-node-sdk.zip', name: 'syncpay-node-sdk.zip' },
-      python: { url: '/downloads/syncpay-python-sdk.zip', name: 'syncpay-python-sdk.zip' },
-      apk: { url: '/downloads/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
+      woocommerce: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-woocommerce-v2.4.2.zip', name: 'syncpay-woocommerce-v2.4.2.zip' },
+      whmcs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-whmcs-v1.8.0.zip', name: 'syncpay-whmcs-v1.8.0.zip' },
+      php: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-php-sdk.zip', name: 'syncpay-php-sdk.zip' },
+      nodejs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-node-sdk.zip', name: 'syncpay-node-sdk.zip' },
+      python: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-python-sdk.zip', name: 'syncpay-python-sdk.zip' },
+      apk: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
     };
 
     const target = fileMap[pluginName];
@@ -1424,10 +1424,14 @@ class PayFlowDashboardApp {
     this.showToast(`Starting download: ${target.name}...`, 'success');
     const link = document.createElement('a');
     link.href = target.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
     link.setAttribute('download', target.name);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 500);
   }
 
   showPluginGuide(pluginName) {
@@ -2833,54 +2837,12 @@ class PayFlowDashboardApp {
   }
 
   openRenewModal() {
-    const old = document.getElementById('renew-modal-overlay');
-    if (old) old.remove();
-
-    const planInfo = auth.getPlan(this.session.plan);
-    const price = this.session.planPrice || 200;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'renew-modal-overlay';
-    overlay.style.cssText = 'position:fixed; inset:0; z-index:999999; background:rgba(6,13,31,0.82); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; padding:20px;';
-    overlay.innerHTML = `
-      <div style="background:#ffffff; border-radius:20px; width:100%; max-width:460px; padding:28px; box-shadow:0 25px 60px rgba(0,0,0,0.4); text-align:left; position:relative;">
-        <button onclick="document.getElementById('renew-modal-overlay').remove()" style="position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; background:#f1f5f9; border:none; color:#64748b; font-size:18px; cursor:pointer;">&times;</button>
-        <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:4px;">Subscription Renewal & Payment</h3>
-        <p style="font-size:13px; color:#64748b; margin-bottom:16px;">Extend your active plan for another 30 days.</p>
-        
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; margin-bottom:14px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px;">
-            <span style="color:#64748b;">Plan:</span>
-            <strong style="color:#0f172a;">${planInfo.label || this.session.plan}</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
-            <span style="color:#64748b;">Extended Duration:</span>
-            <span style="color:#10b981; font-weight:700;">+30 Days</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:16px; border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
-            <span style="font-weight:700; color:#0f172a;">Renewal Fee:</span>
-            <strong style="color:#0284c7; font-size:18px;">৳${price}.00</strong>
-          </div>
-        </div>
-
-        <div style="margin-bottom:12px; font-size:12px; color:#475569; background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:10px 12px; line-height:1.5;">
-          📌 Send Money to <span style="font-weight:800; color:#0f172a;">01712345678</span> via bKash or Nagad and submit TrxID below.
-        </div>
-
-        <div style="margin-bottom:14px;">
-          <label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Transaction ID (TrxID)</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="renew-trx-input" class="form-control" placeholder="e.g., BL78A4982J" style="font-family:monospace; text-transform:uppercase;">
-            <button type="button" class="btn btn-secondary-action" style="white-space:nowrap; padding:0 12px; font-size:12px;" onclick="document.getElementById('renew-trx-input').value='BL'+Math.random().toString(36).slice(2,10).toUpperCase()">⚡ Auto TrxID</button>
-          </div>
-        </div>
-
-        <button class="btn btn-primary-action" style="width:100%; height:44px; font-size:14px;" onclick="window.payflowApp.submitRenewPayment(${price})">
-          Verify Payment & Activate Service →
-        </button>
-      </div>
-    `;
-    document.body.appendChild(overlay);
+    const plan = this.session?.plan || 'business';
+    const billing = this.session?.billingCycle || 'monthly';
+    const price = this.session?.planPrice || (billing === 'yearly' ? 1200 : 200);
+    const email = encodeURIComponent(this.session?.email || '');
+    const name = encodeURIComponent(this.session?.name || 'Merchant');
+    window.location.href = `/checkout?plan=${encodeURIComponent(plan)}&billing=${encodeURIComponent(billing)}&amount=${price}&merchant=${email}&name=${name}`;
   }
 
   submitRenewPayment(amount) {

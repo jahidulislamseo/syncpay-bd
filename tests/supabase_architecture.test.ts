@@ -231,7 +231,7 @@ describe('Supabase PostgreSQL Architecture & Migration Test Suite', { concurrenc
     assert.strictEqual(createRes.statusCode, 201);
     const createBody = JSON.parse(createRes.body);
     assert.strictEqual(createBody.status, true);
-    assert.match(createBody.payment_url, /checkout\.html\?invoice_id=PF/);
+    assert.match(createBody.payment_url, /\/checkout(\.html)?\?invoice_id=PF/);
 
     const invoiceId = createBody.payment_url.split('invoice_id=')[1];
 
