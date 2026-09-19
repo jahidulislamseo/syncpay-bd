@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_PATH = path.resolve(__dirname, '../../payflow.db');
+const DB_PATH = process.env.DB_PATH || (process.env.VERCEL ? '/tmp/payflow.db' : path.resolve(__dirname, '../../payflow.db'));
 
 export interface TransactionRecord {
   id: number;

@@ -104,14 +104,18 @@ server.get('/docs/webhook', async (_req, reply) => {
 const PORT = Number(process.env.PORT) || 4000;
 const HOST = '0.0.0.0';
 
-try {
-  await server.listen({ port: PORT, host: HOST });
-  console.log(`\n======================================================`);
-  console.log(`🚀 SyncPay BD Engine running at: http://localhost:${PORT}`);
-  console.log(`📊 Dashboard & Checkout UI:       http://localhost:${PORT}/`);
-  console.log(`🌐 Production Domain:             https://syncpaybd.xyz`);
-  console.log(`======================================================\n`);
-} catch (err) {
-  server.log.error(err);
-  process.exit(1);
+if (!process.env.VERCEL) {
+  try {
+    await server.listen({ port: PORT, host: HOST });
+    console.log(`\n======================================================`);
+    console.log(`🚀 SyncPay BD Engine running at: http://localhost:${PORT}`);
+    console.log(`📊 Dashboard & Checkout UI:       http://localhost:${PORT}/`);
+    console.log(`🌐 Production Domain:             https://syncpaybd.xyz`);
+    console.log(`======================================================\n`);
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
 }
+
+export default server;

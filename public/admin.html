@@ -8,6 +8,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/admin/css/admin.css">
+  <script>
+    if (window.location.pathname.endsWith('.html')) {
+      const clean = window.location.pathname.replace(/\.html$/, '') || '/';
+      window.history.replaceState(null, '', (clean === '/index' ? '/' : clean) + window.location.search + window.location.hash);
+    }
+  </script>
 </head>
 <body>
 
@@ -128,7 +134,7 @@
             <div class="admin-name">Super Administrator</div>
             <div class="admin-role">Full Infrastructure Scope</div>
           </div>
-          <a href="/dashboard.html" title="Switch to Merchant Dashboard" style="display:inline-flex; align-items:center; color:var(--text-muted);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></a>
+          <a href="/dashboard" title="Switch to Merchant Dashboard" style="display:inline-flex; align-items:center; color:var(--text-muted);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></a>
         </div>
       </div>
     </aside>
