@@ -66,7 +66,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     if (!apiKey) {
       return reply.status(401).send({
         status: false,
-        message: 'Missing API key. Please provide payflow-api-key header or ?apikey query parameter.',
+        message: 'Missing API key. Please provide syncpay-api-key header or ?apikey query parameter.',
       });
     }
 
@@ -124,7 +124,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     if (!apiKey) {
       return reply.status(401).send({
         status: false,
-        message: 'Missing API key. Please provide payflow-api-key header or ?apikey parameter.',
+        message: 'Missing API key. Please provide syncpay-api-key header or ?apikey parameter.',
       });
     }
 

@@ -70,12 +70,44 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
+      position: relative;
     }
 
     .header-left {
       display: flex;
       align-items: center;
       gap: 14px;
+      z-index: 2;
+    }
+
+    .header-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .header-logo-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .header-logo-link:hover {
+      opacity: 0.85;
+    }
+
+    .header-brand-logo {
+      height: 32px;
+      width: auto;
+      max-width: 140px;
+      object-fit: contain;
+      display: block;
     }
 
     .header-icon-box {
@@ -228,6 +260,16 @@
       }
       .provider-bar {
         padding: 10px 16px;
+      }
+      .header-brand-logo {
+        height: 26px;
+        max-width: 110px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .header-center {
+        display: none;
       }
     }
 
@@ -761,6 +803,13 @@
           </div>
           <span class="header-subtitle" id="order-subtitle">Invoice #PFMU80DZWXUWMB</span>
         </div>
+      </div>
+
+      <!-- Centered Brand Logo -->
+      <div class="header-center">
+        <a href="/" target="_blank" title="SyncPay BD" class="header-logo-link">
+          <img src="/images/syncpay-logo.png" alt="SyncPay BD" class="header-brand-logo">
+        </a>
       </div>
 
       <div class="header-right">

@@ -17,7 +17,7 @@ class SyncPayClient {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       'syncpay-api-key': this.apiKey,
-      'payflow-api-key': this.apiKey,
+      'syncpay-api-key': this.apiKey,
       'Content-Type': 'application/json',
       ...options.headers,
     };

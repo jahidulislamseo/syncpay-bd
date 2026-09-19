@@ -28,7 +28,7 @@ class NotificationService {
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'zinipay_sms', 'SMS Forwarded',
-          channelDescription: 'ZiniPay payment SMS forwarding alerts',
+          channelDescription: 'SyncPay BD payment SMS forwarding alerts',
           importance: Importance.high,
           priority: Priority.high,
         ),

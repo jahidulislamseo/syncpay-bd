@@ -133,7 +133,7 @@ function syncpay_woocommerce_init() {
                 'headers'   => array(
                     'Content-Type'       => 'application/json',
                     'syncpay-api-key'    => $this->api_key,
-                    'payflow-api-key'    => $this->api_key,
+                    'syncpay-api-key'    => $this->api_key,
                 ),
                 'body'      => wp_json_encode($payload),
             ));

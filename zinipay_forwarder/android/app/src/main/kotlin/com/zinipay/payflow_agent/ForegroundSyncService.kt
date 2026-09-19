@@ -31,7 +31,7 @@ class ForegroundSyncService : Service() {
             return START_NOT_STICKY
         }
 
-        val notification = buildNotification("ZiniPay Agent Connected", "Monitoring incoming MFS payment SMS in real-time")
+        val notification = buildNotification("SyncPay BD Agent Connected", "Monitoring incoming MFS payment SMS in real-time")
         startForeground(NOTIFICATION_ID, notification)
 
         return START_STICKY
@@ -39,7 +39,7 @@ class ForegroundSyncService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "ZiniPay Payment Daemon"
+            val name = "SyncPay BD Payment Daemon"
             val descriptionText = "Persistent service keeping payment SMS receiver active"
             val importance = NotificationManager.IMPORTANCE_LOW
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {

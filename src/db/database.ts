@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_PATH = process.env.DB_PATH || (process.env.VERCEL ? '/tmp/payflow.db' : path.resolve(__dirname, '../../payflow.db'));
+const DB_PATH = process.env.DB_PATH || (process.env.VERCEL ? '/tmp/syncpay.db' : path.resolve(__dirname, '../../syncpay.db'));
 
 export interface TransactionRecord {
   id: number;
@@ -233,7 +233,7 @@ export class DatabaseService {
     if (!existing) {
       this.db.prepare(`
         INSERT INTO merchants (id, name, api_key, webhook_url)
-        VALUES ('m_payflow_sandbox', 'SyncPay BD Sandbox Merchant', 'sandbox_test_8f4c9a2e7b31', 'https://merchant.com/api/payflow/webhook')
+        VALUES ('m_payflow_sandbox', 'SyncPay BD Sandbox Merchant', 'sandbox_test_8f4c9a2e7b31', 'https://merchant.com/api/syncpay/webhook')
       `).run();
     } else if (existing.id !== 'm_payflow_sandbox') {
       this.db.exec(`
@@ -241,7 +241,7 @@ export class DatabaseService {
         UPDATE devices SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
         UPDATE transactions SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
         UPDATE invoices SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
-        UPDATE merchants SET id = 'm_payflow_sandbox', name = 'SyncPay BD Sandbox Merchant', webhook_url = 'https://merchant.com/api/payflow/webhook' WHERE api_key = 'sandbox_test_8f4c9a2e7b31';
+        UPDATE merchants SET id = 'm_payflow_sandbox', name = 'SyncPay BD Sandbox Merchant', webhook_url = 'https://merchant.com/api/syncpay/webhook' WHERE api_key = 'sandbox_test_8f4c9a2e7b31';
         PRAGMA foreign_keys = ON;
       `);
     }
@@ -265,7 +265,7 @@ export class DatabaseService {
     if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('00000000-0000-0000-0000-000000000999')) {
       this.db.prepare(`
         INSERT OR IGNORE INTO merchants (id, name, api_key, webhook_url)
-        VALUES ('00000000-0000-0000-0000-000000000999', 'SyncPay BD Sandbox (UUID)', 'sandbox_test_8f4c9a2e7b31_uuid', 'https://merchant.com/api/payflow/webhook')
+        VALUES ('00000000-0000-0000-0000-000000000999', 'SyncPay BD Sandbox (UUID)', 'sandbox_test_8f4c9a2e7b31_uuid', 'https://merchant.com/api/syncpay/webhook')
       `).run();
     }
     if (!this.db.prepare('SELECT id FROM devices WHERE id = ? OR device_token = ?').get('00000000-0000-0000-0000-000000000001', 'token_phone_primary_uuid')) {
@@ -865,22 +865,22 @@ export class DatabaseService {
   private seedAdminData() {
     // Seed default admin users
     const checkAdmin = this.db.prepare('SELECT id FROM admin_users WHERE email = ?');
-    if (!checkAdmin.get('admin@payflow.com')) {
+    if (!checkAdmin.get('admin@syncpaybd.xyz')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_root', 'SyncPay BD Super Admin', 'admin@payflow.com', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
+        VALUES ('admin_root', 'SyncPay BD Super Admin', 'admin@syncpaybd.xyz', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
       `).run();
     }
-    if (!checkAdmin.get('ops@payflow.com')) {
+    if (!checkAdmin.get('ops@syncpaybd.xyz')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_ops', 'Tariqul Islam (Ops Lead)', 'ops@payflow.com', 'Operations Admin', 'ACTIVE', 'hashed_ops_pwd')
+        VALUES ('admin_ops', 'Tariqul Islam (Ops Lead)', 'ops@syncpaybd.xyz', 'Operations Admin', 'ACTIVE', 'hashed_ops_pwd')
       `).run();
     }
-    if (!checkAdmin.get('security@payflow.com')) {
+    if (!checkAdmin.get('security@syncpaybd.xyz')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_sec', 'Nusrat Jahan (SecOps)', 'security@payflow.com', 'Security Admin', 'ACTIVE', 'hashed_sec_pwd')
+        VALUES ('admin_sec', 'Nusrat Jahan (SecOps)', 'security@syncpaybd.xyz', 'Security Admin', 'ACTIVE', 'hashed_sec_pwd')
       `).run();
     }
 
@@ -889,7 +889,7 @@ export class DatabaseService {
     if (!checkChaldal.get('m_chaldal_bd')) {
       this.db.prepare(`
         INSERT INTO merchants (id, name, api_key, webhook_url)
-        VALUES ('m_chaldal_bd', 'Chaldal Grocery Express', 'live_sec_chaldal_7781', 'https://api.chaldal.com/payflow/webhook')
+        VALUES ('m_chaldal_bd', 'Chaldal Grocery Express', 'live_sec_chaldal_7781', 'https://api.chaldal.com/syncpay/webhook')
       `).run();
     }
     if (!checkChaldal.get('m_daraz_hub')) {
@@ -950,10 +950,10 @@ export class DatabaseService {
     const auditCount = (this.db.prepare('SELECT COUNT(id) as c FROM audit_logs').get() as any)?.c || 0;
     if (auditCount === 0) {
       const logs = [
-        { email: 'admin@payflow.com', action: 'ADMIN_LOGIN', res: 'Auth', id: 'admin_root', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Super Admin login from trusted dashboard IP' },
-        { email: 'ops@payflow.com', action: 'DEVICE_STATUS_CHECK', res: 'Device', id: 'dev_phone_4', ip: '192.168.1.24', resu: 'SUCCESS', det: 'Dispatched health ping to Gadget Mart forwarder' },
-        { email: 'security@payflow.com', action: 'API_KEY_INSPECTION', res: 'ApiKey', id: 'key_sec_99', ip: '10.0.0.15', resu: 'SUCCESS', det: 'Audited active keys for Chaldal Grocery Express' },
-        { email: 'admin@payflow.com', action: 'SYSTEM_SETTINGS_UPDATE', res: 'Settings', id: 'global_conf', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Updated MFS webhook timeout to 6000ms' },
+        { email: 'admin@syncpaybd.xyz', action: 'ADMIN_LOGIN', res: 'Auth', id: 'admin_root', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Super Admin login from trusted dashboard IP' },
+        { email: 'ops@syncpaybd.xyz', action: 'DEVICE_STATUS_CHECK', res: 'Device', id: 'dev_phone_4', ip: '192.168.1.24', resu: 'SUCCESS', det: 'Dispatched health ping to Gadget Mart forwarder' },
+        { email: 'security@syncpaybd.xyz', action: 'API_KEY_INSPECTION', res: 'ApiKey', id: 'key_sec_99', ip: '10.0.0.15', resu: 'SUCCESS', det: 'Audited active keys for Chaldal Grocery Express' },
+        { email: 'admin@syncpaybd.xyz', action: 'SYSTEM_SETTINGS_UPDATE', res: 'Settings', id: 'global_conf', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Updated MFS webhook timeout to 6000ms' },
       ];
       for (const l of logs) {
         this.db.prepare(`
@@ -1071,7 +1071,7 @@ export class DatabaseService {
     return merchants.map((m) => ({
       ...m,
       status: 'ACTIVE',
-      email: `${m.id}@merchant.payflow.com`,
+      email: `${m.id}@merchant.syncpaybd.xyz`,
     }));
   }
 
@@ -1083,7 +1083,7 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?)
     `).run(id, name, apiKey, webhookUrl || null);
 
-    this.insertAuditLog('admin@payflow.com', 'MERCHANT_CREATE', 'Merchant', id, '127.0.0.1', 'SUCCESS', `Created merchant ${name}`);
+    this.insertAuditLog('admin@syncpaybd.xyz', 'MERCHANT_CREATE', 'Merchant', id, '127.0.0.1', 'SUCCESS', `Created merchant ${name}`);
     return this.getMerchantById(id);
   }
 
@@ -1107,7 +1107,7 @@ export class DatabaseService {
 
   public updateDeviceStatusAdmin(deviceId: string, status: 'ONLINE' | 'OFFLINE' | 'DISABLED') {
     this.db.prepare('UPDATE devices SET status = ? WHERE id = ?').run(status, deviceId);
-    this.insertAuditLog('admin@payflow.com', 'DEVICE_STATUS_CHANGE', 'Device', deviceId, '127.0.0.1', 'SUCCESS', `Set status to ${status}`);
+    this.insertAuditLog('admin@syncpaybd.xyz', 'DEVICE_STATUS_CHANGE', 'Device', deviceId, '127.0.0.1', 'SUCCESS', `Set status to ${status}`);
     return { success: true, deviceId, status };
   }
 
@@ -1168,7 +1168,7 @@ export class DatabaseService {
 
   public revokeApiKeyAdmin(keyId: string) {
     this.db.prepare("UPDATE api_keys SET status = 'revoked' WHERE id = ?").run(keyId);
-    this.insertAuditLog('admin@payflow.com', 'API_KEY_REVOKE', 'ApiKey', keyId, '127.0.0.1', 'SUCCESS', 'Admin revoked merchant API key');
+    this.insertAuditLog('admin@syncpaybd.xyz', 'API_KEY_REVOKE', 'ApiKey', keyId, '127.0.0.1', 'SUCCESS', 'Admin revoked merchant API key');
     return { success: true, keyId };
   }
 
@@ -1216,7 +1216,7 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?, 'ACTIVE', 'hashed_generated_pwd')
     `).run(id, params.name, params.email, params.role);
 
-    this.insertAuditLog('admin@payflow.com', 'ADMIN_USER_CREATE', 'AdminUser', id, '127.0.0.1', 'SUCCESS', `Created admin ${params.name} with role ${params.role}`);
+    this.insertAuditLog('admin@syncpaybd.xyz', 'ADMIN_USER_CREATE', 'AdminUser', id, '127.0.0.1', 'SUCCESS', `Created admin ${params.name} with role ${params.role}`);
     return { id, name: params.name, email: params.email, role: params.role };
   }
 
@@ -1236,7 +1236,7 @@ export class DatabaseService {
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
     `).run(key, value);
 
-    this.insertAuditLog('admin@payflow.com', 'SETTING_UPDATE', 'SystemSetting', key, '127.0.0.1', 'SUCCESS', `Updated ${key} to ${value}`);
+    this.insertAuditLog('admin@syncpaybd.xyz', 'SETTING_UPDATE', 'SystemSetting', key, '127.0.0.1', 'SUCCESS', `Updated ${key} to ${value}`);
     return { success: true, key, value };
   }
 

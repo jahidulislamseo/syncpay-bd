@@ -35,6 +35,8 @@ export class WebhookService {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'SyncPayBD-Webhook-Engine/1.0',
+          'X-SyncPay-Signature': signature,
+          'X-SyncPay-Invoice-Id': params.invoiceId,
           'X-Payflow-Signature': signature,
           'X-Payflow-Invoice-Id': params.invoiceId,
         },

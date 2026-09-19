@@ -13,12 +13,12 @@ class CsvExportService {
     final csv = _buildCsv(transactions);
     final dir = await getTemporaryDirectory();
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final file = File('${dir.path}/zinipay_log_$timestamp.csv');
+    final file = File('${dir.path}/syncpay_log_$timestamp.csv');
     await file.writeAsString(csv, encoding: const SystemEncoding());
 
     await Share.shareXFiles(
       [XFile(file.path, mimeType: 'text/csv')],
-      subject: 'ZiniPay SMS Log — $timestamp',
+      subject: 'SyncPay BD SMS Log — $timestamp',
     );
   }
 

@@ -10,7 +10,7 @@ import 'package:payflow_agent/main.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const ZiniPayForwarderApp());
-    expect(find.byType(ZiniPayForwarderApp), findsOneWidget);
+    await tester.pumpWidget(const SyncPayForwarderApp());
+    expect(find.byType(SyncPayForwarderApp), findsOneWidget);
   });
 }

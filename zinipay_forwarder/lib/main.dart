@@ -17,19 +17,19 @@ void main() async {
       overrides: [
         localVaultProvider.overrideWithValue(vault),
       ],
-      child: const ZiniPayForwarderApp(),
+      child: const SyncPayForwarderApp(),
     ),
   );
 }
 
-class ZiniPayForwarderApp extends ConsumerStatefulWidget {
-  const ZiniPayForwarderApp({super.key});
+class SyncPayForwarderApp extends ConsumerStatefulWidget {
+  const SyncPayForwarderApp({super.key});
 
   @override
-  ConsumerState<ZiniPayForwarderApp> createState() => _ZiniPayForwarderAppState();
+  ConsumerState<SyncPayForwarderApp> createState() => _SyncPayForwarderAppState();
 }
 
-class _ZiniPayForwarderAppState extends ConsumerState<ZiniPayForwarderApp> {
+class _SyncPayForwarderAppState extends ConsumerState<SyncPayForwarderApp> {
   final TelephonyChannelService _telephonyChannel = TelephonyChannelService();
 
   @override
@@ -66,7 +66,7 @@ class _ZiniPayForwarderAppState extends ConsumerState<ZiniPayForwarderApp> {
     }
 
     return MaterialApp(
-      title: 'ZiniPay Payment Agent',
+      title: 'SyncPay BD Payment Agent',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

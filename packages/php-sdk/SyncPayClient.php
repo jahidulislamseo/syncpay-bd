@@ -20,7 +20,7 @@ class SyncPayClient {
 
         $headers = [
             'syncpay-api-key: ' . $this->apiKey,
-            'payflow-api-key: ' . $this->apiKey,
+            'syncpay-api-key: ' . $this->apiKey,
             'Content-Type: application/json',
             'Accept: application/json',
         ];

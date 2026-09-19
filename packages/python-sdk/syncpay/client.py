@@ -14,7 +14,7 @@ class SyncPayClient:
         url = f"{self.base_url}{endpoint}"
         headers = {
             "syncpay-api-key": self.api_key,
-            "payflow-api-key": self.api_key,
+            "syncpay-api-key": self.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
