@@ -6,7 +6,19 @@
 [![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](package.json)
 [![Fastify](https://img.shields.io/badge/Fastify-5.2-black.svg)](https://fastify.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](tsconfig.json)
-[![Android](https://img.shields.io/badge/Android-Agent%20Native%2BFlutter-3DDC84.svg)](zinipay_forwarder/)
+[![Latest Release](https://img.shields.io/github/v/release/jahidulislamseo/syncpay-bd?color=orange&label=Release)](https://github.com/jahidulislamseo/syncpay-bd/releases/latest)
+[![Download APK](https://img.shields.io/badge/Download-Android%20Forwarder%20APK%20(v1.0.0)-success?logo=android)](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-forwarder.apk)
+
+### 📥 Direct Downloads (v1.0.0)
+
+| Asset | Type | Link |
+|---|---|---|
+| **Android Forwarder Agent** | `.apk` (Android 8.0+) | [**Download APK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-forwarder.apk) |
+| **WooCommerce Gateway** | WordPress Plugin (`.zip`) | [**Download Plugin**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-woocommerce-v2.4.2.zip) |
+| **WHMCS Payment Module** | Gateway Module (`.zip`) | [**Download Module**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-whmcs-v1.8.0.zip) |
+| **PHP / Laravel SDK** | Package (`.zip`) | [**Download SDK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-php-sdk.zip) |
+| **Node.js SDK** | TypeScript SDK (`.zip`) | [**Download SDK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-node-sdk.zip) |
+| **Python Client SDK** | REST Client (`.zip`) | [**Download SDK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-python-sdk.zip) |
 
 ---
 
