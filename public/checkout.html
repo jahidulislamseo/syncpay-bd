@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncPay BD | Secure Hosted Checkout</title>
+  <link rel="icon" type="image/png" href="/images/syncpay-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --primary: #E2136E;
+      --primary-dark: #C1115E;
+      --primary-light: #FDF2F7;
+      --primary-border: #FBCFE8;
+      
+      --accent-green: #10B981;
+      --bg-backdrop: rgba(11, 15, 25, 0.75);
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: #090d16;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: var(--text-main);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(226, 19, 110, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.12) 0px, transparent 50%);
+    }
+
+    /* Master Checkout Modal */
+    .checkout-modal {
+      width: 100%;
+      max-width: 960px;
+      background: var(--bg-card);
+      border-radius: 22px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    @keyframes modalEnter {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Header Bar */
+    .checkout-header {
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .header-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .badge-bangla-qr {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .price-display-box {
+      text-align: right;
+    }
+
+    .price-amount {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .price-period {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .btn-close-modal {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    .btn-close-modal:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* Top Provider Selector Tabs */
+    .provider-bar {
+      padding: 12px 28px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+    }
+
+    .provider-pill {
+      flex: 1;
+      max-width: 260px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .provider-pill:hover {
+      border-color: #94a3b8;
+    }
+    .provider-pill.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      box-shadow: 0 4px 12px -2px rgba(226, 19, 110, 0.15);
+    }
+
+    /* 2-Column Master Body */
+    .checkout-body {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 820px) {
+      .checkout-body {
+        grid-template-columns: 1fr;
+        padding: 20px;
+        gap: 24px;
+      }
+      .checkout-header {
+        padding: 16px 20px;
+      }
+      .provider-bar {
+        padding: 10px 16px;
+      }
+    }
+
+    /* Left Column: Source Info & Tabs */
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .merchant-card {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      transition: all 0.3s;
+    }
+
+    .merchant-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .merchant-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .btn-copy-red {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-copy-red:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .merchant-number-display {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: 0.03em;
+      margin-bottom: 10px;
+    }
+
+    .merchant-notice-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+    }
+    .merchant-notice-box strong {
+      color: var(--text-main);
+    }
+
+    /* QR / Steps Sub-Tabs Card */
+    .qr-steps-card {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sub-tabs-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafc;
+    }
+
+    .sub-tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .sub-tab-btn.active {
+      color: var(--primary);
+      background: #ffffff;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .sub-tab-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 310px;
+    }
+
+    /* Bangla QR Container */
+    .bangla-qr-inner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+      text-align: center;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .bangla-qr-inner:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .qr-card-logo {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .qr-frame-pink {
+      background: var(--primary);
+      border-radius: 12px;
+      padding: 10px;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .qr-white-canvas {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 6px;
+      width: 170px;
+      height: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-white-canvas img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .qr-number-sub {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.08em;
+      margin-top: 6px;
+    }
+
+    .qr-sub-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .qr-label-pill {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .btn-zoom-qr {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-zoom-qr:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* Steps Tab Content */
+    .steps-list-container {
+      width: 100%;
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.8;
+    }
+    .steps-list-container ol {
+      padding-left: 20px;
+    }
+    .steps-list-container li {
+      margin-bottom: 6px;
+    }
+    .highlight-val {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* Right Column: Verification Card */
+    .right-column {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .verification-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 20px;
+    }
+    .verification-card-title svg {
+      color: var(--accent-green);
+    }
+
+    .form-group-block {
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: var(--font-mono);
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .field-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .email-chip-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: #475569;
+      margin-bottom: 20px;
+    }
+    .email-chip-box strong {
+      color: var(--text-main);
+      font-family: var(--font-mono);
+    }
+
+    .btn-verify-action {
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--primary);
+      border: none;
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 16px -2px rgba(226, 19, 110, 0.35);
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .btn-verify-action:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .btn-verify-action:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .trust-footer-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #15803d;
+      text-align: center;
+    }
+
+    /* Alerts */
+    .status-alert {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .status-alert.success {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+    .status-alert.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    /* =========================================
+       ZOOM LIGHTBOX MODAL (Pixel-Perfect Match)
+       ========================================= */
+    .qr-zoom-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 20px;
+      animation: fadeInOverlay 0.2s ease;
+    }
+    .qr-zoom-modal-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .qr-zoom-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 28px 26px 24px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
+      position: relative;
+      text-align: center;
+      animation: zoomPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes zoomPop {
+      from { opacity: 0; transform: scale(0.92) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .qr-zoom-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .qr-zoom-close-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: scale(1.05);
+    }
+
+    .qr-zoom-frame-box {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 22px 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .zoom-brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 12px;
+    }
+
+    .zoom-brand-logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.01em;
+    }
+
+    .zoom-brand-subtag {
+      font-size: 11px;
+      font-weight: 800;
+      color: #be123c;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .zoom-color-frame {
+      background: var(--primary);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.3s;
+    }
+
+    .zoom-white-qr-canvas {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 8px;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-white-qr-canvas img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .zoom-footer-phone-number {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.08em;
+      margin-top: 10px;
+    }
+
+    .zoom-card-footer-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .zoom-card-footer-desc {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="checkout-modal">
+    <!-- Header Section -->
+    <div class="checkout-header">
+      <div class="header-left">
+        <div class="header-icon-box" id="header-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <div class="header-titles">
+          <div class="header-title-row">
+            <span class="header-title" id="provider-title">bKash</span>
+            <span class="badge-bangla-qr" id="badge-qr">MFS</span>
+          </div>
+          <span class="header-subtitle" id="order-subtitle">Invoice #PFMU80DZWXUWMB</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="price-display-box">
+          <div class="price-amount" id="display-amount">৳ 299</div>
+          <div class="price-period" id="display-period" style="display:none;"></div>
+        </div>
+        <button class="btn-close-modal" onclick="handleClose()" title="Close">✕</button>
+      </div>
+    </div>
+
+    <!-- Multi-Provider Selectors (Dynamically Loaded from Merchant Settings) -->
+    <div class="provider-bar" id="provider-bar">
+      <!-- Injected dynamically based on merchant configured channels -->
+    </div>
+
+    <!-- 2-Column Master Body -->
+    <div class="checkout-body">
+      
+      <!-- LEFT COLUMN -->
+      <div class="left-column">
+        
+        <!-- Official Merchant Number Card -->
+        <div class="merchant-card">
+          <div class="merchant-card-header">
+            <span class="merchant-tag" id="merchant-tag-label">মার্চেন্ট নম্বর</span>
+            <button class="btn-copy-red" onclick="copyNumber()" id="btn-copy">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copy</span>
+            </button>
+          </div>
+          <div class="merchant-number-display" id="merchant-number">01580397069</div>
+          <div class="merchant-notice-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span id="merchant-notice-text">Account: <strong>bdshop24</strong></span>
+          </div>
+        </div>
+
+        <!-- QR Code & Steps Sub-Tab Switcher -->
+        <div class="qr-steps-card">
+          <div class="sub-tabs-bar">
+            <button class="sub-tab-btn active" id="sub-tab-qr" onclick="switchSubTab('qr')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>Scan QR</span>
+            </button>
+            <button class="sub-tab-btn" id="sub-tab-steps" onclick="switchSubTab('steps')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              <span>পেমেন্ট ধাপ</span>
+            </button>
+          </div>
+
+          <!-- QR Content -->
+          <div class="sub-tab-content" id="content-qr">
+            <div class="bangla-qr-inner" onclick="openZoomModal()" title="Click to Zoom QR Code">
+              <div class="qr-card-logo">
+                <span id="qr-brand-name">bKash</span>
+              </div>
+              <div class="qr-frame-pink" id="qr-frame">
+                <div class="qr-white-canvas">
+                  <img id="qr-img" src="/api/v1/payment/qr?data=01580397069&size=240&raw=1" alt="QR Code">
+                </div>
+                <div class="qr-number-sub" id="qr-phone-caption">01580397069</div>
+              </div>
+              <div class="qr-sub-actions" style="justify-content:center;">
+                <span style="font-size:12px; color:#64748b; font-weight:600; display:inline-flex; align-items:center; gap:5px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                  ট্যাপ করে বড় করুন
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Steps Content -->
+          <div class="sub-tab-content" id="content-steps" style="display:none; align-items:flex-start;">
+            <div class="steps-list-container" id="steps-list">
+              <ol>
+                <li>অ্যাপ ওপেন করে <strong class="highlight-val">Make Payment</strong> সিলেক্ট করুন</li>
+                <li>মার্চেন্ট নম্বর দিন: <strong class="highlight-val" id="step-number-val">01580397069</strong></li>
+                <li>পরিমাণ দিন: <strong class="highlight-val" id="step-amount-val">৳ ২৯৯</strong></li>
+                <li>রেফারেন্স: <strong class="highlight-val" id="step-ref-val">PF-ORD-101</strong></li>
+                <li>পিন দিয়ে পেমেন্ট সম্পন্ন করুন</li>
+              </ol>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-column">
+        
+        <div class="verification-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>পেমেন্ট ভেরিফিকেশন</span>
+        </div>
+
+        <div class="status-alert success" id="alert-success">
+          🎉 <strong>পেমেন্ট সফলভাবে ভেরিফাই হয়েছে!</strong> অনুগ্রহ করে অপেক্ষা করুন...
+        </div>
+        <div class="status-alert error" id="alert-error">
+          ⚠️ <strong>ভেরিফিকেশন ব্যর্থ হয়েছে:</strong> <span id="error-msg"></span>
+        </div>
+
+        <div class="form-group-block">
+          <label class="field-label" id="label-sender">আপনার নম্বর / Pay ID *</label>
+          <input type="text" class="field-input" id="input-sender" placeholder="017XXXXXXXX" maxlength="25">
+        </div>
+
+        <div class="form-group-block">
+          <label class="field-label" id="label-trx">ট্রানজ্যাকশন আইডি (TrxID) *</label>
+          <input type="text" class="field-input" id="input-trx" placeholder="e.g. BAX892K1L" maxlength="30" style="text-transform:uppercase;">
+        </div>
+
+        <div class="email-chip-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>Delivery Email: <strong id="display-email">customer@myshop.com</strong></span>
+        </div>
+
+        <button class="btn-verify-action" id="btn-submit" onclick="submitVerification()">
+          <span>পেমেন্ট নিশ্চিত করুন</span>
+        </button>
+
+        <div class="trust-footer-line" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px;">
+          <span style="font-size:11px; color:#64748b;">Secured by</span>
+          <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height:18px; width:auto; object-fit:contain;">
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================
+       ZOOM LIGHTBOX MODAL (Pixel-Perfect Match)
+       ========================================= -->
+  <div class="qr-zoom-modal-overlay" id="qr-zoom-modal" onclick="closeZoomModal(event)">
+    <div class="qr-zoom-card" onclick="event.stopPropagation()">
+      <button class="qr-zoom-close-btn" onclick="closeZoomModal()" title="Close (Esc)">✕</button>
+
+      <div class="qr-zoom-frame-box">
+        <div class="zoom-brand-header">
+          <span class="zoom-brand-logo-text" id="zoom-brand-text">bKash</span>
+          <span class="zoom-brand-subtag">BANGLA QR</span>
+        </div>
+
+        <div class="zoom-color-frame" id="zoom-color-frame">
+          <div class="zoom-white-qr-canvas">
+            <img id="zoom-qr-image" src="/api/v1/payment/qr?data=01580397069&size=360" alt="Bangla QR Large">
+          </div>
+          <div class="zoom-footer-phone-number" id="zoom-phone-number">01580397069</div>
+        </div>
+      </div>
+
+      <div class="zoom-card-footer-title">BANGLA QR SCAN</div>
+      <div class="zoom-card-footer-desc">Scan with bKash, Nagad, Rocket or any banking app</div>
+    </div>
+  </div>
+
+  <script>
+    let paymentMethods = [];
+    let activeMethodId = null;
+    let activeMethod = null;
+    let invoiceData = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceId = urlParams.get('invoice_id');
+
+    async function init() {
+      const activeId = invoiceId || 'PFMU80DZWXUWMB';
+
+      // 1. Fetch Invoice Details
+      try {
+        const res = await fetch(`/api/v1/payments/invoice/${activeId}`);
+        const data = await res.json();
+        if (data.success && data.invoice) {
+          invoiceData = data.invoice;
+        } else {
+          fallbackDemo();
+        }
+      } catch (e) {
+        fallbackDemo();
+      }
+
+      hydrateInvoice();
+
+      // 2. Fetch Configured Payment Channels for this Merchant
+      try {
+        const mRes = await fetch(`/api/v1/payments/methods?invoice_id=${encodeURIComponent(activeId)}`);
+        const mData = await mRes.json();
+        if (mData.success && Array.isArray(mData.methods) && mData.methods.length > 0) {
+          paymentMethods = mData.methods;
+        } else {
+          fallbackDefaultMethods();
+        }
+      } catch (err) {
+        fallbackDefaultMethods();
+      }
+
+      renderProviderBar();
+
+      // Select preferred or first method
+      const preferred = (invoiceData?.payment_method || invoiceData?.provider || '').toLowerCase();
+      const matched = paymentMethods.find(m => 
+        m.id === preferred || 
+        m.provider_type.toLowerCase() === preferred ||
+        m.title.toLowerCase().includes(preferred)
+      );
+
+      if (matched) {
+        selectMethodById(matched.id);
+      } else if (paymentMethods.length > 0) {
+        selectMethodById(paymentMethods[0].id);
+      }
+    }
+
+    function fallbackDemo() {
+      invoiceData = {
+        id: 'PFMU80DZWXUWMB',
+        invoice_id: 'PFMU80DZWXUWMB',
+        amount: 299,
+        expected_amount: 299,
+        customer_name: 'OmniSub VIP Member',
+        customer_email: 'mdjahidulislambdcalling@gmail.com',
+        redirect_url: 'http://localhost:4000/dashboard.html#transactions',
+        status: 'PENDING'
+      };
+    }
+
+    function fallbackDefaultMethods() {
+      paymentMethods = [
+        {
+          id: 'pm_bkash_default',
+          provider_type: 'bkash',
+          title: 'Pay with bKash Merchant',
+          badge: 'BANGLA QR',
+          account_number: '01580397069',
+          account_name: 'bdshop24',
+          theme_color: '#E2136E',
+          sender_label: 'Your bKash Number *',
+          trx_label: 'bKash TrxID *',
+          instructions: '১. আপনার bKash App ওপেন করুন অথবা ডায়াল করুন *247#\n২. Make Payment সিলেক্ট করুন\n৩. মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৪. পরিমাণ দিন: ৳ {AMOUNT}\n৫. রেফারেন্স (Ref): {REF}\n৬. PIN নম্বর দিয়ে পেমেন্ট কনফার্ম করুন',
+        },
+        {
+          id: 'pm_nagad_default',
+          provider_type: 'nagad',
+          title: 'Pay with Nagad Payment',
+          badge: 'BANGLA QR',
+          account_number: '01712345678',
+          account_name: 'PayFlow Store',
+          theme_color: '#F7941D',
+          sender_label: 'Your Nagad Number *',
+          trx_label: 'Nagad TxnID *',
+          instructions: '১. আপনার Nagad App ওপেন করুন অথবা ডায়াল করুন *167#\n২. Merchant Payment অপশন বেছে নিন\n৩. মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৪. পরিমাণ লিখুন: ৳ {AMOUNT}\n৫. কাউন্টার নং 1 ও রেফারেন্স: {REF} দিন\n৬. গোপন পিন নম্বর দিয়ে সেন্ড করুন',
+        },
+        {
+          id: 'pm_rocket_default',
+          provider_type: 'rocket',
+          title: 'Pay with DBBL Rocket',
+          badge: 'ROCKET QR',
+          account_number: '01912345678',
+          account_name: 'bdshop24',
+          theme_color: '#8C3494',
+          sender_label: 'Your Rocket Number *',
+          trx_label: 'Rocket TrxID *',
+          instructions: '১. আপনার Rocket App ওপেন করুন অথবা ডায়াল করুন *322#\n২. Merchant Payment সিলেক্ট করুন\n৩. মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৪. পরিমাণ দিন: ৳ {AMOUNT}\n৫. রেফারেন্সে দিন: {REF}\n৬. আপনার সিকিউরিটি পিন দিয়ে সম্পন্ন করুন',
+        },
+        {
+          id: 'pm_bank_default',
+          provider_type: 'bank',
+          title: 'City Bank PLC (BEFTN / NPSB)',
+          badge: 'ONLINE BANK',
+          account_number: '1502938471001',
+          account_name: 'PayFlow Technologies Ltd',
+          bank_name: 'City Bank PLC',
+          branch_name: 'Gulshan Avenue Branch',
+          routing_number: '225271983',
+          theme_color: '#005A9C',
+          sender_label: 'Sender Bank / Account Name *',
+          trx_label: 'Bank Transfer Ref / Slip No *',
+          instructions: '১. আপনার ব্যাংক অ্যাপ (যেমন Citytouch, EBL SKYBANKING ইত্যাদি) লগইন করুন\n২. Fund Transfer -> Other Bank Transfer (NPSB / BEFTN) বেছে নিন\n৩. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue Branch দিন\n৪. অ্যাকাউন্ট নং: {ACCOUNT_NUMBER} এবং নাম: PayFlow Technologies Ltd লিখুন\n৫. পরিমাণ: ৳ {AMOUNT} এবং রেফারেন্সে {REF} দিন\n৬. ট্রান্সফার শেষে প্রাপ্ত রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন',
+        },
+        {
+          id: 'pm_binance_default',
+          provider_type: 'binance',
+          title: 'Binance Pay (USDT Crypto)',
+          badge: 'BINANCE PAY',
+          account_number: '829301948',
+          account_name: 'PayFlowGlobal',
+          theme_color: '#F3BA2F',
+          sender_label: 'Your Binance Pay ID / Nickname *',
+          trx_label: 'Binance Order ID / Internal TxID *',
+          instructions: '১. Binance App খুলে ডানপাশে Pay আইকনে চাপুন\n২. Send অপশন নির্বাচন করে Pay ID সিলেক্ট করুন\n৩. মার্চেন্ট Pay ID দিন: {ACCOUNT_NUMBER}\n৪. কারেন্সি USDT নির্বাচন করে পরিমাণ দিন\n৫. Note / Memo তে রেফারেন্স: {REF} লিখুন\n৬. পেমেন্ট শেষে প্রাপ্ত Binance Order ID দিয়ে ভেরিফাই করুন',
+        }
+      ];
+    }
+
+    function getShortProviderLabel(m) {
+      if (!m) return 'Payment';
+      const t = (m.provider_type || '').toLowerCase();
+      const shortMap = {
+        bkash: 'bKash',
+        nagad: 'Nagad',
+        rocket: 'Rocket',
+        upay: 'Upay',
+        tap: 'TAP',
+        islamic_wallet: 'Islamic Wallet',
+        mcash: 'mCash',
+        mycash: 'MYCash',
+        ok_wallet: 'OK Wallet',
+        meghna_pay: 'Meghna Pay',
+        telecash: 'TeleCash',
+        surecash: 'SureCash',
+        rupali_surecash: 'Rupali SureCash',
+        bank: m.bank_name ? m.bank_name.replace(/PLC|Ltd|Bank/gi, '').trim() + ' Bank' : 'City Bank',
+        binance: 'Binance Pay'
+      };
+      if (shortMap[t]) return shortMap[t];
+      return (m.title || '').replace(/Pay with /i, '').split('(')[0].trim() || 'Payment';
+    }
+
+    function hydrateInvoice() {
+      const amt = Number(invoiceData.amount ?? invoiceData.expected_amount ?? 299).toFixed(0);
+      document.getElementById('display-amount').innerText = `৳ ${amt}`;
+      document.getElementById('display-email').innerText = invoiceData.customer_email || 'customer@myshop.com';
+      document.getElementById('order-subtitle').innerText = `Invoice #${invoiceData.id || invoiceData.invoice_id || 'PFMU80DZWXUWMB'}`;
+    }
+
+    function renderProviderBar() {
+      const bar = document.getElementById('provider-bar');
+      if (!bar) return;
+
+      bar.innerHTML = paymentMethods.map(m => {
+        const isAct = m.id === activeMethodId;
+        const type = (m.provider_type || 'bkash').toLowerCase();
+
+        let iconSvg = '';
+        if (type === 'bkash') {
+          iconSvg = `<rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>`;
+        } else if (type === 'nagad') {
+          iconSvg = `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`;
+        } else if (type === 'rocket') {
+          iconSvg = `<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>`;
+        } else if (type === 'upay') {
+          iconSvg = `<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>`;
+        } else if (type === 'tap') {
+          iconSvg = `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`;
+        } else if (type === 'islamic_wallet') {
+          iconSvg = `<path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>`;
+        } else if (type === 'mcash') {
+          iconSvg = `<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/>`;
+        } else if (type === 'mycash') {
+          iconSvg = `<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>`;
+        } else if (type === 'ok_wallet') {
+          iconSvg = `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`;
+        } else if (type === 'meghna_pay') {
+          iconSvg = `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>`;
+        } else if (type === 'telecash') {
+          iconSvg = `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>`;
+        } else if (type === 'surecash' || type === 'rupali_surecash') {
+          iconSvg = `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`;
+        } else if (type === 'bank') {
+          iconSvg = `<path d="M3 21h18"/><path d="M5 21V9"/><path d="M19 21V9"/><path d="M9 21V9"/><path d="M15 21V9"/><path d="m2 9 10-5 10 5"/>`;
+        } else if (type === 'binance') {
+          iconSvg = `<polygon points="12 2 2 12 12 22 22 12 12 2"/><circle cx="12" cy="12" r="3"/>`;
+        } else {
+          iconSvg = `<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>`;
+        }
+
+        const displayLabel = getShortProviderLabel(m);
+
+        return `
+          <button class="provider-pill ${isAct ? 'active' : ''}" onclick="selectMethodById('${m.id}')" id="pill-${m.id}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">${iconSvg}</svg>
+            <span>${displayLabel}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectMethodById(methodId) {
+      activeMethodId = methodId;
+      activeMethod = paymentMethods.find(m => m.id === methodId) || paymentMethods[0];
+      if (!activeMethod) return;
+
+      const type = (activeMethod.provider_type || 'bkash').toLowerCase();
+      const primaryColor = activeMethod.theme_color || '#E2136E';
+      const shortName = getShortProviderLabel(activeMethod);
+
+      // Dynamic color theme
+      document.documentElement.style.setProperty('--primary', primaryColor);
+      document.documentElement.style.setProperty('--primary-light', primaryColor + '18');
+      document.documentElement.style.setProperty('--primary-border', primaryColor + '40');
+
+      document.getElementById('provider-title').innerText = shortName;
+      
+      const badgeEl = document.getElementById('badge-qr');
+      if (type === 'bank') {
+        badgeEl.innerText = 'BANK';
+      } else if (type === 'binance') {
+        badgeEl.innerText = 'CRYPTO';
+      } else {
+        badgeEl.innerText = 'MFS';
+      }
+
+      // Update provider-pill active status
+      document.querySelectorAll('.provider-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.id === `pill-${activeMethod.id}`);
+      });
+
+      // Update Merchant Card Header & Number
+      const tagLabel = document.getElementById('merchant-tag-label');
+      if (type === 'bank') {
+        tagLabel.innerText = 'ব্যাংক অ্যাকাউন্ট নম্বর';
+      } else if (type === 'binance') {
+        tagLabel.innerText = 'Binance Pay ID';
+      } else {
+        tagLabel.innerText = 'মার্চেন্ট নম্বর';
+      }
+
+      document.getElementById('merchant-number').innerText = activeMethod.account_number;
+
+      // Update Merchant Notice Text
+      const noticeBox = document.getElementById('merchant-notice-text');
+      if (type === 'bank') {
+        noticeBox.innerHTML = `Bank: <strong>${activeMethod.bank_name || 'Bank'}</strong> • A/C: <strong>${activeMethod.account_name || 'PayFlow'}</strong>`;
+      } else {
+        noticeBox.innerHTML = `A/C Name: <strong>${activeMethod.account_name || 'PayFlow'}</strong>`;
+      }
+
+      // Update QR Code on checkout card & Zoom modal (raw=1 directly returns PNG image)
+      const qrData = activeMethod.account_number;
+      const qrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=240&raw=1`;
+      document.getElementById('qr-img').src = qrUrl;
+      document.getElementById('qr-phone-caption').innerText = activeMethod.account_number;
+      document.getElementById('qr-brand-name').innerText = shortName;
+
+      const zoomQrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=360&raw=1`;
+      document.getElementById('zoom-qr-image').src = zoomQrUrl;
+      document.getElementById('zoom-brand-text').innerText = shortName;
+      document.getElementById('zoom-phone-number').innerText = activeMethod.account_number;
+
+      // Update Custom Payment Instructions
+      const amt = Number(invoiceData?.amount ?? invoiceData?.expected_amount ?? 299).toFixed(0);
+      const ref = invoiceData?.invoice_id || invoiceData?.id || 'PF-ORD-101';
+
+      let rawInstructions = activeMethod.instructions || '';
+      if (!rawInstructions.trim()) {
+        rawInstructions = `১. ${shortName} অ্যাপ ওপেন করুন\n২. পেমেন্ট সিলেক্ট করে নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ দিন: ৳ {AMOUNT} এবং রেফারেন্স: {REF}\n৪. পিন নম্বর দিয়ে সম্পন্ন করুন`;
+      }
+
+      // Format lines with variable replacement
+      const processedSteps = rawInstructions
+        .replace(/\{ACCOUNT_NUMBER\}/g, `<strong class="highlight-val">${activeMethod.account_number}</strong>`)
+        .replace(/\{AMOUNT\}/g, `<strong class="highlight-val">৳ ${amt}</strong>`)
+        .replace(/\{REF\}/g, `<strong class="highlight-val">${ref}</strong>`)
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => `<li>${line}</li>`)
+        .join('');
+
+      document.getElementById('steps-list').innerHTML = `<ol>${processedSteps}</ol>`;
+
+      // Update Right Column Verification Form Labels & Placeholders
+      const senderLabelEl = document.getElementById('label-sender');
+      const trxLabelEl = document.getElementById('label-trx');
+      const senderInput = document.getElementById('input-sender');
+      const trxInput = document.getElementById('input-trx');
+
+      if (type === 'bank') {
+        senderLabelEl.innerText = 'প্রেরকের নাম / ব্যাংক অ্যাকাউন্ট *';
+        trxLabelEl.innerText = 'ট্রানজ্যাকশন আইডি / স্লিপ নম্বর *';
+        senderInput.placeholder = 'আপনার নাম বা অ্যাকাউন্ট নম্বর';
+        trxInput.placeholder = 'e.g. REF-CITY-98214';
+      } else if (type === 'binance') {
+        senderLabelEl.innerText = 'আপনার Pay ID / Nickname *';
+        trxLabelEl.innerText = 'Binance Order ID / TxID *';
+        senderInput.placeholder = 'e.g. 829301948';
+        trxInput.placeholder = 'e.g. 21903940182';
+      } else {
+        senderLabelEl.innerText = `আপনার ${shortName} নম্বর *`;
+        trxLabelEl.innerText = `${shortName} TrxID *`;
+        senderInput.placeholder = '017XXXXXXXX';
+        trxInput.placeholder = 'e.g. BAX892K1L';
+      }
+    }
+
+    function switchSubTab(tab) {
+      const qrBtn = document.getElementById('sub-tab-qr');
+      const stepsBtn = document.getElementById('sub-tab-steps');
+      const qrContent = document.getElementById('content-qr');
+      const stepsContent = document.getElementById('content-steps');
+
+      if (tab === 'qr') {
+        qrBtn.classList.add('active');
+        stepsBtn.classList.remove('active');
+        qrContent.style.display = 'flex';
+        stepsContent.style.display = 'none';
+      } else {
+        stepsBtn.classList.add('active');
+        qrBtn.classList.remove('active');
+        qrContent.style.display = 'none';
+        stepsContent.style.display = 'flex';
+      }
+    }
+
+    function copyNumber() {
+      const num = document.getElementById('merchant-number').innerText.trim();
+      navigator.clipboard.writeText(num).then(() => {
+        const btn = document.getElementById('btn-copy');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✓ Copied</span>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1400);
+      });
+    }
+
+    /* Zoom Lightbox Modal Handlers */
+    function openZoomModal() {
+      const modal = document.getElementById('qr-zoom-modal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeZoomModal(event) {
+      if (event && event.target && event.target.closest('.qr-zoom-card') && !event.target.classList.contains('qr-zoom-close-btn')) {
+        return;
+      }
+      const modal = document.getElementById('qr-zoom-modal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Close on Escape key press
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeZoomModal();
+      }
+    });
+
+    async function submitVerification() {
+      const trxId = document.getElementById('input-trx').value.trim();
+      const senderPhone = document.getElementById('input-sender').value.trim();
+      const alertSuccess = document.getElementById('alert-success');
+      const alertError = document.getElementById('alert-error');
+      const btn = document.getElementById('btn-submit');
+
+      alertSuccess.style.display = 'none';
+      alertError.style.display = 'none';
+
+      if (!trxId) {
+        alertError.style.display = 'block';
+        document.getElementById('error-msg').innerText = 'অনুগ্রহ করে Transaction ID (TrxID) ইনপুট দিন।';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳ Verifying Transaction...</span>`;
+
+      try {
+        const invId = (invoiceData && (invoiceData.invoice_id || invoiceData.id)) || invoiceId || 'PFMU80DZWXUWMB';
+        const expectedAmt = invoiceData ? Number(invoiceData.amount ?? invoiceData.expected_amount ?? 299) : 299;
+
+        const res = await fetch('/api/v1/payments/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            invoice_id: invId,
+            trx_id: trxId,
+            expected_amount: expectedAmt,
+            customer_phone: senderPhone || undefined,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success && data.verified) {
+          alertSuccess.style.display = 'block';
+          btn.style.display = 'none';
+
+          const redirect = data.redirect_url || invoiceData?.redirect_url;
+          if (redirect) {
+            setTimeout(() => {
+              window.location.href = redirect;
+            }, 1800);
+          }
+        } else {
+          alertError.style.display = 'block';
+          document.getElementById('error-msg').innerText = data.message || 'ট্রানজ্যাকশন আইডি মেলেনি। টাকা পাঠানোর পর সঠিক TrxID দিন।';
+          btn.disabled = false;
+          btn.innerHTML = `<span>Verify Payment & Activate Plan</span>`;
+        }
+      } catch (err) {
+        alertError.style.display = 'block';
+        document.getElementById('error-msg').innerText = 'নেটওয়ার্ক সংযোগ ব্যর্থ: ' + err.message;
+        btn.disabled = false;
+        btn.innerHTML = `<span>Verify Payment & Activate Plan</span>`;
+      }
+    }
+
+    function handleClose() {
+      if (invoiceData && invoiceData.cancel_url) {
+        window.location.href = invoiceData.cancel_url;
+      } else {
+        window.history.back();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

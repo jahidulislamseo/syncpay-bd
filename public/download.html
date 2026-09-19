@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncPay BD Android App | ১-ক্লিকে ফোনে ইনস্টল করুন</title>
+  <meta name="description" content="SyncPay BD Android SMS Forwarder APK direct download and automated installation guide.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-subtle: #f0f9ff;
+      --primary-border: #bae6fd;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --bg-body: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 680px;
+      width: 100%;
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 36px 28px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 520px;
+      margin: 0 auto 28px;
+    }
+
+    /* Grid Layout for Download & QR */
+    .download-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+
+    @media (max-width: 600px) {
+      .download-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-box h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-box p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 14.5px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -4px rgba(16, 185, 129, 0.5);
+    }
+
+    .qr-box {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-frame {
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .qr-frame img {
+      width: 140px;
+      height: 140px;
+      display: block;
+    }
+
+    .qr-caption {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Step-by-Step Instructions */
+    .steps-box {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .steps-box-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .steps-list {
+      list-style: none;
+      counter-reset: custom-counter;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .steps-list li {
+      counter-increment: custom-counter;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .steps-list li::before {
+      content: counter(custom-counter);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+    .footer-links a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="badge-pill">
+      <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block;"></span>
+      <span>READY FOR INSTALLATION</span>
+    </div>
+
+    <h1 class="title">SyncPay Forwarder Android App</h1>
+    <p class="subtitle">
+      ফ্লাটার কোড বা টার্মিনাল ছাড়াই আপনার অ্যান্ড্রয়েড ফোনে সরাসরি APK ফাইলটি ইনস্টল করে বিকাশ ও নগদ লেনদেন স্বয়ংক্রিয় করুন।
+    </p>
+
+    <!-- Grid -->
+    <div class="download-grid">
+      
+      <!-- Option 1: Direct APK Download -->
+      <div class="card-box">
+        <div>
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>১-ক্লিকে APK ডাউনলোড</span>
+          </h3>
+          <p>
+            ফোনের ব্রাউজার থেকে সরাসরি APK ডাউনলোড করুন। সাইজ: <strong>75 MB</strong>, সংস্করণ: <strong>1.0.0</strong>।
+          </p>
+        </div>
+        <a href="/downloads/syncpay-forwarder.apk" download="syncpay-forwarder.apk" class="btn-download" id="btn-apk-download">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download APK Now</span>
+        </a>
+      </div>
+
+      <!-- Option 2: QR Scan to Phone -->
+      <div class="card-box qr-box">
+        <div class="qr-frame">
+          <img id="qr-code-img" src="/api/v1/payment/qr?data=http://localhost:4000/downloads/payflow-forwarder.apk&size=200" alt="Download QR">
+        </div>
+        <span class="qr-caption">📷 ফোনের ক্যামেরা দিয়ে স্ক্যান করে ডাউনলোড করুন</span>
+      </div>
+
+    </div>
+
+    <!-- 3 Step Installation Guide -->
+    <div class="steps-box">
+      <div class="steps-box-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>ইনস্টল ও কানেক্ট করার ৩টি সহজ ধাপ:</span>
+      </div>
+      <ol class="steps-list">
+        <li>
+          <span><strong>APK ফাইলটি ডাউনলোড করুন:</strong> উপরের বাটনে ক্লিক করুন অথবা ফোনের ক্যামেরা দিয়ে QR কোডটি স্ক্যান করে ফাইলটি ডাউনলোড করুন।</span>
+        </li>
+        <li>
+          <span><strong>ফোনে ইনস্টল করুন:</strong> ডাউনলোড সম্পূর্ণ হলে নোটিফিকেশন থেকে ফাইলটি ওপেন করে <strong>"Install"</strong> বাটনে চাপুন (যদি "Install unknown apps" পারমিশন চায়, ব্রাউজারকে Allow করে দিন)।</span>
+        </li>
+        <li>
+          <span><strong>অ্যাপ চালু করে পেয়ার করুন:</strong> অ্যাপটি ওপেন করে <a href="/dashboard.html#devices" style="color:#38bdf8; text-decoration:none; font-weight:700;">মার্চেন্ট ড্যাশবোর্ডের</a> QR কোডটি স্ক্যান করুন। ব্যাস! স্বয়ংক্রিয়ভাবে সার্ভারের সাথে কানেক্ট হয়ে যাবে।</span>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="footer-links">
+      <a href="/dashboard.html">← মার্চেন্ট ড্যাশবোর্ড</a>
+      <span>•</span>
+      <a href="/checkout.html">চেকআউট পেজ</a>
+      <span>•</span>
+      <span class="mono" id="server-lan-ip" style="color:#64748b;">Server: Loading...</span>
+    </div>
+  </div>
+
+  <script>
+    // Automatically detect current LAN IP / Hostname for the QR Code
+    const host = window.location.host;
+    const protocol = window.location.protocol;
+    const downloadUrl = `${protocol}//${host}/downloads/syncpay-forwarder.apk`;
+
+    document.getElementById('btn-apk-download').href = downloadUrl;
+    document.getElementById('qr-code-img').src = `/api/v1/payment/qr?data=${encodeURIComponent(downloadUrl)}&size=240`;
+    document.getElementById('server-lan-ip').innerText = `Host: ${host}`;
+  </script>
+
+</body>
+</html>

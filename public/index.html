@@ -1,0 +1,2775 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncPay BD | পার্সোনাল নাম্বারে অটো পেমেন্ট ভেরিফিকেশন</title>
+  <meta name="description" content="Personal-number payment automation for Bangladesh. Instant bKash, Nagad, Rocket and Upay verification with zero per-transaction fee (syncpaybd.xyz).">
+  <link rel="icon" type="image/png" href="/images/syncpay-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    if (window.location.pathname.endsWith('.html')) {
+      const clean = window.location.pathname.replace(/\.html$/, '') || '/';
+      window.history.replaceState(null, '', (clean === '/index' ? '/' : clean) + window.location.search + window.location.hash);
+    }
+  </script>
+  <style>
+    :root {
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --border-subtle: #e2e8f0;
+      --border-focus: #0284c7;
+      
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-subtle: #f0f9ff;
+      --primary-border: #bae6fd;
+
+      --bkash: #e2136e;
+      --nagad: #f97316;
+      --rocket: #8b5cf6;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --danger: #ef4444;
+      --danger-bg: #fef2f2;
+
+      --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+      --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+      --shadow-lg: 0 16px 40px -6px rgba(15, 23, 42, 0.09);
+      --radius: 16px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: clip;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.03) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(226, 19, 110, 0.02) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* === STICKY / FIXED FLOATING PILL NAVBAR === */
+    header {
+      position: fixed;
+      top: 16px;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 9999;
+      padding: 0 20px;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+    .nav-wrap {
+      height: 64px;
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 999px;
+      padding: 0 12px 0 20px;
+      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      pointer-events: all;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.4px;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+    }
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.15s ease;
+    }
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-cta-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-subtle {
+      background: #f1f5f9;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-subtle:hover {
+      background: #e2e8f0;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+      transition: all 0.15s;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Nav Dropdown */
+    .nav-dropdown {
+      position: relative;
+    }
+    .nav-dropdown > a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .nav-dropdown > a::after {
+      content: '▾';
+      font-size: 11px;
+      opacity: 0.6;
+      transition: transform 0.2s;
+    }
+    .nav-dropdown:hover > a::after {
+      transform: rotate(180deg);
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px -6px rgba(15,23,42,0.12);
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      z-index: 200;
+    }
+    .nav-dropdown:hover .dropdown-menu {
+      display: flex;
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .dropdown-item:hover {
+      background: var(--primary-subtle);
+    }
+    .dropdown-item-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--primary-subtle);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .dropdown-item-text strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+    .dropdown-item-text span {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 4px 8px;
+    }
+
+    /* Developer Section */
+    .dev-section {
+      padding: 80px 0;
+    }
+    .dev-section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .dev-section h2 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .dev-section-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin-bottom: 48px;
+      line-height: 1.6;
+    }
+    .dev-api-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+    @media(max-width:900px) {
+      .dev-api-cards { grid-template-columns: 1fr; }
+    }
+    .dev-api-card {
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .dev-api-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--primary-subtle) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .dev-api-card:hover {
+      border-color: var(--primary-border);
+      box-shadow: 0 8px 24px -4px rgba(2,132,199,0.12);
+      transform: translateY(-2px);
+    }
+    .dev-api-card:hover::before { opacity: 1; }
+    .dev-api-card-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+    .dev-api-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .dev-api-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .dev-api-card .dev-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .dev-code-wrap {
+      background: #0f172a;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .code-tabs {
+      display: flex;
+      gap: 0;
+      background: #1e293b;
+      padding: 0 16px;
+      border-bottom: 1px solid #334155;
+    }
+    .code-tab {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .code-tab.active {
+      color: #38bdf8;
+      border-bottom-color: #38bdf8;
+    }
+    .code-tab:hover:not(.active) { color: #94a3b8; }
+    .code-body {
+      padding: 28px 32px;
+      overflow-x: auto;
+      display: none;
+    }
+    .code-body.active { display: block; }
+    .code-body pre {
+      margin: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #e2e8f0;
+    }
+    .c-kw { color: #f472b6; }
+    .c-fn { color: #60a5fa; }
+    .c-str { color: #86efac; }
+    .c-cmt { color: #475569; font-style: italic; }
+    .c-num { color: #fb923c; }
+    .c-var { color: #a78bfa; }
+    .dev-platforms {
+      margin-top: 48px;
+      text-align: center;
+    }
+    .dev-platforms p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    .platform-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .platform-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* === MODERN IMMERSIVE HERO SECTION === */
+    .hero-section-outer {
+      position: relative;
+      background: linear-gradient(145deg, #070e24 0%, #0b1a3d 40%, #0d2852 75%, #07132e 100%);
+      overflow: hidden;
+      padding: 110px 0 80px;
+    }
+    .hero-section-outer::before {
+      content: '';
+      position: absolute;
+      top: 10%;
+      right: 5%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, rgba(14, 165, 233, 0) 70%);
+      pointer-events: none;
+    }
+    .hero-section-outer::after {
+      content: '';
+      position: absolute;
+      bottom: -10%;
+      left: 10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0) 70%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 48px;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+    .hero-left {
+      text-align: left;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .hero-tag .tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+    .hero-h1 {
+      font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    .hero-h1 span.gradient-text {
+      background: linear-gradient(90deg, #38bdf8 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 16px;
+      color: #94a3b8;
+      max-width: 540px;
+      line-height: 1.68;
+      margin-bottom: 32px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .btn-hero-main {
+      padding: 13px 26px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-hero-main:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(2, 132, 199, 0.45);
+    }
+    .btn-hero-alt {
+      padding: 13px 24px;
+      background: rgba(255, 255, 255, 0.07);
+      color: #f1f5f9;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(8px);
+    }
+    .btn-hero-alt:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+    }
+    .hero-chips-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .hero-chips-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hero-chip.bkash { color: #f43f5e; border-color: rgba(244, 63, 94, 0.25); background: rgba(244, 63, 94, 0.08); }
+    .hero-chip.nagad { color: #f97316; border-color: rgba(249, 115, 22, 0.25); background: rgba(249, 115, 22, 0.08); }
+    .hero-chip.rocket { color: #a855f7; border-color: rgba(168, 85, 247, 0.25); background: rgba(168, 85, 247, 0.08); }
+    .hero-chip.upay { color: #10b981; border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.08); }
+
+    /* Hero Right Showcase Mockup */
+    .hero-right {
+      position: relative;
+    }
+    .hero-mockup-frame {
+      position: relative;
+      border-radius: 18px;
+      padding: 6px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.03) 100%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .hero-mockup-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .hero-float-pill {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      z-index: 3;
+    }
+    .hero-float-pill.top-left {
+      top: -14px;
+      left: -18px;
+    }
+    .hero-float-pill.bottom-right {
+      bottom: -16px;
+      right: -16px;
+    }
+    .pill-icon-wrap {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .pill-icon-wrap.success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .pill-icon-wrap.blue {
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+    .pill-text-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1.3;
+    }
+    .pill-text-sub {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    /* Metric Strip below Hero */
+    .metrics-container {
+      position: relative;
+      z-index: 5;
+      margin-top: -36px;
+      margin-bottom: 56px;
+    }
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 22px 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    .metric-col {
+      text-align: center;
+      border-right: 1px solid #f1f5f9;
+      padding: 6px;
+    }
+    .metric-col:last-child {
+      border-right: none;
+    }
+    .metric-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+    .metric-lbl {
+      font-size: 12px;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Section Headers */
+    .sec-head {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .sec-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      background: var(--primary-subtle);
+      padding: 3px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .sec-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .sec-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Interactive Sandbox Hub */
+    .hub-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 64px;
+    }
+    .hub-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .hub-tabs {
+      display: flex;
+      gap: 10px;
+    }
+    .hub-tab {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .hub-tab.active {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+    .hub-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--success);
+      background: var(--success-bg);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid #a7f3d0;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Tab 1: Live Demo Grid */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        text-align: center;
+      }
+      .hero-left {
+        text-align: center;
+      }
+      .hero-actions, .hero-chips-wrap {
+        justify-content: center;
+      }
+      .hero-sub {
+        margin: 0 auto 32px;
+      }
+      .demo-grid, .metrics-bar {
+        grid-template-columns: 1fr;
+      }
+      .metric-col {
+        border-right: none;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 12px 6px;
+      }
+      .metric-col:last-child {
+        border-bottom: none;
+      }
+      .hero-h1 {
+        font-size: 32px;
+      }
+      .hero-float-pill {
+        display: none;
+      }
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .kpi-mini {
+      background: #f8fafc;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .kpi-mini-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+    }
+    .kpi-mini-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+
+    .feed-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .feed-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .feed-table-scroll {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .feed-table-scroll tbody tr {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .feed-table-scroll tbody tr:hover {
+      background: #f0fdf4;
+    }
+    .btn-refresh {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th {
+      padding: 10px 12px;
+      text-align: left;
+      color: var(--text-light);
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-main);
+    }
+    .table-logo-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mfs-mini-img {
+      height: 18px;
+      width: auto;
+      object-fit: contain;
+    }
+    .pill-verified { background: var(--success-bg); color: var(--success); padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+    .pill-pending { background: #fffbeb; color: #d97706; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+
+    /* Quick Test SMS Bar */
+    .sim-strip {
+      margin-top: 16px;
+      background: var(--primary-subtle);
+      border: 1px dashed var(--primary-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sim-strip-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0369a1;
+    }
+    .sim-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-sim-send {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: #fff;
+      transition: background 0.15s;
+    }
+    .btn-sim-send:hover {
+      background: #f1f5f9;
+    }
+
+    /* Checkout Card */
+    .checkout-wrap {
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+    .checkout-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .mfs-toggle-group {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .btn-mfs {
+      flex: 1;
+      padding: 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: #f8fafc;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .btn-mfs img {
+      height: 20px;
+      object-fit: contain;
+    }
+    .btn-mfs.active-bkash {
+      background: #ffffff;
+      border: 2px solid var(--bkash);
+      box-shadow: 0 2px 8px rgba(226, 19, 110, 0.15);
+    }
+    .btn-mfs.active-nagad {
+      background: #ffffff;
+      border: 2px solid var(--nagad);
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.15);
+    }
+
+    .inst-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 14px;
+      color: var(--text-muted);
+    }
+    .copy-chip {
+      background: #e2e8f0;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .input-row {
+      margin-bottom: 12px;
+    }
+    .input-lbl {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .input-ctrl {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+    }
+    .input-ctrl:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    .btn-checkout {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-checkout:hover {
+      background: var(--primary-hover);
+    }
+
+    .msg-banner {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      display: none;
+    }
+    .msg-success {
+      background: var(--success-bg);
+      border: 1px solid #bbf7d0;
+      color: #15803d;
+    }
+    .msg-error {
+      background: var(--danger-bg);
+      border: 1px solid #fecaca;
+      color: var(--danger);
+    }
+
+    /* Tab 2: Developer Console */
+    .dev-api-wrap {
+      display: none;
+    }
+    .api-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 850px) {
+      .api-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .api-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px;
+      background: #fafafa;
+    }
+    .api-endpoint-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .method-tag {
+      background: #0284c7;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    .code-view {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 12px;
+      color: #38bdf8;
+      font-size: 11px;
+      overflow-x: auto;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+
+    /* Feature Split Section (Android Forwarder & Encryption) */
+    .feature-split {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 64px;
+    }
+    @media (max-width: 850px) {
+      .feature-split {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+    }
+    .feature-split-img {
+      width: 100%;
+      height: auto;
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .feature-list-item {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .feature-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--primary-subtle);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* 5-Step Process */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+    @media (max-width: 900px) {
+      .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 550px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .step-item {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .step-badge {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      background: var(--primary-subtle);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .step-h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .step-p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Comparison Table */
+    .comp-wrap {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 64px;
+    }
+    .comp-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .comp-tbl th {
+      padding: 14px 18px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-subtle);
+      background: #f8fafc;
+    }
+    .comp-tbl td {
+      padding: 14px 18px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .comp-col-payflow {
+      background: #f0f9ff;
+      color: #0369a1;
+      font-weight: 700;
+    }
+
+    /* Pricing Section */
+    .pricing-toggle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .btn-toggle {
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-toggle.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .badge-save {
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid #bbf7d0;
+    }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 960px) {
+      .plans-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 550px) {
+      .plans-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .plan-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .plan-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .plan-card.featured {
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.12);
+    }
+    .popular-flag {
+      position: absolute;
+      top: -10px;
+      right: 18px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .plan-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .plan-amount-wrap {
+      margin: 12px 0 16px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .plan-price {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .plan-dur {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    .plan-bullets {
+      list-style: none;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+    .plan-bullets li {
+      padding: 6px 0;
+      border-bottom: 1px solid #f8fafc;
+      display: flex;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+    .plan-bullets span.chk {
+      color: var(--success);
+      font-weight: 800;
+    }
+    .btn-choose-plan {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: #f8fafc;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .plan-card.featured .btn-choose-plan {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .btn-choose-plan:hover {
+      background: var(--text-main);
+      color: #fff;
+    }
+
+    /* Secondary Plans Expander */
+    .plans-expander {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .btn-expand-plans {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .secondary-plans-wrap {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    /* Logo Cards Grid */
+    .logo-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+    .logo-card-item {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .logo-card-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+      border-color: #cbd5e1;
+    }
+    .logo-img-preview {
+      height: 36px;
+      width: auto;
+      max-width: 140px;
+      object-fit: contain;
+    }
+    .logo-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-light);
+    }
+
+    /* Integrations Grid */
+    .integrations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 64px;
+    }
+    .int-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+    }
+    .int-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+      border-color: #bae6fd;
+    }
+    .int-logo-box {
+      height: 40px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+    }
+    .int-logo-img {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
+    }
+    .int-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .int-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* FAQ */
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto 64px;
+    }
+    .faq-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .faq-q {
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-q:hover {
+      background: #f8fafc;
+    }
+    .faq-a {
+      padding: 0 20px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: none;
+      line-height: 1.6;
+    }
+    .faq-card.active .faq-a {
+      display: block;
+    }
+    .faq-card.active .faq-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Clean Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      background: #ffffff;
+      padding: 44px 0 24px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 768px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .footer-col h4 {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .footer-links {
+      list-style: none;
+      font-size: 13px;
+    }
+    .footer-links li {
+      margin-bottom: 8px;
+    }
+    .footer-links a {
+      color: var(--text-light);
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+    .footer-btm {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <header>
+    <div class="container nav-wrap">
+      <a href="#" class="brand">
+        <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height: 48px; width: auto; object-fit: contain; display: block;">
+        <span class="badge-pill">v1.0</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#how-it-works">কীভাবে কাজ করে</a></li>
+        <li><a href="#pricing">প্রাইসিং</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li class="nav-dropdown">
+          <a href="#developers">ডেভেলপার</a>
+          <div class="dropdown-menu">
+            <a href="/docs/api" class="dropdown-item">
+              <div class="dropdown-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <div class="dropdown-item-text">
+                <strong>API Documentation</strong>
+                <span>Invoice, payment verification ও webhook সব কিছু।</span>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="/docs/trx-verification" class="dropdown-item">
+              <div class="dropdown-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <div class="dropdown-item-text">
+                <strong>Transaction Verification API</strong>
+                <span>Backend-side advanced payment verification flow।</span>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="/docs/webhook" class="dropdown-item">
+              <div class="dropdown-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 16.98h4v5h-4z"/><path d="M2 16.98h4v5H2z"/><path d="M10 2h4v5h-4z"/><path d="M12 7v5"/><path d="M5 12v5"/><path d="M19 12v5"/><path d="M5 12h14"/></svg>
+              </div>
+              <div class="dropdown-item-text">
+                <strong>Webhook API</strong>
+                <span>Real-time SMS payment events আপনার URL-এ পাঠান।</span>
+              </div>
+            </a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-cta-wrap">
+        <a href="/dashboard" class="btn-subtle" style="display:inline-flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          <span>লগইন</span>
+        </a>
+        <a href="/dashboard" class="btn-primary" style="display:inline-flex; align-items:center; gap:6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          শুরু করুন
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Modern Immersive Hero Section (Lenden-inspired) -->
+    <section class="hero-section-outer">
+      <div class="container">
+        <div class="hero-grid">
+          <!-- Left Content -->
+          <div class="hero-left">
+            <div class="hero-tag">
+              <span class="tag-dot"></span>
+              <span>Bangladesh Personal MFS Payment Automation</span>
+            </div>
+
+            <h1 class="hero-h1">
+              পার্সোনাল নাম্বারে অটো পেমেন্ট ভেরিফিকেশন<br>
+              <span class="gradient-text">bKash • Nagad • Rocket • Upay</span>
+            </h1>
+
+            <p class="hero-sub">
+              কোনো অফিশিয়াল মার্চেন্ট অ্যাকাউন্ট বা ট্রেড লাইসেন্স ছাড়াই বিকাশ ও নগদে আসা পেমেন্ট সেকেন্ডের মধ্যে ভেরিফাই করুন।
+              গ্রাহকের TrxID ও অ্যামাউন্ট মিলিয়ে অটোমেটিক ইনস্ট্যান্ট ডেলিভারি—প্রতি লেনদেনে ০% ফি।
+            </p>
+
+            <div class="hero-actions">
+              <a href="#hub" class="btn-hero-main">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>লাইভ স্যান্ডবক্স টেস্ট করুন</span>
+              </a>
+              <a href="#pricing" class="btn-hero-alt">
+                <span>প্ল্যান ও সাবস্ক্রিপশন দেখুন</span>
+                <span>→</span>
+              </a>
+            </div>
+
+            <!-- Supported Wallets -->
+            <div class="hero-chips-wrap">
+              <span class="hero-chips-label">সাপোর্টেড ওয়ালেট:</span>
+              <span class="hero-chip bkash">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                bKash
+              </span>
+              <span class="hero-chip nagad">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                Nagad
+              </span>
+              <span class="hero-chip rocket">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                Rocket
+              </span>
+              <span class="hero-chip upay">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                Upay
+              </span>
+            </div>
+          </div>
+
+          <!-- Right Showcase Mockup with Floating Status Badges -->
+          <div class="hero-right">
+            <!-- Floating Pill Top Left -->
+            <div class="hero-float-pill top-left">
+              <div class="pill-icon-wrap success">✓</div>
+              <div>
+                <div class="pill-text-title">Instant Auto-Verification</div>
+                <div class="pill-text-sub">bKash & Nagad Ingestion Active</div>
+              </div>
+            </div>
+
+            <!-- Dashboard Mockup Card -->
+            <div class="hero-mockup-frame">
+              <img src="/images/hero-preview.jpg" alt="SyncPay BD Dashboard and Mobile Payment Verification" class="hero-mockup-img">
+            </div>
+
+            <!-- Floating Pill Bottom Right -->
+            <div class="hero-float-pill bottom-right">
+              <div class="pill-icon-wrap blue">⚡</div>
+              <div>
+                <div class="pill-text-title">TrxID Auto-Matched</div>
+                <div class="pill-text-sub">&lt; 3s Verification Speed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Compact Trust Metrics Strip -->
+    <div class="container metrics-container">
+      <div class="metrics-bar">
+        <div class="metric-col">
+          <div class="metric-val">756+</div>
+          <div class="metric-lbl">অ্যাক্টিভ মার্চেন্ট</div>
+        </div>
+        <div class="metric-col">
+          <div class="metric-val">231,133+</div>
+          <div class="metric-lbl">পেমেন্ট ভেরিফাইড</div>
+        </div>
+        <div class="metric-col">
+          <div class="metric-val">৳ 97M+</div>
+          <div class="metric-lbl">ট্রানজ্যাকশন ভলিউম</div>
+        </div>
+        <div class="metric-col">
+          <div class="metric-val" style="color: #10b981;">0%</div>
+          <div class="metric-lbl">প্রতি লেনদেনে শতাংশ ফি নেই</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Sandbox & Developer API Hub -->
+    <section id="hub" class="container">
+      <div class="hub-card">
+        <!-- Hub Top Navigation & Status -->
+        <div class="hub-nav">
+          <div class="hub-tabs">
+            <button class="hub-tab active" id="tab-btn-demo" onclick="switchHubTab('demo')">
+              SMS ও কাস্টমার চেকআউট ডেমো
+            </button>
+            <button class="hub-tab" id="tab-btn-api" onclick="switchHubTab('api')">
+              ডেভেলপার স্যান্ডবক্স API v1.0
+            </button>
+          </div>
+          <div class="hub-status">
+            <span class="live-dot"></span>
+            <span>Local Daemon Active (Port 4000)</span>
+          </div>
+        </div>
+
+        <!-- TAB 1: Live SMS Telephony Stream & Checkout Demo -->
+        <div id="hub-demo-view">
+          <!-- Quick KPIs -->
+          <div class="kpi-row">
+            <div class="kpi-mini">
+              <div class="kpi-mini-lbl">Today's Collections</div>
+              <div class="kpi-mini-val" id="kpi-today-rev">৳ 0.00</div>
+            </div>
+            <div class="kpi-mini">
+              <div class="kpi-mini-lbl">Verified Transactions</div>
+              <div class="kpi-mini-val" id="kpi-verified-count" style="color: #10b981;">0</div>
+            </div>
+            <div class="kpi-mini">
+              <div class="kpi-mini-lbl">Connected Forwarder</div>
+              <div class="kpi-mini-val" style="font-size:14px; color:#0284c7; margin-top:5px;">
+                Samsung A54 (01712345678)
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-grid">
+            <!-- Left: SMS Stream & 1-Click Generator -->
+            <div>
+              <div class="feed-box">
+                <div class="feed-head">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span>ইনকামিং SMS টেলিফোনি স্ট্রিম</span>
+                    <span style="font-size: 11px; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 999px; font-weight: 600;">ক্লিক করে টেস্ট করুন</span>
+                  </div>
+                  <button class="btn-refresh" onclick="fetchFeed()">↻ রিফ্রেশ</button>
+                </div>
+                <div class="feed-table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>মেথড</th>
+                        <th>TrxID</th>
+                        <th>অ্যামাউন্ট</th>
+                        <th>স্ট্যাটাস</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tx-tbody">
+                      <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-light); padding: 24px;">
+                          SMS ইভেন্টের জন্য অপেক্ষা করা হচ্ছে...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Quick SMS Simulator Strip -->
+              <div class="sim-strip">
+                <span class="sim-strip-title">1-Click টেস্ট SMS পাঠান:</span>
+                <div class="sim-btns">
+                  <button class="btn-sim-send" style="color: #db2777;" onclick="triggerSimSms('bKash', 1500)">
+                    + bKash ৳1,500
+                  </button>
+                  <button class="btn-sim-send" style="color: #ea580c;" onclick="triggerSimSms('Nagad', 850)">
+                    + Nagad ৳850
+                  </button>
+                  <button class="btn-sim-send" style="color: #9333ea;" onclick="triggerSimSms('Rocket', 500)">
+                    + Rocket ৳500
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Interactive Customer Checkout Box -->
+            <div class="checkout-wrap">
+              <div class="checkout-header">
+                <strong style="font-size: 15px; color: var(--text-main);">কাস্টমার চেকআউট ডেমো</strong>
+                <span class="badge-pill">অর্ডার #ORD-8821</span>
+              </div>
+              
+              <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                পরিশোধযোগ্য অ্যামাউন্ট: <strong style="color: #0f172a; font-size: 16px;" id="disp-amount">৳ 1,500.00</strong>
+              </div>
+
+              <div class="mfs-toggle-group">
+                <button class="btn-mfs active-bkash" id="btn-bkash" onclick="selectProvider('bKash')">
+                  <img src="/images/bkash.svg" alt="bKash Logo">
+                </button>
+                <button class="btn-mfs" id="btn-nagad" onclick="selectProvider('Nagad')">
+                  <img src="/images/nagad.svg" alt="Nagad Logo">
+                </button>
+              </div>
+
+              <div class="inst-box" id="instruction-box">
+                ১. আপনার <strong>bKash App</strong>-এ গিয়ে <strong>Send Money</strong> করুন।<br>
+                ২. <strong>৳1,500.00</strong> পাঠান এই নাম্বারে: <span class="copy-chip mono">01712345678</span><br>
+                ৩. প্রাপ্ত SMS থেকে <strong>TrxID</strong> নিচে ইনপুট দিন।
+              </div>
+
+              <div class="input-row">
+                <label class="input-lbl">Transaction ID (TrxID)</label>
+                <input type="text" id="input-trx" class="input-ctrl mono" placeholder="উদাঃ BL78A4982J">
+              </div>
+
+              <div class="input-row">
+                <label class="input-lbl">Amount (BDT)</label>
+                <input type="number" id="input-amount" class="input-ctrl mono" value="1500" readonly>
+              </div>
+
+              <button class="btn-checkout" onclick="submitVerification()">ভেরিফাই ও অর্ডার সম্পন্ন করুন</button>
+
+              <div class="msg-banner msg-success" id="alert-success">
+                <strong>পেমেন্ট সফলভাবে ভেরিফাইড!</strong> অর্ডার অনুমোদিত হয়েছে।
+              </div>
+              <div class="msg-banner msg-error" id="alert-error">
+                <strong id="error-title">ভেরিফিকেশন ব্যর্থ</strong>
+                <div id="error-msg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Developer API Console (/v1/payment/create & /v1/payment/verify) -->
+        <div id="hub-api-view" class="dev-api-wrap">
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            API Key: <code class="mono" style="background:#f1f5f9; padding:3px 8px; border-radius:6px; color:#0f172a;">sandbox_test_8f4c9a2e7b31</code>
+          </div>
+
+          <div class="api-grid">
+            <!-- Left: Create Invoice -->
+            <div class="api-card">
+              <div class="api-endpoint-badge">
+                <span class="method-tag">POST</span>
+                <span class="mono">/v1/payment/create</span>
+              </div>
+
+              <div class="input-row">
+                <label class="input-lbl">Amount (BDT)</label>
+                <input type="number" id="pf-amount" class="input-ctrl mono" value="1200">
+              </div>
+              <div class="input-row">
+                <label class="input-lbl">Customer Name</label>
+                <input type="text" id="pf-cus-name" class="input-ctrl" value="Rahim Ahmed">
+              </div>
+
+              <button class="btn-checkout" style="padding: 9px;" onclick="testPayflowCreateInvoice()">
+                Test Create Invoice (POST)
+              </button>
+
+              <div class="code-view" id="pf-create-response">// Response JSON will appear here</div>
+              
+              <div id="pf-paylink-wrap" style="display:none; margin-top:10px; font-size:12px;">
+                পেমেন্ট লিঙ্ক: <a id="pf-paylink-anchor" href="#" class="mono" style="color:#0284c7;"></a>
+              </div>
+            </div>
+
+            <!-- Right: Verify Payment Status -->
+            <div class="api-card">
+              <div class="api-endpoint-badge">
+                <span class="method-tag" style="background:#10b981;">POST</span>
+                <span class="mono">/v1/payment/verify</span>
+              </div>
+
+              <div class="input-row">
+                <label class="input-lbl">Invoice ID</label>
+                <input type="text" id="pf-verify-id" class="input-ctrl mono" placeholder="উদাঃ PF98X2K9L">
+              </div>
+
+              <button class="btn-checkout" style="background:#10b981; padding: 9px;" onclick="testPayflowVerifyInvoice()">
+                Test Verify Status (POST)
+              </button>
+
+              <div class="code-view" id="pf-verify-response" style="color: #4ade80;">// Verification JSON will appear here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Android Forwarder & Security Feature Split -->
+    <section id="forwarder" class="container">
+      <div class="feature-split">
+        <div>
+          <span class="sec-tag">Enterprise Security</span>
+          <h2 class="sec-title" style="text-align: left; margin-top: 6px;">
+            অ্যান্ড্রয়েড টেলিফোনি ফরওয়ার্ড ও এন্ড-টু-এন্ড এনক্রিপশন
+          </h2>
+          <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">
+            গ্রাহক যখনই আপনার bKash বা Nagad পার্সোনাল নাম্বারে টাকা পাঠায়, আমাদের অ্যান্ড্রয়েড ব্যাকগ্রাউন্ড ডেমন তাৎক্ষণিক SMS ক্যাপচার করে ব্যাংকিং-গ্রেড এনক্রিপশনে ক্লাউড ড্যাশবোর্ডে ফরোয়ার্ড করে।
+          </p>
+
+          <div class="feature-list-item">
+            <div class="feature-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+              <strong style="font-size: 14px; color: var(--text-main);">ডাবল-স্পেন্ড ও ফেক TrxID প্রটেকশন</strong>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">একই TrxID একাধিকবার বা অন্য অর্ডারে ব্যবহার করা অসম্ভব।</p>
+            </div>
+          </div>
+
+          <div class="feature-list-item">
+            <div class="feature-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <strong style="font-size: 14px; color: var(--text-main);">১০ মিনিটের সেশন উইন্ডো ও অ্যামাউন্ট ম্যাচ</strong>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">অর্ডারের সঠিক অ্যামাউন্ট ম্যাচ না হলে পেমেন্ট এপ্রুভ হয় না।</p>
+            </div>
+          </div>
+
+          <div class="feature-list-item">
+            <div class="feature-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <strong style="font-size: 14px; color: var(--text-main);">মাল্টি-ডিভাইস ও টিম পারমিশন</strong>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">পাসওয়ার্ড শেয়ার না করেই একাধিক ফোন ও সিম একসাথে ট্র্যাক করুন।</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <img src="/images/security-forwarder.jpg" alt="Android SMS Forwarder with Encrypted Cloud Server" class="feature-split-img">
+        </div>
+      </div>
+    </section>
+
+    <!-- 5-Step Process -->
+    <section id="how-it-works" class="container">
+      <div class="sec-head">
+        <span class="sec-tag" data-i18n="how_tag">Workflow</span>
+        <h2 class="sec-title" data-i18n="how_h2">৫ ধাপে সহজ অটোমেশন প্রক্রিয়া</h2>
+        <p class="sec-sub" data-i18n="how_sub">ম্যানুয়াল স্ক্রিনশট দেখা বা অ্যাপ খুলে SMS খোঁজার ঝামেলা চিরতরে বন্ধ করুন।</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-item">
+          <div class="step-badge">1</div>
+          <h4 class="step-h4" data-i18n="step1_title">কাস্টমার চেকআউট</h4>
+          <p class="step-p" data-i18n="step1_text">ওয়েবসাইট, অ্যাপ বা পেমেন্ট লিংক থেকে অর্ডারের অ্যামাউন্ট নিয়ে পেমেন্ট পেজে আসে।</p>
+        </div>
+        <div class="step-item">
+          <div class="step-badge">2</div>
+          <h4 class="step-h4" data-i18n="step2_title">সেশন তৈরি</h4>
+          <p class="step-p" data-i18n="step2_text">bKash বা Nagad বেছে নেওয়ার সাথে সাথে নির্দিষ্ট ১০ মিনিটের টাইম-উইন্ডো সেশন লক হয়।</p>
+        </div>
+        <div class="step-item">
+          <div class="step-badge">3</div>
+          <h4 class="step-h4" data-i18n="step3_title">পেমেন্ট সেন্ড</h4>
+          <p class="step-p" data-i18n="step3_text">কাস্টমার নির্দিষ্ট নাম্বারে টাকা পাঠিয়ে প্রাপ্ত TrxID ইনপুট বক্সে সাবমিট করে।</p>
+        </div>
+        <div class="step-item">
+          <div class="step-badge">4</div>
+          <h4 class="step-h4" data-i18n="step4_title">অটো ভেরিফাই</h4>
+          <p class="step-p" data-i18n="step4_text">অ্যামাউন্ট, TrxID ও সেশন ম্যাচ হলে সিস্টেম ১ সেকেন্ডের মধ্যে অর্ডার ভেরিফাই করে।</p>
+        </div>
+        <div class="step-item">
+          <div class="step-badge">5</div>
+          <h4 class="step-h4" data-i18n="step5_title">ইনস্ট্যান্ট ডেলিভারি</h4>
+          <p class="step-p" data-i18n="step5_text">অর্ডার অটো পেইড মার্ক হয় এবং ডিজিটাল প্রোডাক্ট বা সার্ভিস সাথে সাথে ডেলিভার হয়।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Matrix -->
+    <section id="comparison" class="container">
+      <div class="sec-head">
+        <span class="sec-tag" data-i18n="comp_tag">Comparison</span>
+        <h2 class="sec-title" data-i18n="comp_h2">SyncPay BD বনাম ট্র্যাডিশনাল পেমেন্ট গেটওয়ে</h2>
+        <p class="sec-sub" data-i18n="comp_sub">কাস্টোডিয়াল গেটওয়ের জটিলতা ছাড়া সম্পূর্ণ নিজস্ব নিয়ন্ত্রণে অটোমেশন চালান।</p>
+      </div>
+
+      <div class="comp-wrap">
+        <table class="comp-tbl">
+          <thead>
+            <tr>
+              <th data-i18n="comp_th_feature">বৈশিষ্ট্য</th>
+              <th class="comp-col-payflow" data-i18n="comp_th_payflow">⚡ SyncPay BD</th>
+              <th data-i18n="comp_th_trad">🏦 Traditional Gateway</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong data-i18n="comp_row1_title">Transaction Fees</strong></td>
+              <td class="comp-col-payflow" data-i18n="comp_row1_pf">ফ্ল্যাট সাবস্ক্রিপশন (প্রতি অর্ডারে ০% ফি)</td>
+              <td data-i18n="comp_row1_tr">প্রতি অর্ডারে ১.৫% – ৩.৫% ফি কাটা হয়</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="comp_row2_title">অ্যাকাউন্ট রিকোয়ারমেন্ট</strong></td>
+              <td class="comp-col-payflow" data-i18n="comp_row2_pf">Personal, Agent বা Merchant নাম্বার সাপোর্টেড</td>
+              <td data-i18n="comp_row2_tr">বাধ্যতামূলক ট্রেড লাইসেন্স ও মার্চেন্ট অনুমোদন</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="comp_row3_title">টাকা পাওয়ার সময়</strong></td>
+              <td class="comp-col-payflow" data-i18n="comp_row3_pf">তাৎক্ষণিক সরাসরি আপনার ব্যক্তিগত ওয়ালেটে</td>
+              <td data-i18n="comp_row3_tr">৩ থেকে ৭ দিন ব্যাংকে টাকা আটকে থাকে</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="comp_row4_title">লেনদেনের লিমিট</strong></td>
+              <td class="comp-col-payflow" data-i18n="comp_row4_pf">আনলিমিটেড ট্রানজ্যাকশন ভেরিফিকেশন</td>
+              <td data-i18n="comp_row4_tr">ভলিউম লিমিট ও মাসিক এক্সট্রা চার্জ</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="comp_row5_title">ডাবল স্পেন্ড প্রটেকশন</strong></td>
+              <td class="comp-col-payflow" data-i18n="comp_row5_pf">একই TrxID পুনর্ব্যবহার সম্পূর্ণ অটোমেটিক ব্লক</td>
+              <td data-i18n="comp_row5_tr">ম্যানুয়াল SMS চেকিংয়ে ভুয়া স্ক্রিনশটের ঝুঁকি</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="container">
+      <div class="sec-head">
+        <span class="sec-tag">Pricing</span>
+        <h2 class="sec-title">সহজ ও সাশ্রয়ী সাবস্ক্রিপশন প্ল্যান</h2>
+        <p class="sec-sub">কোনো পার-ট্রানজ্যাকশন কমিশন নেই। আনলিমিটেড ভেরিফিকেশন ও ৩ দিনের মানি-ব্যাক।</p>
+      </div>
+
+      <div class="pricing-toggle">
+        <button class="btn-toggle active" id="btn-monthly" onclick="setBillingCycle('monthly')">মাসিক বিলিং</button>
+        <button class="btn-toggle" id="btn-yearly" onclick="setBillingCycle('yearly')">বাৎসরিক বিলিং</button>
+        <span class="badge-save">বাৎসরিকে ৫০% ছাড়</span>
+      </div>
+
+      <!-- Core 4 Plans Grid -->
+      <div class="plans-grid" id="core-plans-container">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Secondary High-Volume Plans Toggle -->
+      <div class="plans-expander">
+        <button class="btn-expand-plans" id="btn-toggle-extra" onclick="toggleExtraPlans()">
+          + আরও বড় প্ল্যান দেখুন (Elite, Growth, Scale, Mega)
+        </button>
+        <div class="secondary-plans-wrap" id="extra-plans-container">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Integrations Section -->
+    <section id="integrations" class="container">
+      <div class="sec-head">
+        <span class="sec-tag">Plugins & SDKs</span>
+        <h2 class="sec-title">জনপ্রিয় প্ল্যাটফর্মে সহজে সংযুক্ত করুন</h2>
+        <p class="sec-sub">রেডিমেড ওয়ার্ডপ্রেস প্লাগইন ও ফ্রেমওয়ার্ক লাইব্রেরি দিয়ে ৫ মিনিটে শুরু করুন।</p>
+      </div>
+
+      <div class="integrations-grid">
+        <div class="int-card">
+          <div class="int-logo-box">
+            <img src="/images/woocommerce.svg" alt="WooCommerce" class="int-logo-img">
+          </div>
+          <div class="int-title">WooCommerce Plugin</div>
+          <p class="int-desc">WordPress ই-কমার্সে ১ ক্লিকে পার্সোনাল bKash/Nagad গেটওয়ে চালু করুন।</p>
+        </div>
+
+        <div class="int-card">
+          <div class="int-logo-box">
+            <img src="/images/laravel.svg" alt="Laravel" class="int-logo-img">
+          </div>
+          <div class="int-title">Laravel SDK</div>
+          <p class="int-desc">লারাভেল অ্যাপের জন্য কম্পোজার প্যাকেজ ও সাইনড ওয়েবহুক কন্ট্রোলার।</p>
+        </div>
+
+        <div class="int-card">
+          <div class="int-logo-box">
+            <img src="/images/wordpress.svg" alt="WordPress" class="int-logo-img">
+          </div>
+          <div class="int-title">WordPress Gateway</div>
+          <p class="int-desc">কাস্টম ফর্ম ও কোর্স রেজিস্ট্রেশন প্লাগইনের সাথে সরাসরি ইন্টিগ্রেশন।</p>
+        </div>
+
+        <div class="int-card">
+          <div class="int-logo-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <div class="int-title">SMM Panel Module v2</div>
+          <p class="int-desc">SMM প্যানেলে ইনস্ট্যান্ট অটো ফান্ড অ্যাড—ভুয়া TrxID সম্পূর্ণ ব্লক।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="container">
+      <div class="sec-head">
+        <span class="sec-tag">FAQ</span>
+        <h2 class="sec-title">প্রায় জিজ্ঞাসিত প্রশ্নাবলী</h2>
+      </div>
+
+      <div class="faq-container">
+        <div class="faq-card active">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>পার্সোনাল নাম্বার দিয়ে কি পেমেন্ট অটোমেশন চালানো যায়?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            হ্যাঁ, ১০০% সম্ভব। অফিশিয়াল মার্চেন্ট অ্যাকাউন্ট বা ট্রেড লাইসেন্স ছাড়াই সাধারণ পার্সোনাল নাম্বারে আসা SMS টেলিফোনি ফরওয়ার্ডারের মাধ্যমে পড়ে তাৎক্ষণিক ভেরিফাই করা যায়।
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>SyncPay কি কাস্টোডিয়াল পেমেন্ট গেটওয়ে?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            না। কাস্টোডিয়াল গেটওয়ে টাকা ব্যাংকে আটকে রাখে এবং দিন শেষে ফি কাটে। SyncPay কোনো টাকা ধরে রাখে না—গ্রাহক সরাসরি আপনার ওয়ালেটে টাকা পাঠায়, আর সিস্টেম শুধু স্বয়ংক্রিয়ভাবে অর্ডার কনফার্ম করে।
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>WooCommerce বা SMM প্যানেলে কি প্লাগইন লাগানো যায়?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            হ্যাঁ। আমাদের তৈরি রেডিমেড WooCommerce প্লাগইন, SMM প্যানেল মডিউল (v2), Laravel SDK এবং REST API দিয়ে কয়েক মিনিটে কানেক্ট করা যায়।
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>টাকা রিফান্ড বা মানি-ব্যাক গ্যারান্টি আছে কি?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            মাসিক প্ল্যানের ক্ষেত্রে ৩ দিন এবং বাৎসরিক প্ল্যানের ক্ষেত্রে ১৫ দিনের ফুল মানি-ব্যাক গ্যারান্টি রয়েছে।
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Developer Section -->
+    <section id="developers" class="dev-section container">
+      <div class="dev-section-label">ডেভেলপার ইন্টিগ্রেশন</div>
+      <h2>যেকোনো Platform-এ সংযুক্ত করুন</h2>
+      <p class="dev-section-sub">
+        মাত্র একটি API দিয়ে আপনার website, app বা e-commerce store-এ payment verification যোগ করুন।
+        WordPress, Shopify থেকে custom backend — সবখানে কাজ করে।
+      </p>
+
+      <!-- 3 API Cards -->
+      <div class="dev-api-cards">
+        <a href="/docs/api" class="dev-api-card">
+          <div class="dev-api-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3>API Documentation</h3>
+          <p>Invoice তৈরি, payment verify ও webhook handle করার সম্পূর্ণ গাইড।</p>
+          <span class="dev-link">দেখুন →</span>
+        </a>
+        <a href="/docs/trx-verification" class="dev-api-card">
+          <div class="dev-api-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3>Transaction Verification API</h3>
+          <p>Backend থেকে সরাসরি advanced payment verification করুন।</p>
+          <span class="dev-link">দেখুন →</span>
+        </a>
+        <a href="/docs/webhook" class="dev-api-card">
+          <div class="dev-api-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 16.98h4v5h-4z"/><path d="M2 16.98h4v5H2z"/><path d="M10 2h4v5h-4z"/><path d="M12 7v5"/><path d="M5 12v5"/><path d="M19 12v5"/><path d="M5 12h14"/></svg>
+          </div>
+          <h3>Webhook API</h3>
+          <p>Real-time payment SMS events আপনার নিজের URL-এ পাঠান।</p>
+          <span class="dev-link">দেখুন →</span>
+        </a>
+      </div>
+
+      <!-- Code Block with tabs -->
+      <div class="dev-code-wrap">
+        <div class="code-tabs">
+          <div class="code-tab active" onclick="switchTab('php', this)">PHP</div>
+          <div class="code-tab" onclick="switchTab('js', this)">JavaScript</div>
+          <div class="code-tab" onclick="switchTab('wordpress', this)">WordPress</div>
+          <div class="code-tab" onclick="switchTab('python', this)">Python</div>
+        </div>
+
+        <div id="tab-php" class="code-body active">
+          <pre><span class="c-cmt">// Payment Verify করুন — PHP</span>
+<span class="c-var">$response</span> = <span class="c-fn">file_get_contents</span>(<span class="c-str">'https://syncpaybd.xyz/api/v1/payment/verify'</span>,
+  <span class="c-kw">false</span>,
+  <span class="c-fn">stream_context_create</span>([
+    <span class="c-str">'http'</span> => [
+      <span class="c-str">'method'</span>  => <span class="c-str">'POST'</span>,
+      <span class="c-str">'header'</span>  => <span class="c-str">'Content-Type: application/json\r\nAuthorization: Bearer YOUR_API_KEY'</span>,
+      <span class="c-str">'content'</span> => <span class="c-fn">json_encode</span>([
+        <span class="c-str">'trx_id'</span>   => <span class="c-var">$trxId</span>,
+        <span class="c-str">'amount'</span>   => <span class="c-var">$amount</span>,
+        <span class="c-str">'provider'</span> => <span class="c-str">'bKash'</span>
+      ])
+    ]
+  ])
+);
+<span class="c-var">$data</span> = <span class="c-fn">json_decode</span>(<span class="c-var">$response</span>, <span class="c-kw">true</span>);
+<span class="c-kw">if</span> (<span class="c-var">$data</span>[<span class="c-str">'verified'</span>] === <span class="c-kw">true</span>) {
+  <span class="c-cmt">// Payment confirmed — order process করুন</span>
+}</pre>
+        </div>
+
+        <div id="tab-js" class="code-body">
+          <pre><span class="c-cmt">// Payment Verify করুন — JavaScript (fetch)</span>
+<span class="c-kw">const</span> <span class="c-var">res</span> = <span class="c-kw">await</span> <span class="c-fn">fetch</span>(<span class="c-str">'https://syncpaybd.xyz/api/v1/payment/verify'</span>, {
+  method: <span class="c-str">'POST'</span>,
+  headers: {
+    <span class="c-str">'Content-Type'</span>: <span class="c-str">'application/json'</span>,
+    <span class="c-str">'Authorization'</span>: <span class="c-str">'Bearer YOUR_API_KEY'</span>
+  },
+  body: <span class="c-fn">JSON.stringify</span>({
+    trx_id:   <span class="c-var">trxId</span>,
+    amount:   <span class="c-var">amount</span>,
+    provider: <span class="c-str">'Nagad'</span>
+  })
+});
+<span class="c-kw">const</span> <span class="c-var">data</span> = <span class="c-kw">await</span> <span class="c-var">res</span>.<span class="c-fn">json</span>();
+<span class="c-kw">if</span> (<span class="c-var">data</span>.verified) {
+  console.<span class="c-fn">log</span>(<span class="c-str">'Payment confirmed'</span>);
+}</pre>
+        </div>
+
+        <div id="tab-wordpress" class="code-body">
+          <pre><span class="c-cmt">// WordPress — WooCommerce Payment Gateway (functions.php)</span>
+<span class="c-fn">add_action</span>(<span class="c-str">'woocommerce_order_status_pending'</span>, <span class="c-kw">function</span>(<span class="c-var">$order_id</span>) {
+  <span class="c-var">$order</span>  = <span class="c-fn">wc_get_order</span>(<span class="c-var">$order_id</span>);
+  <span class="c-var">$trxId</span>  = <span class="c-var">$order</span>-><span class="c-fn">get_meta</span>(<span class="c-str">'_syncpay_trx_id'</span>);
+
+  <span class="c-var">$res</span> = <span class="c-fn">wp_remote_post</span>(<span class="c-str">'https://syncpaybd.xyz/api/v1/payment/verify'</span>, [
+    <span class="c-str">'headers'</span> => [ <span class="c-str">'Authorization'</span> => <span class="c-str">'Bearer '</span> . <span class="c-fn">get_option</span>(<span class="c-str">'syncpay_api_key'</span>) ],
+    <span class="c-str">'body'</span>    => [ <span class="c-str">'trx_id'</span> => <span class="c-var">$trxId</span>, <span class="c-str">'amount'</span> => <span class="c-var">$order</span>-><span class="c-fn">get_total</span>() ]
+  ]);
+  <span class="c-var">$data</span> = <span class="c-fn">json_decode</span>(<span class="c-fn">wp_remote_retrieve_body</span>(<span class="c-var">$res</span>));
+
+  <span class="c-kw">if</span> (<span class="c-var">$data</span>->verified) {
+    <span class="c-var">$order</span>-><span class="c-fn">payment_complete</span>();  <span class="c-cmt">// Order confirm</span>
+  }
+});</pre>
+        </div>
+
+        <div id="tab-python" class="code-body">
+          <pre><span class="c-cmt"># Payment Verify করুন — Python (requests)</span>
+<span class="c-kw">import</span> requests
+
+<span class="c-var">res</span> = requests.<span class="c-fn">post</span>(
+    <span class="c-str">'https://syncpaybd.xyz/api/v1/payment/verify'</span>,
+    headers={<span class="c-str">'Authorization'</span>: <span class="c-str">'Bearer YOUR_API_KEY'</span>},
+    json={
+        <span class="c-str">'trx_id'</span>:   trx_id,
+        <span class="c-str">'amount'</span>:   amount,
+        <span class="c-str">'provider'</span>: <span class="c-str">'Rocket'</span>
+    }
+)
+<span class="c-var">data</span> = <span class="c-var">res</span>.<span class="c-fn">json</span>()
+<span class="c-kw">if</span> <span class="c-var">data</span>[<span class="c-str">'verified'</span>]:
+    print(<span class="c-str">'Payment confirmed'</span>)</pre>
+        </div>
+      </div>
+
+      <!-- Platform pills -->
+      <div class="dev-platforms">
+        <p>যেকোনো platform-এ কাজ করে:</p>
+        <div class="platform-pills">
+          <div class="platform-pill">WordPress / WooCommerce</div>
+          <div class="platform-pill">Shopify</div>
+          <div class="platform-pill">Django / Flask</div>
+          <div class="platform-pill">Next.js / Nuxt</div>
+          <div class="platform-pill">Laravel / PHP</div>
+          <div class="platform-pill">Android / iOS</div>
+          <div class="platform-pill">Custom REST API</div>
+          <div class="platform-pill">Node.js / Express</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Clean Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="margin-bottom: 14px;">
+            <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height: 46px; width: auto; object-fit: contain; display: block;">
+          </div>
+          <p style="font-size: 13px; color: var(--text-light); max-width: 320px;">
+            বাংলাদেশি ক্ষুদ্র উদ্যোক্তা, ফ্রিল্যান্সার ও ই-কমার্স সাইটের জন্য পার্সোনাল নাম্বার পেমেন্ট অটোমেশন ইঞ্জিন।
+          </p>
+        </div>
+
+        <div>
+          <h4>কুইক লিংকস</h4>
+          <ul class="footer-links">
+            <li><a href="#hub">লাইভ ডেমো</a></li>
+            <li><a href="#forwarder">সিকিউরিটি</a></li>
+            <li><a href="#pricing">প্রাইসিং</a></li>
+            <li><a href="#how-it-works">ওয়ার্কফ্লো</a></li>
+            <li><a href="#comparison">গেটওয়ে তুলনা</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>ডেভেলপার্স</h4>
+          <ul class="footer-links">
+            <li><a href="#hub">Sandbox API</a></li>
+            <li><a href="#integrations">WooCommerce Plugin</a></li>
+            <li><a href="#integrations">Laravel SDK</a></li>
+            <li><a href="#faq">সাপোর্ট FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>যোগাযোগ</h4>
+          <div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+            <strong>হটলাইন:</strong> +8809638445387<br>
+            <strong>ইমেইল:</strong> support@syncpaybd.xyz<br>
+            <strong>এনক্রিপশন:</strong> Bank-Grade HMAC SHA-256
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-btm">
+        <span>© 2026 SyncPay BD. All rights reserved.</span>
+        <span>Made for Bangladesh • 0% Transaction Commission</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Clean Application Scripts -->
+  <script>
+    let currentProvider = 'bKash';
+    let currentBilling = 'monthly';
+    const API_KEY = 'live_demo_sec_99410';
+    const PAYFLOW_SANDBOX_KEY = 'sandbox_test_8f4c9a2e7b31';
+
+    // Pricing dataset
+    const primaryPlans = [
+      { id: 'starter', name: 'Starter 1', monthly: 100, yearly: 50, sites: '1 Website', bonus: 'Standard Features', support: 'Basic Support' },
+      { id: 'pro', name: 'Pro 2', monthly: 150, yearly: 75, sites: '2 Websites', bonus: '1 Landing Page Bonus', support: 'Priority Support' },
+      { id: 'business', name: 'Business 3', monthly: 200, yearly: 100, sites: '3 Websites', bonus: '1 Landing Page Bonus', support: 'Priority Support', featured: true, badge: 'Popular' },
+      { id: 'enterprise', name: 'Enterprise 5', monthly: 300, yearly: 150, sites: '5 Websites', bonus: '1 Landing Page Bonus', support: '24/7 Premium Support' }
+    ];
+
+    const extraPlans = [
+      { id: 'agency', name: 'Agency 4', monthly: 250, yearly: 125, sites: '4 Websites' },
+      { id: 'elite', name: 'Elite 10', monthly: 350, yearly: 175, sites: '10 Websites' },
+      { id: 'growth', name: 'Growth 20', monthly: 700, yearly: 350, sites: '20 Websites' },
+      { id: 'scale', name: 'Scale 30', monthly: 1000, yearly: 500, sites: '30 Websites' },
+      { id: 'mega', name: 'Mega 50', monthly: 2000, yearly: 1000, sites: '50 Websites' }
+    ];
+
+    function renderPricing() {
+      const isYearly = currentBilling === 'yearly';
+      const coreContainer = document.getElementById('core-plans-container');
+      const extraContainer = document.getElementById('extra-plans-container');
+
+      coreContainer.innerHTML = primaryPlans.map(p => {
+        const price = isYearly ? p.yearly : p.monthly;
+        return `
+          <div class="plan-card ${p.featured ? 'featured' : ''}">
+            ${p.badge ? `<div class="popular-flag">${p.badge}</div>` : ''}
+            <div>
+              <div class="plan-title">${p.name}</div>
+              <div class="plan-amount-wrap">
+                <span class="plan-price">৳${price}</span>
+                <span class="plan-dur">${isYearly ? '/মাস (বাৎসরিক)' : '/মাস'}</span>
+              </div>
+              <ul class="plan-bullets">
+                <li><span class="chk">✓</span> ${p.sites} Integration</li>
+                <li><span class="chk">✓</span> ${p.bonus}</li>
+                <li><span class="chk">✓</span> Unlimited Transactions</li>
+                <li><span class="chk">✓</span> Full API + Plugins</li>
+                <li><span class="chk">✓</span> ${p.support}</li>
+                <li><span class="chk">✓</span> ${isYearly ? '15' : '3'} Days Money Back</li>
+              </ul>
+            </div>
+            <a href="#hub" class="btn-choose-plan">শুরু করুন →</a>
+          </div>
+        `;
+      }).join('');
+
+      extraContainer.innerHTML = extraPlans.map(p => {
+        const price = isYearly ? p.yearly : p.monthly;
+        return `
+          <div class="plan-card" style="padding: 16px;">
+            <div class="plan-title">${p.name}</div>
+            <div class="plan-amount-wrap" style="margin: 8px 0;">
+              <span class="plan-price" style="font-size:24px;">৳${price}</span>
+              <span class="plan-dur">${isYearly ? '/মাস' : '/মাস'}</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+              ✓ ${p.sites} • 24/7 Dedicated Support
+            </div>
+            <a href="#hub" class="btn-choose-plan" style="padding: 7px; font-size:12px;">বাছাই করুন</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setBillingCycle(c) {
+      currentBilling = c;
+      document.getElementById('btn-monthly').className = 'btn-toggle ' + (c === 'monthly' ? 'active' : '');
+      document.getElementById('btn-yearly').className = 'btn-toggle ' + (c === 'yearly' ? 'active' : '');
+      renderPricing();
+    }
+
+    function toggleExtraPlans() {
+      const wrap = document.getElementById('extra-plans-container');
+      const btn = document.getElementById('btn-toggle-extra');
+      if (wrap.style.display === 'grid') {
+        wrap.style.display = 'none';
+        btn.innerText = '+ আরও বড় প্ল্যান দেখুন (Elite, Growth, Scale, Mega)';
+      } else {
+        wrap.style.display = 'grid';
+        btn.innerText = '- হাই-ভলিউম প্ল্যান লুকান';
+      }
+    }
+
+    // Hub Tab Switching
+    function switchHubTab(tab) {
+      const demoView = document.getElementById('hub-demo-view');
+      const apiView = document.getElementById('hub-api-view');
+      const demoBtn = document.getElementById('tab-btn-demo');
+      const apiBtn = document.getElementById('tab-btn-api');
+
+      if (tab === 'demo') {
+        demoView.style.display = 'block';
+        apiView.style.display = 'none';
+        demoBtn.className = 'hub-tab active';
+        apiBtn.className = 'hub-tab';
+      } else {
+        demoView.style.display = 'none';
+        apiView.style.display = 'block';
+        demoBtn.className = 'hub-tab';
+        apiBtn.className = 'hub-tab active';
+      }
+    }
+
+    // Provider Selector
+    function selectProvider(p) {
+      currentProvider = p;
+      const bBtn = document.getElementById('btn-bkash');
+      const nBtn = document.getElementById('btn-nagad');
+      const box = document.getElementById('instruction-box');
+
+      if (p === 'bKash') {
+        bBtn.className = 'btn-mfs active-bkash';
+        nBtn.className = 'btn-mfs';
+        box.innerHTML = `
+          ১. আপনার <strong>bKash App</strong>-এ গিয়ে <strong>Send Money</strong> করুন।<br>
+          ২. <strong>৳1,500.00</strong> পাঠান এই নাম্বারে: <span class="copy-chip mono">01712345678</span><br>
+          ৩. প্রাপ্ত SMS থেকে <strong>TrxID</strong> নিচে ইনপুট দিন।
+        `;
+      } else {
+        bBtn.className = 'btn-mfs';
+        nBtn.className = 'btn-mfs active-nagad';
+        box.innerHTML = `
+          ১. আপনার <strong>Nagad App</strong>-এ গিয়ে <strong>Send Money</strong> করুন।<br>
+          ২. <strong>৳1,500.00</strong> পাঠান এই নাম্বারে: <span class="copy-chip mono">01712345678</span><br>
+          ৩. প্রাপ্ত SMS থেকে <strong>TxnID</strong> নিচে ইনপুট দিন।
+        `;
+      }
+    }
+
+    // Live Feed Polling
+    async function fetchFeed() {
+      try {
+        const [statsRes, txsRes] = await Promise.all([
+          fetch('/api/v1/merchant/stats'),
+          fetch('/api/v1/merchant/transactions')
+        ]);
+        const statsData = await statsRes.json();
+        const txsData = await txsRes.json();
+
+        if (statsData.success) {
+          document.getElementById('kpi-today-rev').innerText = '৳ ' + statsData.data.todayRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
+          document.getElementById('kpi-verified-count').innerText = statsData.data.totalVerified;
+        }
+
+        if (txsData.success) {
+          renderTable(txsData.data);
+        }
+      } catch (err) {
+        console.error('Feed poll error:', err);
+      }
+    }
+
+    function selectDemoTxn(trxId, amount, provider) {
+      document.getElementById('input-trx').value = trxId;
+      document.getElementById('input-amount').value = amount;
+      document.getElementById('disp-amount').innerText = '৳ ' + Number(amount).toFixed(2);
+      
+      if (provider === 'Nagad') selectProvider('Nagad');
+      else selectProvider('bKash');
+
+      const alertSuccess = document.getElementById('alert-success');
+      const alertError = document.getElementById('alert-error');
+      if (alertSuccess) alertSuccess.style.display = 'none';
+      if (alertError) alertError.style.display = 'none';
+
+      const inputEl = document.getElementById('input-trx');
+      inputEl.focus();
+      inputEl.style.borderColor = '#0284c7';
+      inputEl.style.boxShadow = '0 0 0 3px rgba(2, 132, 199, 0.25)';
+      setTimeout(() => {
+        inputEl.style.borderColor = '';
+        inputEl.style.boxShadow = '';
+      }, 700);
+    }
+
+    function renderTable(txs) {
+      const tbody = document.getElementById('tx-tbody');
+      if (!txs || txs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light); padding: 20px;">কোনো লেনদেন পাওয়া যায়নি</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = txs.map(tx => {
+        let logoSrc = '/images/bkash.svg';
+        if (tx.provider === 'Nagad') logoSrc = '/images/nagad.svg';
+        else if (tx.provider === 'Rocket') logoSrc = '/images/rocket.svg';
+        else if (tx.provider === 'Upay') logoSrc = '/images/upay.svg';
+
+        const sClass = tx.is_verified === 1 ? 'pill-verified' : 'pill-pending';
+        const sText = tx.is_verified === 1 ? 'VERIFIED' : 'PENDING';
+
+        return `
+          <tr onclick="selectDemoTxn('${tx.trx_id}', ${tx.amount}, '${tx.provider}')" title="ক্লিক করে ডানপাশের চেকআউটে টেস্ট করুন">
+            <td>
+              <div class="table-logo-cell">
+                <img src="${logoSrc}" alt="${tx.provider}" class="mfs-mini-img">
+                <span style="font-weight:600; font-size:12px;">${tx.provider}</span>
+              </div>
+            </td>
+            <td><span class="mono" style="font-weight:700; color:#0284c7;">${tx.trx_id}</span></td>
+            <td style="font-weight:700;">৳${Number(tx.amount).toFixed(2)}</td>
+            <td><span class="${sClass}">${sText}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function triggerSimSms(provider, amount) {
+      try {
+        const res = await fetch('/api/v1/merchant/simulate-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider, amount })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('input-trx').value = data.transaction.trx_id;
+          document.getElementById('input-amount').value = data.transaction.amount;
+          document.getElementById('disp-amount').innerText = '৳ ' + data.transaction.amount.toFixed(2);
+          if (provider === 'Nagad') selectProvider('Nagad');
+          else selectProvider('bKash');
+          fetchFeed();
+        }
+      } catch (e) {
+        alert('Simulator Error: ' + e.message);
+      }
+    }
+
+    async function submitVerification() {
+      const trxId = document.getElementById('input-trx').value.trim();
+      const amount = parseFloat(document.getElementById('input-amount').value);
+      const alertSuccess = document.getElementById('alert-success');
+      const alertError = document.getElementById('alert-error');
+
+      alertSuccess.style.display = 'none';
+      alertError.style.display = 'none';
+
+      if (!trxId) {
+        alertError.style.display = 'block';
+        document.getElementById('error-title').innerText = 'TrxID প্রয়োজন';
+        document.getElementById('error-msg').innerText = 'দয়া করে ট্রানজ্যাকশন আইডি লিখুন।';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v1/payments/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            api_key: API_KEY,
+            trx_id: trxId,
+            expected_amount: amount,
+            order_id: 'ORD-8821'
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.verified) {
+          alertSuccess.style.display = 'block';
+          fetchFeed();
+        } else {
+          alertError.style.display = 'block';
+          document.getElementById('error-title').innerText = 'ভেরিফিকেশন ব্যর্থ';
+          document.getElementById('error-msg').innerText = data.message || 'ট্রানজ্যাকশনটি ভেরিফাই করা যায়নি।';
+        }
+      } catch (err) {
+        alertError.style.display = 'block';
+        document.getElementById('error-title').innerText = 'নেটওয়ার্ক এরর';
+        document.getElementById('error-msg').innerText = err.message;
+      }
+    }
+
+    // Developer API Tests
+    async function testPayflowCreateInvoice() {
+      const amount = parseFloat(document.getElementById('pf-amount').value) || 1200;
+      const cusName = document.getElementById('pf-cus-name').value.trim() || 'Rahim Ahmed';
+      const resEl = document.getElementById('pf-create-response');
+      const payWrap = document.getElementById('pf-paylink-wrap');
+      const payAnchor = document.getElementById('pf-paylink-anchor');
+
+      resEl.innerText = '// Sending POST /v1/payment/create ...';
+      payWrap.style.display = 'none';
+
+      try {
+        const response = await fetch('/v1/payment/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'payflow-api-key': PAYFLOW_SANDBOX_KEY
+          },
+          body: JSON.stringify({
+            cus_name: cusName,
+            amount: amount,
+            redirect_url: 'https://merchant.com/success',
+            webhook_url: 'https://merchant.com/webhook'
+          })
+        });
+
+        const data = await response.json();
+        resEl.innerText = JSON.stringify(data, null, 2);
+
+        if (data.status && data.payment_url) {
+          payWrap.style.display = 'block';
+          payAnchor.href = data.payment_url;
+          payAnchor.innerText = data.payment_url;
+
+          const match = data.payment_url.match(/invoice_id=([^&]+)/);
+          if (match) {
+            document.getElementById('pf-verify-id').value = match[1];
+          }
+        }
+      } catch (err) {
+        resEl.innerText = `Error: ${err.message}`;
+      }
+    }
+
+    async function testPayflowVerifyInvoice() {
+      const invoiceId = document.getElementById('pf-verify-id').value.trim();
+      const resEl = document.getElementById('pf-verify-response');
+
+      if (!invoiceId) {
+        alert('ইনভয়েস আইডি প্রদান করুন।');
+        return;
+      }
+
+      resEl.innerText = `// Sending POST /v1/payment/verify for ${invoiceId}...`;
+
+      try {
+        const response = await fetch('/v1/payment/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'payflow-api-key': PAYFLOW_SANDBOX_KEY
+          },
+          body: JSON.stringify({ invoice_id: invoiceId })
+        });
+
+        const data = await response.json();
+        resEl.innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resEl.innerText = `Error: ${err.message}`;
+      }
+    }
+
+    function toggleFaq(el) {
+      el.parentElement.classList.toggle('active');
+    }
+
+    function switchTab(lang, btn) {
+      // hide all bodies
+      document.querySelectorAll('.code-body').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + lang).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // Init
+    renderPricing();
+    fetchFeed();
+    setInterval(fetchFeed, 3000);
+  </script>
+</body>
+</html>
