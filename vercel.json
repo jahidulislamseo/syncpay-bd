@@ -2,16 +2,10 @@
   "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/api", "destination": "/api" },
-    { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/checkout", "destination": "/checkout.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/download", "destination": "/download.html" },
-    { "source": "/app", "destination": "/download.html" },
-    { "source": "/docs/api", "destination": "/docs/api.html" },
-    { "source": "/docs/trx-verification", "destination": "/docs/trx-verification.html" },
-    { "source": "/docs/webhook", "destination": "/docs/webhook.html" }
+    { "source": "/app", "destination": "/download.html" }
   ]
 }
