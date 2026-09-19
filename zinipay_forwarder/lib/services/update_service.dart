@@ -72,9 +72,9 @@ class UpdateService {
 
       if (showNoUpdateToast && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('আপনার অ্যাপটি আপ-টু-ডেট আছে (v${AppConfig.appVersion})'),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: Color(0xFF10B981),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -270,7 +270,6 @@ class UpdateService {
     int receivedBytes = 0;
     int totalBytes = 0;
     StateSetter? dialogSetState;
-    bool isCancelled = false;
 
     showDialog(
       context: context,
@@ -387,7 +386,6 @@ class UpdateService {
         final sink = file.openWrite();
 
         await response.stream.listen((chunk) {
-          if (isCancelled) return;
           sink.add(chunk);
           receivedBytes += chunk.length;
           if (totalBytes > 0) {

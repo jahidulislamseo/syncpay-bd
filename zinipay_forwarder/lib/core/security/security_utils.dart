@@ -39,7 +39,7 @@ class SecurityUtils {
   /// Generates a standardized Device ID e.g. ZP-AND-82A91
   static String generateDeviceId() {
     final random = Random();
-    final chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final suffix = List.generate(5, (_) => chars[random.nextInt(chars.length)]).join();
     return 'ZP-AND-$suffix';
   }

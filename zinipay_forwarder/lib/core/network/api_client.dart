@@ -87,13 +87,13 @@ class ApiClient {
           trxId: body['trxId'] as String?,
         );
       } else if (response.statusCode == 401) {
-        return IngestApiResponse(
+        return const IngestApiResponse(
           success: false,
           statusCode: 401,
           errorMessage: 'Device authentication failed. Verify Pairing Token.',
         );
       } else if (response.statusCode == 403) {
-        return IngestApiResponse(
+        return const IngestApiResponse(
           success: false,
           statusCode: 403,
           errorMessage: 'Device or merchant account is disabled/suspended.',

@@ -72,9 +72,9 @@ class _AgentShellState extends ConsumerState<AgentShell> {
             ),
             label: loc.tr('nav_activity'),
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.bar_chart_outlined),
-            activeIcon: const Icon(Icons.bar_chart),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart_outlined),
+            activeIcon: Icon(Icons.bar_chart),
             label: 'পরিসংখ্যান',
           ),
           BottomNavigationBarItem(

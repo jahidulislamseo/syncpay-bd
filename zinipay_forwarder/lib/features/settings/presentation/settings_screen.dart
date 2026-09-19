@@ -96,7 +96,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 16),
 
           // ── Security: Biometric ──────────────────────────────────────────
-          _SectionHeader(title: 'নিরাপত্তা'),
+          const _SectionHeader(title: 'নিরাপত্তা'),
           Card(child: Column(children: [
             SwitchListTile(
               secondary: const Icon(Icons.fingerprint, color: Color(0xFF6366F1)),
@@ -105,7 +105,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ? 'App খুলতে Fingerprint / Face ID ব্যবহার'
                   : 'এই ডিভাইসে Biometric সমর্থিত নয়'),
               value: _biometricEnabled,
-              activeColor: const Color(0xFF6366F1),
+              activeThumbColor: const Color(0xFF6366F1),
               onChanged: _biometricAvailable ? _toggleBiometric : null,
             ),
           ])),
@@ -125,7 +125,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 16),
 
           // ── Bank Providers ───────────────────────────────────────────────
-          _SectionHeader(title: 'ব্যাংক প্রদানকারী'),
+          const _SectionHeader(title: 'ব্যাংক প্রদানকারী'),
           Card(child: Column(children: [
             _ProviderTile('DBBL',       'Dutch-Bangla Bank Ltd.',       const Color(0xFF005BAC), agentState.dbblActive,       (v) => ref.read(agentProvider.notifier).toggleProvider('dbbl',       v)),
             const Divider(height: 1),
@@ -138,14 +138,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 16),
 
           // ── Alerts ───────────────────────────────────────────────────────
-          _SectionHeader(title: 'এলার্ট'),
+          const _SectionHeader(title: 'এলার্ট'),
           Card(child: Column(children: [
             SwitchListTile(
               secondary: const Icon(Icons.notifications_active, color: Color(0xFF10B981)),
               title: const Text('Payment Notification', style: TextStyle(fontWeight: FontWeight.bold)),
               subtitle: const Text('প্রতিটি forwarded SMS-এর জন্য notification'),
               value: agentState.notificationsEnabled,
-              activeColor: const Color(0xFF10B981),
+              activeThumbColor: const Color(0xFF10B981),
               onChanged: (v) => ref.read(agentProvider.notifier).setNotificationsEnabled(v),
             ),
             const Divider(height: 1),
@@ -154,14 +154,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: const Text('বড় পেমেন্ট Alert', style: TextStyle(fontWeight: FontWeight.bold)),
               subtitle: const Text('৳৫,০০০ বা বেশি হলে বিশেষ alert'),
               value: agentState.bigPaymentAlertEnabled,
-              activeColor: const Color(0xFFF59E0B),
+              activeThumbColor: const Color(0xFFF59E0B),
               onChanged: (v) => ref.read(agentProvider.notifier).setBigPaymentAlertEnabled(v),
             ),
           ])),
           const SizedBox(height: 16),
 
           // ── Export ───────────────────────────────────────────────────────
-          _SectionHeader(title: 'ডেটা'),
+          const _SectionHeader(title: 'ডেটা'),
           Card(child: Column(children: [
             ListTile(
               leading: const Icon(Icons.download, color: Color(0xFF6366F1)),
@@ -266,7 +266,7 @@ class _ProviderTile extends StatelessWidget {
     title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
     subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
     value: value,
-    activeColor: color,
+    activeThumbColor: color,
     onChanged: onChanged,
   );
 }

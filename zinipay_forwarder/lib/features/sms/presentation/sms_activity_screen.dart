@@ -33,6 +33,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
 
   Color _getStatusColor(SmsStatus status) {
     switch (status) {
+      case SmsStatus.forwarded:
       case SmsStatus.matched:
       case SmsStatus.processed:
         return const Color(0xFF10B981);

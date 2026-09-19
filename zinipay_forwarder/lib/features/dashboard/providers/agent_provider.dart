@@ -12,6 +12,7 @@ class AgentState {
   final int? latencyMs;
   final DateTime lastSyncedAt;
   final String backendUrl;
+  String get serverUrl => backendUrl;
   final String deviceId;
   final String deviceToken;
   final String merchantId;

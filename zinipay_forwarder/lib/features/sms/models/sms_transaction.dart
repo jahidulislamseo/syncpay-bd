@@ -3,6 +3,7 @@ enum SmsStatus {
   processing,
   processed,
   matched,
+  forwarded,
   rejected,
   failed,
   retrying,
