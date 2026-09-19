@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Webhook API | SyncPay BD</title>
-  <meta name="description" content="SyncPay BD Webhook API — real-time payment SMS events আপনার URL-এ পাঠান।">
+  <meta name="description" content="SyncPay BD Webhook API — Stream real-time payment SMS events directly to your endpoint.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#f8fafc;--bg-card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#64748b;--primary:#0284c7;--primary-s:#f0f9ff;--primary-b:#bae6fd;--radius:16px;--radius-sm:8px;}
+    :root{--bg:#f8fafc;--bg-card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#64748b;--primary:#0284c7;--primary-h:#0369a1;--primary-s:#f0f9ff;--primary-b:#bae6fd;--success:#10b981;--danger:#ef4444;--radius:16px;--radius-sm:8px;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     html{scroll-behavior:smooth;}
     body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;}
@@ -34,26 +34,24 @@
     .content h2:first-of-type{margin-top:0;padding-top:0;border-top:none;}
     .content h3{font-size:15px;font-weight:700;margin:24px 0 10px;}
     .content p{font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.7;}
-    .content ul{padding-left:20px;margin-bottom:14px;}
-    .content ul li{font-size:14px;color:var(--muted);margin-bottom:6px;}
-    .code-block{background:#0f172a;border-radius:var(--radius-sm);padding:20px 24px;margin:12px 0 20px;overflow-x:auto;}
-    .code-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:#e2e8f0;margin:0;}
-    .c-kw{color:#f472b6;}.c-fn{color:#60a5fa;}.c-str{color:#86efac;}.c-cmt{color:#475569;font-style:italic;}.c-num{color:#fb923c;}.c-var{color:#a78bfa;}.c-key{color:#38bdf8;}
+    .page-chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);background:var(--primary-s);border:1px solid var(--primary-b);padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+    .alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:20px;font-size:13px;}
+    .alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;}
+    .alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#b45309;}
+    .alert-info{background:var(--primary-s);border:1px solid var(--primary-b);color:#0369a1;}
+    .setup-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:24px 0;}
+    .setup-step{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;}
+    .setup-step-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:12px;}
+    .setup-step h4{font-size:14px;font-weight:700;margin-bottom:6px;}
+    .setup-step p{font-size:12px;color:var(--light);margin:0;line-height:1.5;}
     .param-table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:13px;}
     .param-table th{text-align:left;padding:10px 14px;background:#f8fafc;border:1px solid var(--border);color:var(--light);font-size:11px;text-transform:uppercase;letter-spacing:.06em;}
     .param-table td{padding:11px 14px;border:1px solid var(--border);color:var(--muted);vertical-align:top;}
     .param-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--text);font-size:12px;}
-    .alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:20px;font-size:13px;}
-    .alert-info{background:var(--primary-s);border:1px solid var(--primary-b);color:#0369a1;}
-    .alert-warn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e;}
-    .alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;}
-    .page-chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);background:var(--primary-s);border:1px solid var(--primary-b);padding:5px 14px;border-radius:20px;margin-bottom:14px;}
-    .event-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;background:#0f172a;color:#38bdf8;margin-bottom:8px;}
-    .setup-steps{counter-reset:step;display:flex;flex-direction:column;gap:16px;margin:20px 0;}
-    .setup-step{display:flex;gap:14px;}
-    .setup-step-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;}
-    .setup-step-body h4{font-size:14px;font-weight:700;margin-bottom:4px;}
-    .setup-step-body p{font-size:13px;color:var(--muted);margin:0;}
+    .code-block{background:#0f172a;border-radius:var(--radius-sm);padding:20px 24px;margin:12px 0 20px;overflow-x:auto;}
+    .code-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:#e2e8f0;margin:0;}
+    .c-kw{color:#f472b6;}.c-fn{color:#60a5fa;}.c-str{color:#86efac;}.c-cmt{color:#475569;font-style:italic;}.c-num{color:#fb923c;}.c-var{color:#a78bfa;}.c-key{color:#38bdf8;}
+    .event-badge{display:inline-block;background:#0f172a;color:#38bdf8;font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:6px;margin-bottom:8px;}
   </style>
 </head>
 <body>
@@ -64,7 +62,7 @@
         <a href="/docs/api">API Docs</a>
         <a href="/docs/trx-verification">Verification</a>
         <a href="/docs/webhook" style="color:var(--primary)">Webhook</a>
-        <a href="/" class="btn-back">← হোম</a>
+        <a href="/" class="btn-back">← Home</a>
       </div>
     </div>
   </header>
@@ -88,57 +86,57 @@
     <main class="content">
       <div class="page-chip">Webhook API</div>
       <h1>Webhook API</h1>
-      <p class="lead">Real-time payment events আপনার server-এ পাঠান। কোনো polling লাগবে না — SMS পাওয়ার সাথে সাথে আপনার URL-এ HTTP POST যাবে।</p>
+      <p class="lead">Stream real-time payment events directly to your server. No manual polling needed — as soon as an SMS is received, an HTTP POST request is dispatched to your URL.</p>
 
       <div class="alert alert-success">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Webhook ব্যবহার করলে payment detect হওয়ার <strong>2-5 সেকেন্ডের মধ্যে</strong> আপনার system নোটিফাই হয়।</span>
+        <span>Using webhooks, your system is notified within <strong>2-5 seconds</strong> of payment detection.</span>
       </div>
 
-      <h2 id="overview">Webhook কীভাবে কাজ করে</h2>
-      <p>আমাদের Android agent SMS পেলে PayFlow server-কে জানায়। Server তখন আপনার registered webhook URL-এ HTTP POST পাঠায়। আপনার server <code>200 OK</code> দিলে delivery confirmed।</p>
+      <h2 id="overview">How Webhooks Work</h2>
+      <p>When our Android agent receives a payment SMS, it notifies the SyncPay server. The server then dispatches an HTTP POST payload to your registered webhook URL. When your server responds with <code>200 OK</code>, delivery is confirmed.</p>
 
       <h2 id="setup">Webhook Setup</h2>
       <div class="setup-steps">
         <div class="setup-step">
           <div class="setup-step-num">1</div>
           <div class="setup-step-body">
-            <h4>Dashboard থেকে Webhook URL register করুন</h4>
-            <p>Settings → Webhooks → Add Endpoint-এ আপনার server URL দিন।</p>
+            <h4>Register Webhook URL in Dashboard</h4>
+            <p>Navigate to Settings → Webhooks → Add Endpoint and enter your server URL.</p>
           </div>
         </div>
         <div class="setup-step">
           <div class="setup-step-num">2</div>
           <div class="setup-step-body">
-            <h4>Secret Key সংগ্রহ করুন</h4>
-            <p>Signature verify করতে এই secret দরকার হবে।</p>
+            <h4>Save Secret Key</h4>
+            <p>Obtain your secret key used to verify HMAC signatures on incoming requests.</p>
           </div>
         </div>
         <div class="setup-step">
           <div class="setup-step-num">3</div>
           <div class="setup-step-body">
-            <h4>HTTPS endpoint তৈরি করুন</h4>
-            <p>আপনার server-এ একটি POST endpoint বানান। Webhook শুধু HTTPS-এ পাঠানো হয়।</p>
+            <h4>Create HTTPS Endpoint</h4>
+            <p>Set up an HTTP POST endpoint on your server. Webhooks are dispatched only via HTTPS.</p>
           </div>
         </div>
         <div class="setup-step">
           <div class="setup-step-num">4</div>
           <div class="setup-step-body">
-            <h4>Signature verify করুন ও 200 দিন</h4>
-            <p>Request valid হলে <code>200 OK</code> response দিন। অন্যথায় retry হবে।</p>
+            <h4>Verify Signature and Return 200</h4>
+            <p>Validate the signature and reply with a <code>200 OK</code> status. Otherwise, retries occur.</p>
           </div>
         </div>
       </div>
 
       <h2 id="events">Events</h2>
-      <p>নিচের events-এর জন্য webhook পাঠানো হয়:</p>
+      <p>Webhooks are triggered for the following events:</p>
       <table class="param-table">
-        <thead><tr><th>Event</th><th>কখন পাঠানো হয়</th></tr></thead>
+        <thead><tr><th>Event</th><th>Trigger Condition</th></tr></thead>
         <tbody>
-          <tr><td>payment.received</td><td>নতুন payment SMS detect হলে</td></tr>
-          <tr><td>payment.verified</td><td>Transaction verify হলে</td></tr>
-          <tr><td>payment.failed</td><td>Verification fail হলে</td></tr>
-          <tr><td>payment.expired</td><td>Invoice expire হলে</td></tr>
+          <tr><td>payment.received</td><td>When a new payment SMS is detected</td></tr>
+          <tr><td>payment.verified</td><td>When a transaction is successfully verified</td></tr>
+          <tr><td>payment.failed</td><td>When transaction verification fails</td></tr>
+          <tr><td>payment.expired</td><td>When an invoice expires</td></tr>
         </tbody>
       </table>
 
@@ -158,10 +156,10 @@
 }</pre></div>
 
       <h2 id="security">Signature Verification</h2>
-      <p>প্রতিটি webhook request-এ <code>X-PayFlow-Signature</code> header থাকে। Request body-র HMAC-SHA256 hash verify করুন।</p>
+      <p>Every webhook request includes an <code>X-SyncPay-Signature</code> header. Verify the HMAC-SHA256 hash of the request body.</p>
       <div class="code-block"><pre><span class="c-cmt">// PHP — Signature verify</span>
 <span class="c-var">$payload</span>   = <span class="c-fn">file_get_contents</span>(<span class="c-str">'php://input'</span>);
-<span class="c-var">$signature</span> = <span class="c-var">$_SERVER</span>[<span class="c-str">'HTTP_X_PAYFLOW_SIGNATURE'</span>];
+<span class="c-var">$signature</span> = <span class="c-var">$_SERVER</span>[<span class="c-str">'HTTP_X_SYNCPAY_SIGNATURE'</span>];
 <span class="c-var">$expected</span>  = <span class="c-str">'sha256='</span> . <span class="c-fn">hash_hmac</span>(<span class="c-str">'sha256'</span>, <span class="c-var">$payload</span>, <span class="c-var">$webhookSecret</span>);
 
 <span class="c-kw">if</span> (!<span class="c-fn">hash_equals</span>(<span class="c-var">$expected</span>, <span class="c-var">$signature</span>)) {
@@ -169,17 +167,17 @@
   <span class="c-kw">exit</span>(<span class="c-str">'Invalid signature'</span>);
 }
 
-<span class="c-cmt">// Valid — process করুন</span>
+<span class="c-cmt">// Valid — process order</span>
 <span class="c-var">$data</span> = <span class="c-fn">json_decode</span>(<span class="c-var">$payload</span>, <span class="c-kw">true</span>);
 <span class="c-fn">http_response_code</span>(<span class="c-num">200</span>);</pre></div>
 
       <div class="alert alert-warn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span>Signature verify না করলে যেকেউ fake webhook পাঠাতে পারে। সবসময় verify করুন।</span>
+        <span>Without signature verification, unauthorized parties could send fraudulent webhook requests. Always verify signatures.</span>
       </div>
 
       <h2 id="retry">Retry Policy</h2>
-      <p>আপনার server <code>200</code> না দিলে বা timeout হলে আমরা retry করি:</p>
+      <p>If your server returns a non-200 code or times out, automated retries are triggered:</p>
       <table class="param-table">
         <thead><tr><th>Attempt</th><th>Delay</th></tr></thead>
         <tbody>
@@ -187,13 +185,13 @@
           <tr><td>2nd retry</td><td>5 minutes</td></tr>
           <tr><td>3rd retry</td><td>30 minutes</td></tr>
           <tr><td>4th retry</td><td>2 hours</td></tr>
-          <tr><td>Final</td><td>24 hours — তারপর abandon</td></tr>
+          <tr><td>Final</td><td>24 hours — then marked abandoned</td></tr>
         </tbody>
       </table>
 
       <div class="alert alert-info">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span>Webhook handler idempotent রাখুন — একই event একাধিকবার পেলেও duplicate order না হয়।</span>
+        <span>Keep your webhook handler idempotent — ensure that processing the same event multiple times will not duplicate customer orders.</span>
       </div>
     </main>
   </div>

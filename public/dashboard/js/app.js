@@ -34,6 +34,26 @@ class PayFlowDashboardApp {
     this.session = auth.getSession();
     this.updateSidebarUser();
 
+    // Check plan upgrade param from URL if logged in
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestedPlan = urlParams.get('plan');
+      if (requestedPlan && this.session && this.session.plan !== requestedPlan) {
+        auth.upgradePlan(requestedPlan);
+        this.session.plan = requestedPlan;
+        this.updateSidebarUser();
+      }
+    } catch (e) {}
+
+    // Check flash toast message from homepage plan activation
+    try {
+      const flash = JSON.parse(localStorage.getItem('syncpay_toast') || 'null');
+      if (flash && flash.message) {
+        setTimeout(() => this.showToast(flash.message, flash.type || 'success'), 400);
+        localStorage.removeItem('syncpay_toast');
+      }
+    } catch (e) {}
+
     // 4. Initialize Language
     i18n.applyTranslations();
 
@@ -168,20 +188,20 @@ class PayFlowDashboardApp {
     lockedPanel.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; text-align:center; padding:40px 20px;">
         <div style="width:72px; height:72px; background:var(--warning-bg); border:2px solid var(--warning-border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:20px;">🔒</div>
-        <h2 style="font-size:22px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">${label} — আপগ্রেড দরকার</h2>
+        <h2 style="font-size:22px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">${label} — Upgrade Required</h2>
         <p style="font-size:14px; color:var(--text-muted); max-width:420px; line-height:1.7; margin-bottom:24px;">
-          আপনার বর্তমান <strong>${planInfo.label}</strong> প্যাকেজে এই ফিচারটি উপলব্ধ নেই।
-          <strong>${nextPlanInfo?.label || 'উচ্চতর প্যাকেজে'}</strong> আপগ্রেড করে সব ফিচার আনলক করুন।
+          This feature is not available in your current <strong>${planInfo.label}</strong> plan.
+          Upgrade to <strong>${nextPlanInfo?.label || 'a higher tier'}</strong> to unlock all features.
         </p>
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
           <button class="btn btn-primary-action" style="padding:12px 28px; font-size:14px;" onclick="window.payflowApp.openUpgradeModal('${nextPlan}')">
-            ⚡ ${nextPlanInfo?.label || 'Enterprise'}-এ আপগ্রেড করুন
+            ⚡ Upgrade to ${nextPlanInfo?.label || 'Enterprise'}
           </button>
-          <a href="#home" class="btn btn-secondary-action" style="padding:12px 28px; font-size:14px; text-decoration:none;">← ড্যাশবোর্ডে ফিরুন</a>
+          <a href="#home" class="btn btn-secondary-action" style="padding:12px 28px; font-size:14px; text-decoration:none;">← Back to Dashboard</a>
         </div>
 
         <div style="margin-top:36px; padding:20px; background:var(--bg-subtle); border:1px solid var(--border); border-radius:12px; max-width:480px; width:100%;">
-          <div style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px;">প্যাকেজ তুলনা</div>
+          <div style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px;">Plan Comparison</div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; font-size:12px;">
             ${Object.entries(allPlans).map(([key, p]) => `
               <div style="padding:10px; border-radius:8px; border:2px solid ${key===planKey?p.color:'var(--border)'}; background:${key===planKey?'var(--primary-subtle)':'var(--bg-surface)'}">
@@ -201,13 +221,13 @@ class PayFlowDashboardApp {
     const plans = auth.getAllPlans();
     const p = plans[targetPlan];
     if (!p) return;
-    const prices = { starter: '৳৯৯৯/মাস', growth: '৳২,৯৯৯/মাস', enterprise: '৳৯,৯৯৯/মাস' };
-    const confirmed = confirm(`${p.label} প্যাকেজে আপগ্রেড করবেন? (${prices[targetPlan] || ''})\n\nডেমো মোডে ক্লিক করলে তাৎক্ষণিক আপগ্রেড হবে।`);
+    const prices = { starter: '৳999/mo', growth: '৳2,999/mo', enterprise: '৳9,999/mo' };
+    const confirmed = confirm(`Upgrade to ${p.label} plan? (${prices[targetPlan] || ''})\n\nDemo mode will apply instant upgrade.`);
     if (confirmed) {
       auth.upgradePlan(targetPlan);
       this.session = auth.getSession();
       this.updateSidebarUser();
-      this.showToast(`${p.label} প্যাকেজে আপগ্রেড সম্পন্ন! 🎉`, 'success');
+      this.showToast(`Upgraded to ${p.label} plan successfully! 🎉`, 'success');
       setTimeout(() => { window.location.hash = '#home'; window.location.reload(); }, 1500);
     }
   }
@@ -681,9 +701,9 @@ class PayFlowDashboardApp {
         <div class="card-panel">
           <div class="card-panel-header">
             <div>
-              <h3 class="card-panel-title">সরাসরি TrxID বা ইনভয়েস ভেরিফিকেশন</h3>
+              <h3 class="card-panel-title">Direct TrxID or Invoice Verification</h3>
               <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
-                বিকাশ, নগদ, রকেট বা উপায় থেকে প্রাপ্ত ট্রানজ্যাকশন আইডি প্রদান করে সিম এসএমএস-এর সাথে ইনস্ট্যান্ট ম্যাচ নিশ্চিত করুন।
+                Enter Transaction ID received from bKash, Nagad, Rocket, or Upay for instant SIM SMS auto-matching.
               </p>
             </div>
           </div>
@@ -691,26 +711,26 @@ class PayFlowDashboardApp {
           <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
             <div style="flex:1; min-width:260px;">
               <input type="text" id="quick-verify-input" class="form-control" 
-                     placeholder="উদাহরণ: BL78A4982J বা NG991B24KC..." 
+                     placeholder="e.g., BL78A4982J or NG991B24KC..." 
                      style="font-size:15px; font-family:monospace; text-transform:uppercase;"
                      onkeypress="if(event.key==='Enter') window.payflowApp.runQuickVerify()">
             </div>
             <button class="btn btn-primary-action" onclick="window.payflowApp.runQuickVerify()" style="display:inline-flex; align-items:center; gap:8px; padding:10px 22px;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <span>ভেরিফাই ও ম্যাচ করুন</span>
+              <span>Verify & Match</span>
             </button>
             <button class="btn btn-secondary-action" onclick="window.payflowApp.resetQuickVerify()" style="display:inline-flex; align-items:center; gap:6px;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-              <span>ক্লিয়ার</span>
+              <span>Clear</span>
             </button>
           </div>
 
           <!-- Quick Test Presets -->
           <div style="display:flex; align-items:center; gap:8px; margin-top:14px; flex-wrap:wrap; font-size:12px;">
-            <span style="color:var(--text-muted); font-size:11px; text-transform:uppercase; font-weight:700;">কুইক টেস্ট স্যাম্পল:</span>
+            <span style="color:var(--text-muted); font-size:11px; text-transform:uppercase; font-weight:700;">Quick Test Samples:</span>
             <button class="btn-preset-chip" onclick="window.payflowApp.fillAndVerify('BL78A4982J')">bKash: BL78A4982J</button>
             <button class="btn-preset-chip" onclick="window.payflowApp.fillAndVerify('NG991B24KC')">Nagad: NG991B24KC</button>
-            <button class="btn-preset-chip" onclick="window.payflowApp.fillAndVerify('RK201948LA')">Rocket: RK201948LA (পেন্ডিং)</button>
+            <button class="btn-preset-chip" onclick="window.payflowApp.fillAndVerify('RK201948LA')">Rocket: RK201948LA (Pending)</button>
             <button class="btn-preset-chip" onclick="window.payflowApp.fillAndVerify('UP398112MK')">Upay: UP398112MK</button>
           </div>
 
@@ -722,10 +742,10 @@ class PayFlowDashboardApp {
         <div class="card-panel">
           <div class="card-panel-header" style="margin-bottom:16px;">
             <div>
-              <h3 class="card-panel-title">সিম ফরওয়ার্ডার থেকে প্রাপ্ত সাম্প্রতিক TrxID তালিকা</h3>
-              <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">সর্বশেষ ইনকামিং লেনদেন ও অটো-ম্যাচ স্ট্যাটাস</p>
+              <h3 class="card-panel-title">Recent TrxID Stream from SIM Forwarder</h3>
+              <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Latest incoming transactions & auto-match statuses</p>
             </div>
-            <span class="badge badge-neutral" style="font-size:11px;">লাইভ সিঙ্ক</span>
+            <span class="badge badge-neutral" style="font-size:11px;">Live Sync</span>
           </div>
 
           <div class="table-container" style="overflow-x:auto;">
@@ -733,13 +753,13 @@ class PayFlowDashboardApp {
               <thead>
                 <tr>
                   <th>TrxID</th>
-                  <th>প্রোভাইডার</th>
-                  <th>পরিমাণ</th>
-                  <th>প্রেরক নম্বর</th>
-                  <th>অর্ডার আইডি</th>
-                  <th>স্ট্যাটাস</th>
-                  <th>সময়</th>
-                  <th style="text-align:right;">অ্যাকশন</th>
+                  <th>Provider</th>
+                  <th>Amount</th>
+                  <th>Sender Number</th>
+                  <th>Order ID</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                  <th style="text-align:right;">Actions</th>
                 </tr>
               </thead>
               <tbody id="quick-verify-history-tbody"></tbody>
@@ -759,7 +779,7 @@ class PayFlowDashboardApp {
 
     const query = input.value.trim().toUpperCase();
     if (!query) {
-      this.showToast('অনুগ্রহ করে একটি TrxID প্রবেশ করান', 'warning');
+      this.showToast('Please enter a TrxID', 'warning');
       return;
     }
 
@@ -781,7 +801,7 @@ class PayFlowDashboardApp {
               </div>
               <div>
                 <h4 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary);">
-                  ${isVerified ? 'লেনদেন সফলভাবে ম্যাচ ও যাচাইকৃত!' : 'লেনদেন পাওয়া গেছে (অনুমোদন পেন্ডিং)'}
+                  ${isVerified ? 'Transaction matched & verified!' : 'Transaction found (Approval pending)'}
                 </h4>
                 <span class="mono" style="font-size:13px; color:var(--primary); font-weight:700;">TrxID: ${tx.trx_id}</span>
               </div>
@@ -795,25 +815,25 @@ class PayFlowDashboardApp {
 
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:14px; font-size:13px;">
             <div style="background:var(--bg-surface); padding:10px; border-radius:8px; border:1px solid var(--border);">
-              <span style="color:var(--text-muted); font-size:11px; display:block;">পরিমাণ</span>
+              <span style="color:var(--text-muted); font-size:11px; display:block;">Amount</span>
               <strong style="font-size:16px; color:var(--text-primary);">৳ ${Number(tx.amount).toFixed(2)}</strong>
             </div>
             <div style="background:var(--bg-surface); padding:10px; border-radius:8px; border:1px solid var(--border);">
-              <span style="color:var(--text-muted); font-size:11px; display:block;">MFS প্রোভাইডার</span>
+              <span style="color:var(--text-muted); font-size:11px; display:block;">MFS Provider</span>
               <strong>${tx.provider}</strong>
             </div>
             <div style="background:var(--bg-surface); padding:10px; border-radius:8px; border:1px solid var(--border);">
-              <span style="color:var(--text-muted); font-size:11px; display:block;">প্রেরক নম্বর</span>
+              <span style="color:var(--text-muted); font-size:11px; display:block;">Sender Phone</span>
               <span class="mono">${tx.sender || 'N/A'}</span>
             </div>
             <div style="background:var(--bg-surface); padding:10px; border-radius:8px; border:1px solid var(--border);">
-              <span style="color:var(--text-muted); font-size:11px; display:block;">ইনভয়েস / অর্ডার</span>
+              <span style="color:var(--text-muted); font-size:11px; display:block;">Invoice / Order ID</span>
               <span class="mono">${tx.order_id || 'ORD-AUTO'}</span>
             </div>
           </div>
 
           <div style="margin-bottom:14px;">
-            <span style="color:var(--text-muted); font-size:11px; text-transform:uppercase; font-weight:700; display:block; margin-bottom:4px;">সিম কাঁচা SMS পে-লোড:</span>
+            <span style="color:var(--text-muted); font-size:11px; text-transform:uppercase; font-weight:700; display:block; margin-bottom:4px;">SIM Raw SMS Payload:</span>
             <div class="raw-sms-box">${tx.raw_sms || 'No raw SMS captured'}</div>
           </div>
 
@@ -821,28 +841,28 @@ class PayFlowDashboardApp {
             ${!isVerified ? `
               <button class="btn btn-primary-action" onclick="window.payflowApp.manualApproveTransaction('${tx.trx_id}')" style="display:inline-flex; align-items:center; gap:6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>ম্যানুয়াল অনুমোদন করুন (Approve Now)</span>
+                <span>Manual Approve (Approve Now)</span>
               </button>
             ` : ''}
-            <button class="btn btn-secondary-action" onclick="window.payflowApp.viewTransaction('${tx.trx_id}')">বিস্তারিত দেখুন</button>
+            <button class="btn btn-secondary-action" onclick="window.payflowApp.viewTransaction('${tx.trx_id}')">View Details</button>
           </div>
         </div>
       `;
-      this.showToast(`TrxID ${tx.trx_id} সফলভাবে ম্যাচ হয়েছে!`, 'success');
+      this.showToast(`TrxID ${tx.trx_id} successfully matched!`, 'success');
     } else {
       resultBox.innerHTML = `
         <div style="background:var(--bg-subtle); border:2px dashed var(--warning-border, #f59e0b); border-radius:12px; padding:24px; text-align:center;">
           <div style="font-size:32px; margin-bottom:8px;">🔍</div>
-          <h4 style="margin:0 0 6px 0; font-size:16px; font-weight:700; color:var(--text-primary);">কোনো ম্যাচিং ট্রানজ্যাকশন পাওয়া যায়নি</h4>
+          <h4 style="margin:0 0 6px 0; font-size:16px; font-weight:700; color:var(--text-primary);">No Matching Transaction Found</h4>
           <p style="font-size:13px; color:var(--text-muted); max-width:440px; margin:0 auto 16px auto; line-height:1.6;">
-            "${query}" আইডির কোনো ইনকামিং লেনদেন আমাদের ফরওয়ার্ডার সিস্টেমে রেজিস্টার হয়নি। অনুগ্রহ করে নিশ্চিত করুন গ্রাহক টাকা পাঠিয়েছে এবং আপনার সিম ফরওয়ার্ডার সক্রিয় আছে।
+            No incoming transaction with ID "${query}" registered in forwarder. Please confirm customer payment and SIM forwarder status.
           </p>
           <div style="display:flex; gap:10px; justify-content:center;">
-            <button class="btn btn-secondary-action" onclick="window.payflowApp.openSmsSimulatorModal()">SMS টেস্ট সিমুলেটরে যান</button>
+            <button class="btn btn-secondary-action" onclick="window.payflowApp.openSmsSimulatorModal()">Open SMS Test Simulator</button>
           </div>
         </div>
       `;
-      this.showToast('কোনো লেনদেন পাওয়া যায়নি', 'warning');
+      this.showToast('No transaction found', 'warning');
     }
   }
 
@@ -866,7 +886,7 @@ class PayFlowDashboardApp {
     if (!tx) return;
     tx.is_verified = 1;
     tx.verified_at = new Date().toISOString();
-    this.showToast(`TrxID ${trxId} ম্যানুয়ালি অনুমোদিত হয়েছে!`, 'success');
+    this.showToast(`TrxID ${trxId} manually approved!`, 'success');
     this.runQuickVerify();
     this.renderQuickVerifyHistory();
   }
@@ -877,7 +897,7 @@ class PayFlowDashboardApp {
 
     const txs = this.transactions || [];
     if (txs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">কোনো লেনদেন পাওয়া যায়নি</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No transactions found</td></tr>`;
       return;
     }
 
@@ -898,7 +918,7 @@ class PayFlowDashboardApp {
           <td style="font-size:11px; color:var(--text-muted);">${new Date(t.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>
           <td style="text-align:right;">
             <button class="btn-icon-sm" title="Verify Now" onclick="window.payflowApp.fillAndVerify('${t.trx_id}')" style="background:var(--bg-subtle); border:1px solid var(--border); padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer;">
-              ম্যাচ দেখুন
+              View Match
             </button>
           </td>
         </tr>
@@ -922,24 +942,24 @@ class PayFlowDashboardApp {
         <!-- Top Stats Row -->
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">মোট গৃহীত SMS</div>
+            <div class="stat-card-title">Total Received SMS</div>
             <div class="stat-card-value" style="font-size:22px; margin-top:8px;">${(txs.length * 320 + 242).toLocaleString()}</div>
-            <div style="font-size:12px; color:var(--success); margin-top:4px;">● আজ সক্রিয় স্ট্রিম</div>
+            <div style="font-size:12px; color:var(--success); margin-top:4px;">● Active Stream Today</div>
           </div>
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">সফল পার্সিং রেট</div>
+            <div class="stat-card-title">Parsing Success Rate</div>
             <div class="stat-card-value" style="font-size:22px; margin-top:8px; color:var(--success);">99.2%</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">রেজেক্স অটো-ম্যাচ</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Regex Auto-Match</div>
           </div>
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">সংযুক্ত ফরওয়ার্ডার ফোন</div>
-            <div class="stat-card-value" style="font-size:22px; margin-top:8px;">${devices.length || 2} টি</div>
-            <div style="font-size:12px; color:var(--primary); margin-top:4px;">ONLINE ডেমোন মোড</div>
+            <div class="stat-card-title">Connected SIM Devices</div>
+            <div class="stat-card-value" style="font-size:22px; margin-top:8px;">${devices.length || 2} Devices</div>
+            <div style="font-size:12px; color:var(--primary); margin-top:4px;">ONLINE Daemon Mode</div>
           </div>
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">গড় ডেলিভারি লেটেন্সি</div>
+            <div class="stat-card-title">Avg Delivery Latency</div>
             <div class="stat-card-value" style="font-size:22px; margin-top:8px;">~850ms</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">সিম থেকে ক্লাউড এপিআই</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">SIM to Cloud API</div>
           </div>
         </div>
 
@@ -948,22 +968,22 @@ class PayFlowDashboardApp {
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
             <div style="display:flex; gap:10px; flex-wrap:wrap; flex:1;">
               <select id="sms-log-provider-filter" class="form-control" style="width:auto; min-width:140px;" onchange="window.payflowApp.filterSmsLogs()">
-                <option value="all">সব প্রোভাইডার</option>
+                <option value="all">All Providers</option>
                 <option value="bKash">bKash</option>
                 <option value="Nagad">Nagad</option>
                 <option value="Rocket">Rocket</option>
                 <option value="Upay">Upay</option>
               </select>
-              <input type="text" id="sms-log-search-input" class="form-control" placeholder="TrxID বা মেসেজ দিয়ে খুঁজুন..." style="flex:1; min-width:200px;" oninput="window.payflowApp.filterSmsLogs()">
+              <input type="text" id="sms-log-search-input" class="form-control" placeholder="Search by TrxID or message content..." style="flex:1; min-width:200px;" oninput="window.payflowApp.filterSmsLogs()">
             </div>
             <div style="display:flex; gap:8px;">
               <button class="btn btn-secondary-action" onclick="window.payflowApp.openSmsSimulatorModal()" style="display:inline-flex; align-items:center; gap:6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>SMS টেস্ট পার্সার</span>
+                <span>SMS Test Parser</span>
               </button>
               <button class="btn btn-primary-action" onclick="window.payflowApp.refreshSmsLogs()" style="display:inline-flex; align-items:center; gap:6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                <span>রিফ্রেশ</span>
+                <span>Refresh</span>
               </button>
             </div>
           </div>
@@ -973,13 +993,13 @@ class PayFlowDashboardApp {
             <table class="data-table" style="width:100%;">
               <thead>
                 <tr>
-                  <th>টাইমস্ট্যাম্প</th>
-                  <th>সিম/ডিভাইস</th>
-                  <th>প্রোভাইডার</th>
-                  <th>নিষ্কাশিত TrxID</th>
-                  <th>পরিমাণ</th>
-                  <th>কাঁচা SMS বডি (Raw Forwarder Payload)</th>
-                  <th>স্ট্যাটাস</th>
+                  <th>Timestamp</th>
+                  <th>SIM / Device</th>
+                  <th>Provider</th>
+                  <th>Extracted TrxID</th>
+                  <th>Amount</th>
+                  <th>Raw Forwarder SMS Payload</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody id="sms-logs-tbody"></tbody>
@@ -1012,7 +1032,7 @@ class PayFlowDashboardApp {
     }
 
     if (txs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">কোনো SMS লগ পাওয়া যায়নি</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No SMS logs found</td></tr>`;
       return;
     }
 
@@ -1049,7 +1069,7 @@ class PayFlowDashboardApp {
 
   refreshSmsLogs() {
     this.renderSmsLogsTable();
-    this.showToast('SMS স্ট্রিম রিফ্রেশ সম্পন্ন', 'success');
+    this.showToast('SMS stream refreshed successfully', 'success');
   }
 
   openSmsSimulatorModal() {
@@ -1065,27 +1085,27 @@ class PayFlowDashboardApp {
     modal.innerHTML = `
       <div style="background:var(--bg-surface, #fff); border:1px solid var(--border, #e2e8f0); border-radius:16px; width:95%; max-width:540px; padding:24px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h3 style="margin:0; font-size:18px; font-weight:700; color:var(--text-primary);">📲 SMS পার্সিং টেস্ট সিমুলেটর</h3>
+          <h3 style="margin:0; font-size:18px; font-weight:700; color:var(--text-primary);">📲 SMS Parsing Test Simulator</h3>
           <button onclick="window.payflowApp.closeSmsSimulatorModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">✕</button>
         </div>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
-          আপনার অ্যান্ড্রয়েড টেলিফোনি ফরওয়ার্ডারে আসা যেকোনো কাঁচা বিকাশ বা নগদ এসএমএস পেস্ট করে রিয়েল-টাইম রেজেক্স এক্সট্র্যাকশন টেস্ট করুন:
+          Paste any raw bKash or Nagad SMS received by your Android telephony forwarder to test real-time regex extraction:
         </p>
 
         <div class="form-group">
-          <label class="form-label">স্যাম্পল টেমপ্লেট নির্বাচন:</label>
+          <label class="form-label">Select Sample Template:</label>
           <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-            <button class="btn-preset-chip" onclick="document.getElementById('sim-sms-text').value='You have received Tk 2,500.00 from 01711223344. Fee Tk 0.00. Balance Tk 32,500.00. TrxID BK99281XAC at 19/09/2026 15:30'">bKash ক্যাশ-ইন</button>
-            <button class="btn-preset-chip" onclick="document.getElementById('sim-sms-text').value='Received Amount: Tk 1,200.00 from 01822334455. TxnID: NG883921PP. Balance: Tk 15,400.00'">Nagad ক্যাশ-ইন</button>
+            <button class="btn-preset-chip" onclick="document.getElementById('sim-sms-text').value='You have received Tk 2,500.00 from 01711223344. Fee Tk 0.00. Balance Tk 32,500.00. TrxID BK99281XAC at 19/09/2026 15:30'">bKash Cash-In</button>
+            <button class="btn-preset-chip" onclick="document.getElementById('sim-sms-text').value='Received Amount: Tk 1,200.00 from 01822334455. TxnID: NG883921PP. Balance: Tk 15,400.00'">Nagad Cash-In</button>
           </div>
-          <textarea id="sim-sms-text" class="form-control mono" rows="4" style="font-size:12px; resize:vertical;" placeholder="এসএমএস টেক্সট লিখুন...">You have received Tk 2,500.00 from 01711223344. Fee Tk 0.00. Balance Tk 32,500.00. TrxID BK99281XAC at 19/09/2026 15:30</textarea>
+          <textarea id="sim-sms-text" class="form-control mono" rows="4" style="font-size:12px; resize:vertical;" placeholder="Enter SMS text...">You have received Tk 2,500.00 from 01711223344. Fee Tk 0.00. Balance Tk 32,500.00. TrxID BK99281XAC at 19/09/2026 15:30</textarea>
         </div>
 
         <div id="sim-parsed-result" style="margin-bottom:16px; display:none;"></div>
 
         <div style="display:flex; gap:10px; justify-content:flex-end;">
-          <button class="btn btn-secondary-action" onclick="window.payflowApp.closeSmsSimulatorModal()">বন্ধ করুন</button>
-          <button class="btn btn-primary-action" onclick="window.payflowApp.testSimulateSms()">পার্স ও ইনজেস্ট করুন</button>
+          <button class="btn btn-secondary-action" onclick="window.payflowApp.closeSmsSimulatorModal()">Close</button>
+          <button class="btn btn-primary-action" onclick="window.payflowApp.testSimulateSms()">Parse & Ingest</button>
         </div>
       </div>
     `;
@@ -1124,11 +1144,11 @@ class PayFlowDashboardApp {
     resBox.style.display = 'block';
     resBox.innerHTML = `
       <div style="background:var(--bg-subtle); border:1px solid var(--primary); border-radius:8px; padding:12px; font-size:12px;">
-        <div style="font-weight:700; color:var(--primary); margin-bottom:6px;">✓ পার্সিং সফল (Extracted Data):</div>
-        <div>প্রোভাইডার: <strong>${provider}</strong></div>
+        <div style="font-weight:700; color:var(--primary); margin-bottom:6px;">✓ Parsing Successful (Extracted Data):</div>
+        <div>Provider: <strong>${provider}</strong></div>
         <div>TrxID: <span class="mono" style="color:var(--primary); font-weight:700;">${trxId}</span></div>
-        <div>পরিমাণ: <strong>৳ ${amount.toFixed(2)}</strong></div>
-        <div>প্রেরক: <span class="mono">${sender || 'Unknown'}</span></div>
+        <div>Amount: <strong>৳ ${amount.toFixed(2)}</strong></div>
+        <div>Sender: <span class="mono">${sender || 'Unknown'}</span></div>
       </div>
     `;
 
@@ -1148,7 +1168,7 @@ class PayFlowDashboardApp {
       isDemo: true,
     };
     this.transactions.unshift(newTx);
-    this.showToast(`SMS পার্সিং সফল! TrxID ${trxId} ইনজেস্ট হয়েছে`, 'success');
+    this.showToast(`SMS parsed successfully! TrxID ${trxId} ingested`, 'success');
   }
 
   // ==========================================
@@ -1164,15 +1184,15 @@ class PayFlowDashboardApp {
         <div class="card-panel" style="background:linear-gradient(135deg, rgba(2,132,199,0.08) 0%, rgba(99,102,241,0.05) 100%); border-color:rgba(2,132,199,0.25);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
             <div>
-              <span class="badge" style="background:var(--primary); color:#fff; font-size:11px; margin-bottom:8px;">রেডিমেড ইন্টিগ্রেশন</span>
-              <h2 style="font-size:20px; font-weight:800; color:var(--text-primary); margin:6px 0;">অফিসিয়াল পেমেন্ট প্লাগইন ও ক্লায়েন্ট লাইব্রেরী</h2>
+              <span class="badge" style="background:var(--primary); color:#fff; font-size:11px; margin-bottom:8px;">Ready Integrations</span>
+              <h2 style="font-size:20px; font-weight:800; color:var(--text-primary); margin:6px 0;">Official Payment Plugins & Client SDKs</h2>
               <p style="font-size:13px; color:var(--text-muted); max-width:650px; line-height:1.6;">
-                আপনার WordPress/WooCommerce স্টোর, WHMCS বিলিং প্ল্যাটফর্ম, বা কাস্টম PHP/Node/Python অ্যাপ্লিকেশনে কোনো কোড জটিলতা ছাড়াই ১ ক্লিকে SyncPay BD যুক্ত করুন।
+                Easily integrate SyncPay BD into your WordPress/WooCommerce store, WHMCS billing platform, or custom PHP/Node/Python applications.
               </p>
             </div>
             <a href="#docs" class="btn btn-secondary-action" style="display:inline-flex; align-items:center; gap:8px;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              <span>API ডকুমেন্টেশন দেখুন</span>
+              <span>View API Documentation</span>
             </a>
           </div>
         </div>
@@ -1187,22 +1207,22 @@ class PayFlowDashboardApp {
                   <div style="width:44px; height:44px; background:#7f54b3; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:18px;">W</div>
                   <div>
                     <h3 style="font-size:16px; font-weight:700; margin:0;">WooCommerce Gateway</h3>
-                    <span style="font-size:12px; color:var(--text-muted);">WordPress 5.8+ ও Woo 6.0+</span>
+                    <span style="font-size:12px; color:var(--text-muted);">WordPress 5.8+ & Woo 6.0+</span>
                   </div>
                 </div>
                 <span class="badge badge-completed" style="font-size:10px;">v2.4.2 LATEST</span>
               </div>
               <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:14px;">
-                চেকআউট পেজে সরাসরি বিকাশ, নগদ ও রকেট পপআপ/পেমেন্ট বক্স, ডায়নামিক QR কোড এবং স্বয়ংক্রিয় TrxID ম্যাচিং।
+                Direct bKash, Nagad, and Rocket popup/payment boxes on checkout page, dynamic QR codes, and automatic TrxID matching.
               </p>
               <div style="background:var(--bg-subtle); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                  <span style="color:var(--text-muted);">রেটিং:</span>
+                  <span style="color:var(--text-muted);">Rating:</span>
                   <span style="color:#f59e0b; font-weight:700;">★★★★★ (5.0)</span>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">ইনস্টলেশন:</span>
-                  <span>১ ক্লিকে প্লাগইন আপলোড</span>
+                  <span style="color:var(--text-muted);">Installation:</span>
+                  <span>1-Click Plugin Upload</span>
                 </div>
               </div>
             </div>
@@ -1211,7 +1231,7 @@ class PayFlowDashboardApp {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Download ZIP
               </button>
-              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('woocommerce')">গাইড</button>
+              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('woocommerce')">Guide</button>
             </div>
           </div>
 
@@ -1229,15 +1249,15 @@ class PayFlowDashboardApp {
                 <span class="badge badge-completed" style="font-size:10px;">v1.8.0</span>
               </div>
               <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:14px;">
-                হোস্টিং ও ডোমেন ইনভয়েস পরিশোধে ক্লায়েন্ট এরিয়া ইন্টিগ্রেশন। পেমেন্ট পাওয়া মাত্র স্বয়ংক্রিয় ইনভয়েস পেইড এবং সার্ভিস অ্যাক্টিভেশন।
+                Client area integration for hosting and domain invoices. Automatic invoice paid and service activation upon payment arrival.
               </p>
               <div style="background:var(--bg-subtle); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                  <span style="color:var(--text-muted);">মডিউল পাথ:</span>
+                  <span style="color:var(--text-muted);">Module Path:</span>
                   <span class="mono" style="font-size:11px;">/modules/gateways/</span>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">ফিচার:</span>
+                  <span style="color:var(--text-muted);">Features:</span>
                   <span>Auto Invoice Callback</span>
                 </div>
               </div>
@@ -1247,7 +1267,7 @@ class PayFlowDashboardApp {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Download ZIP
               </button>
-              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('whmcs')">গাইড</button>
+              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('whmcs')">Guide</button>
             </div>
           </div>
 
@@ -1265,7 +1285,7 @@ class PayFlowDashboardApp {
                 <span class="badge badge-neutral" style="font-size:10px;">Composer</span>
               </div>
               <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:14px;">
-                পিএইচপি বা লারাভেল ব্যাকএন্ডের জন্য পূর্ণাঙ্গ অবজেক্ট ওরিয়েন্টেড ক্লায়েন্ট। ইনভয়েস তৈরি ও ওয়েবহুক ভ্যালিডেশন সাপোর্ট।
+                Full object-oriented client for PHP or Laravel backends. Invoice creation and webhook validation support.
               </p>
               <div style="background:var(--bg-subtle); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:16px;">
                 <div class="mono" style="font-size:12px; color:var(--primary); user-select:all;">composer require syncpay/mfs-sdk</div>
@@ -1277,9 +1297,9 @@ class PayFlowDashboardApp {
                 Download ZIP
               </button>
               <button class="btn btn-secondary-action" style="flex:1;" onclick="window.payflowApp.copySnippetText('composer require syncpay/mfs-sdk', this)">
-                কপি
+                Copy
               </button>
-              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('php')">গাইড</button>
+              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('php')">Guide</button>
             </div>
           </div>
 
@@ -1297,7 +1317,7 @@ class PayFlowDashboardApp {
                 <span class="badge badge-neutral" style="font-size:10px;">NPM</span>
               </div>
               <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:14px;">
-                টাইপস্ক্রিপ্ট টাইপিংসহ এসিনক্রোনাস নোড ক্লায়েন্ট। অটো-রিট্রাই ও ক্রিপ্টোগ্রাফিক ওয়েবহুক ভেরিফায়ার।
+                Asynchronous Node.js client with TypeScript definitions. Auto-retry and cryptographic webhook verifier.
               </p>
               <div style="background:var(--bg-subtle); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:16px;">
                 <div class="mono" style="font-size:12px; color:var(--primary); user-select:all;">npm install @syncpaybd/sdk</div>
@@ -1309,9 +1329,9 @@ class PayFlowDashboardApp {
                 Download ZIP
               </button>
               <button class="btn btn-secondary-action" style="flex:1;" onclick="window.payflowApp.copySnippetText('npm install @syncpaybd/sdk', this)">
-                কপি
+                Copy
               </button>
-              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('nodejs')">গাইড</button>
+              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('nodejs')">Guide</button>
             </div>
           </div>
 
@@ -1329,7 +1349,7 @@ class PayFlowDashboardApp {
                 <span class="badge badge-neutral" style="font-size:10px;">PyPI</span>
               </div>
               <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:14px;">
-                জ্যাঙ্গো ও ফাস্টএপিআই ব্যাকএন্ডের জন্য পাইথন মডিউল। সিঙ্ক ও অ্যাসিন্ক রিকোয়েস্ট সাপোর্ট।
+                Python module for Django and FastAPI backends. Sync and async request support.
               </p>
               <div style="background:var(--bg-subtle); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:16px;">
                 <div class="mono" style="font-size:12px; color:var(--primary); user-select:all;">pip install syncpay-bd</div>
@@ -1341,9 +1361,9 @@ class PayFlowDashboardApp {
                 Download ZIP
               </button>
               <button class="btn btn-secondary-action" style="flex:1;" onclick="window.payflowApp.copySnippetText('pip install syncpay-bd', this)">
-                কপি
+                Copy
               </button>
-              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('python')">গাইড</button>
+              <button class="btn btn-secondary-action" onclick="window.payflowApp.showPluginGuide('python')">Guide</button>
             </div>
           </div>
 
@@ -1361,22 +1381,22 @@ class PayFlowDashboardApp {
                 <span class="badge badge-completed" style="font-size:10px;">v3.1.0 OFFICIAL</span>
               </div>
               <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:14px;">
-                সিম ফোনে ইনস্টল করে কিউআর কোড স্ক্যান করুন। ব্যাকগ্রাউন্ডে ব্যাটারি অপটিমাইজেশন বন্ধ রেখে ২৪/৭ নিরবচ্ছিন্ন এসএমএস ফরওয়ার্ডিং।
+                Install on your SIM phone and scan QR code. Keep background battery optimization off for 24/7 continuous SMS forwarding.
               </p>
               <div style="background:var(--bg-subtle); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">অ্যাপ সাইজ:</span>
-                  <span>৭৮ মেগাবাইট (Production Build)</span>
+                  <span style="color:var(--text-muted);">App Size:</span>
+                  <span>78 MB (Production Build)</span>
                 </div>
               </div>
             </div>
             <div style="display:flex; gap:8px;">
               <a href="#devices" class="btn btn-secondary-action" style="flex:1; text-align:center; text-decoration:none;">
-                ডিভাইস পেয়ার
+                Pair Device
               </a>
               <button class="btn btn-primary-action" style="flex:1;" onclick="window.payflowApp.downloadPlugin('apk')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                APK ডাউনলোড
+                Download APK
               </button>
             </div>
           </div>
@@ -1397,11 +1417,11 @@ class PayFlowDashboardApp {
 
     const target = fileMap[pluginName];
     if (!target) {
-      this.showToast('প্যাকেজ পাওয়া যায়নি', 'error');
+      this.showToast('Package not found', 'error');
       return;
     }
 
-    this.showToast(`ডাউনলোড শুরু হচ্ছে: ${target.name}...`, 'success');
+    this.showToast(`Starting download: ${target.name}...`, 'success');
     const link = document.createElement('a');
     link.href = target.url;
     link.setAttribute('download', target.name);
@@ -1412,21 +1432,21 @@ class PayFlowDashboardApp {
 
   showPluginGuide(pluginName) {
     const guides = {
-      woocommerce: 'WooCommerce ইনস্টলেশন গাইড:\n1. WordPress ড্যাশবোর্ড > Plugins > Add New > Upload Plugin-এ যান।\n2. ডাউনলোড করা syncpay-woocommerce.zip ফাইল আপলোড করে সক্রিয় করুন।\n3. WooCommerce > Settings > Payments > SyncPay BD সেটিংসে গিয়ে আপনার API Key বসান।',
-      whmcs: 'WHMCS মডিউল সেটআপ গাইড:\n1. ডাউনলোড করা ফাইল আনজিপ করে /modules/gateways/ ফোল্ডারে পেস্ট করুন।\n2. WHMCS Setup > Payments > Payment Gateways থেকে SyncPay সক্রিয় করুন।\n3. Merchant Key ও Webhook Secret প্রদান করে সেভ করুন।',
-      php: 'PHP ইন্টিগ্রেশন কোড:\nuse SyncPay\\Client;\n$client = new Client(["api_key" => "YOUR_KEY"]);\n$invoice = $client->invoice->create(["amount" => 1000, "order_id" => "ORD-123"]);',
-      nodejs: 'Node.js ইন্টিগ্রেশন কোড:\nimport { SyncPayClient } from "@syncpaybd/sdk";\nconst pay = new SyncPayClient({ apiKey: "YOUR_KEY" });\nconst inv = await pay.createInvoice({ amount: 1000, orderId: "ORD-123" });',
-      python: 'Python ইন্টিগ্রেশন কোড:\nfrom syncpay import SyncPay\nclient = SyncPay(api_key="YOUR_KEY")\ninv = client.create_invoice(amount=1000, order_id="ORD-123")',
+      woocommerce: 'WooCommerce Installation Guide:\n1. Go to WordPress Dashboard > Plugins > Add New > Upload Plugin.\n2. Upload the downloaded syncpay-woocommerce.zip file and activate it.\n3. Go to WooCommerce > Settings > Payments > SyncPay BD and paste your API Key.',
+      whmcs: 'WHMCS Module Setup Guide:\n1. Unzip the downloaded file into the /modules/gateways/ directory.\n2. Activate SyncPay in WHMCS Setup > Payments > Payment Gateways.\n3. Enter your Merchant Key and Webhook Secret, then click Save.',
+      php: 'PHP Integration Sample:\nuse SyncPay\\Client;\n$client = new Client(["api_key" => "YOUR_KEY"]);\n$invoice = $client->invoice->create(["amount" => 1000, "order_id" => "ORD-123"]);',
+      nodejs: 'Node.js Integration Sample:\nimport { SyncPayClient } from "@syncpaybd/sdk";\nconst pay = new SyncPayClient({ apiKey: "YOUR_KEY" });\nconst inv = await pay.createInvoice({ amount: 1000, orderId: "ORD-123" });',
+      python: 'Python Integration Sample:\nfrom syncpay import SyncPay\nclient = SyncPay(api_key="YOUR_KEY")\ninv = client.create_invoice(amount=1000, order_id="ORD-123")',
     };
-    alert(guides[pluginName] || 'ডকুমেন্টেশন রেফারেন্স দেখুন');
+    alert(guides[pluginName] || 'Please refer to documentation');
   }
 
   copySnippetText(text, btn) {
     navigator.clipboard.writeText(text).then(() => {
-      this.showToast('ক্লিপবোর্ডে কপি করা হয়েছে!', 'success');
+      this.showToast('Copied to clipboard!', 'success');
       if (btn) {
         const original = btn.innerText;
-        btn.innerText = '✓ কপিড!';
+        btn.innerText = '✓ Copied!';
         setTimeout(() => btn.innerText = original, 1500);
       }
     });
@@ -1467,24 +1487,24 @@ class PayFlowDashboardApp {
         <!-- Top Stats Strip -->
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">মোট অডিটেড ভলিউম</div>
+            <div class="stat-card-title">Total Audited Volume</div>
             <div class="stat-card-value" style="font-size:22px; margin-top:8px; color:var(--text-primary);">৳ ${(s.todayRevenue || verifiedVolume || 125450).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
-            <div style="font-size:12px; color:var(--success); margin-top:4px;">● আজ সংগৃহীত মোট পেমেন্ট</div>
+            <div style="font-size:12px; color:var(--success); margin-top:4px;">● Total payments collected today</div>
           </div>
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">সফল ট্রানজ্যাকশন</div>
-            <div class="stat-card-value" style="font-size:22px; margin-top:8px; color:var(--success);">${(s.totalVerified || verifiedTxs.length || 1243).toLocaleString()} টি</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">সিম দ্বারা শতভাগ যাচাইকৃত</div>
+            <div class="stat-card-title">Successful Transactions</div>
+            <div class="stat-card-value" style="font-size:22px; margin-top:8px; color:var(--success);">${(s.totalVerified || verifiedTxs.length || 1243).toLocaleString()} Txs</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">100% verified via SIM</div>
           </div>
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">গড় ভেরিফিকেশন সাকসেস</div>
+            <div class="stat-card-title">Avg Verification Success</div>
             <div class="stat-card-value" style="font-size:22px; margin-top:8px; color:var(--primary);">${successRate}%</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">০% চার্জ ব্যাক লেজার</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">0% Chargeback Ledger</div>
           </div>
           <div class="stat-card" style="padding:16px;">
-            <div class="stat-card-title">গড় টিকিট সাইজ</div>
+            <div class="stat-card-title">Avg Ticket Size</div>
             <div class="stat-card-value" style="font-size:22px; margin-top:8px;">৳ ${txs.length ? (totalVolume / txs.length).toFixed(2) : '1,250.00'}</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">প্রতি অর্ডারের গড় মূল্য</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Average order value</div>
           </div>
         </div>
 
@@ -1492,9 +1512,9 @@ class PayFlowDashboardApp {
         <div class="card-panel">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
             <div>
-              <h3 class="card-panel-title">অডিট ও হিসাব বিবরণী এক্সপোর্ট</h3>
+              <h3 class="card-panel-title">Audit & Accounting Statement Export</h3>
               <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
-                সকল সফল লেনদেন, কাস্টমার নম্বর ও ট্রানজ্যাকশন আইডিসহ সম্পূর্ণ লেজার ডাউনলোড করুন।
+                Download complete ledger with all verified transactions, customer phone numbers, and TrxIDs.
               </p>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -1518,8 +1538,8 @@ class PayFlowDashboardApp {
         <div class="card-panel">
           <div class="card-panel-header" style="margin-bottom:16px;">
             <div>
-              <h3 class="card-panel-title">MFS চ্যানেল অনুযায়ী পারফরম্যান্স বিশ্লেষণ</h3>
-              <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">প্রতিটি মোবাইল ফাইন্যান্সিয়াল সার্ভিসের শেয়ার ও সাফল্যের হার</p>
+              <h3 class="card-panel-title">MFS Channel Performance Breakdown</h3>
+              <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Share and success rate by mobile financial service channel</p>
             </div>
           </div>
 
@@ -1527,12 +1547,12 @@ class PayFlowDashboardApp {
             <table class="data-table" style="width:100%;">
               <thead>
                 <tr>
-                  <th>চ্যানেল</th>
-                  <th>লেনদেন সংখ্যা</th>
-                  <th>মোট সংগৃহীত পরিমাণ</th>
-                  <th>ভলিউম শেয়ার (%)</th>
-                  <th>সাফল্যের হার</th>
-                  <th>স্ট্যাটাস</th>
+                  <th>Channel</th>
+                  <th>Transaction Count</th>
+                  <th>Total Amount</th>
+                  <th>Volume Share (%)</th>
+                  <th>Success Rate</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -1544,7 +1564,7 @@ class PayFlowDashboardApp {
                         <span>${p.name}</span>
                       </div>
                     </td>
-                    <td><strong>${p.count || (p.name==='bKash'?620:p.name==='Nagad'?410:140)}</strong> টি</td>
+                    <td><strong>${p.count || (p.name==='bKash'?620:p.name==='Nagad'?410:140)}</strong> Txs</td>
                     <td class="mono" style="font-weight:700;">৳ ${(p.volume || (p.name==='bKash'?65200:p.name==='Nagad'?38400:12500)).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
                     <td>
                       <div style="display:flex; align-items:center; gap:8px;">
@@ -1602,95 +1622,95 @@ class PayFlowDashboardApp {
         <!-- Card 1: Business Profile -->
         <div class="card-panel">
           <div class="card-panel-header" style="margin-bottom:16px;">
-            <h4 class="card-panel-title">মার্চেন্ট প্রোফাইল</h4>
+            <h4 class="card-panel-title">Merchant Profile</h4>
             <span class="badge" style="background:${plan.color}20; color:${plan.color}; font-weight:700;">${plan.badge}</span>
           </div>
           <div class="form-group">
-            <label class="form-label">মার্চেন্টের নাম</label>
+            <label class="form-label">Merchant Full Name</label>
             <input type="text" id="settings-name-input" class="form-control" value="${session.name || ''}">
           </div>
           <div class="form-group">
-            <label class="form-label">প্রতিষ্ঠানের নাম (Business)</label>
+            <label class="form-label">Business / Brand Name</label>
             <input type="text" id="settings-business-input" class="form-control" value="${session.business || ''}">
           </div>
           <div class="form-group">
-            <label class="form-label">লগইন / যোগাযোগ ইমেইল</label>
+            <label class="form-label">Login / Contact Email</label>
             <input type="email" id="settings-email-input" class="form-control" value="${session.email || ''}">
           </div>
           <div class="form-group">
-            <label class="form-label">সাপোর্ট ফোন নম্বর</label>
+            <label class="form-label">Support Phone Number</label>
             <input type="tel" id="settings-phone-input" class="form-control" value="${session.phone || '01712345678'}">
           </div>
           <div class="form-group">
-            <label class="form-label">মার্চেন্ট ওয়েবসাইট URL</label>
+            <label class="form-label">Merchant Website URL</label>
             <input type="url" id="settings-website-input" class="form-control" value="${session.website || 'https://mymerchantsite.com'}">
           </div>
           <button class="btn btn-primary-action" style="margin-top:8px;" onclick="window.payflowApp.saveMerchantProfile()">
-            প্রোফাইল সংরক্ষণ করুন
+            Save Profile
           </button>
         </div>
 
         <!-- Card 2: Security & Matching Engine -->
         <div class="card-panel">
           <div class="card-panel-header" style="margin-bottom:16px;">
-            <h4 class="card-panel-title">পেমেন্ট সিকিউরিটি ও ইঞ্জিন</h4>
+            <h4 class="card-panel-title">Payment Security & Engine</h4>
             <span class="badge badge-completed" style="font-size:10px;">SECURE 256-BIT</span>
           </div>
           <div class="form-group">
-            <label class="form-label">ডাবল-স্পেন্ড লক (Anti-Replay Rule)</label>
+            <label class="form-label">Double-Spend Lock (Anti-Replay Rule)</label>
             <select class="form-control" id="settings-antireplay">
-              <option value="strict" selected>Strict Anti-Replay (১টি TrxID একবারই ক্যাশ-ইন)</option>
+              <option value="strict" selected>Strict Anti-Replay (1 TrxID per cash-in)</option>
               <option value="relaxed">Relaxed (Same order re-check)</option>
             </select>
-            <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:4px;">একই TrxID একাধিক অর্ডারে ব্যবহার প্রতিরোধ করে।</span>
+            <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:4px;">Prevents the same TrxID from being used across multiple orders.</span>
           </div>
           <div class="form-group">
-            <label class="form-label">টেলিফোনি ফরওয়ার্ডার মোড</label>
+            <label class="form-label">Telephony Forwarder Mode</label>
             <select class="form-control" id="settings-forwarder-mode">
               <option value="daemon" selected>High-Throughput Android Daemon (850ms Polling)</option>
               <option value="push">Firebase Cloud Messaging (FCM Push)</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">লেনদেন মিলানোর সর্বোচ্চ সময় (Window)</label>
+            <label class="form-label">Transaction Matching Timeout Window</label>
             <select class="form-control" id="settings-window">
-              <option value="30" selected>৩০ মিনিট (Recommended)</option>
-              <option value="60">১ ঘণ্টা</option>
-              <option value="120">২ ঘণ্টা</option>
+              <option value="30" selected>30 Minutes (Recommended)</option>
+              <option value="60">1 Hour</option>
+              <option value="120">2 Hours</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">টেলিগ্রাম / নোটিফিকেশন অ্যালার্ট ওয়েবহুক</label>
+            <label class="form-label">Telegram / Alert Notification Webhook</label>
             <input type="url" id="settings-alert-url" class="form-control" placeholder="https://api.telegram.org/bot.../sendMessage" value="https://api.telegram.org/bot12345/alert">
           </div>
           <button class="btn btn-primary-action" style="margin-top:8px;" onclick="window.payflowApp.saveSecuritySettings()">
-            ইঞ্জিন রুলস সেভ করুন
+            Save Engine Rules
           </button>
         </div>
 
         <!-- Card 3: Subscription & API Access Info -->
         <div class="card-panel" style="grid-column: 1 / -1;">
           <div class="card-panel-header" style="margin-bottom:16px;">
-            <h4 class="card-panel-title">সাবস্ক্রিপশন ও প্যাকেজ কোটা</h4>
+            <h4 class="card-panel-title">Subscription & Package Quotas</h4>
             <button class="btn btn-secondary-action" onclick="window.payflowApp.openUpgradeModal('${session.plan==='starter'?'growth':'enterprise'}')">
-              প্যাকেজ পরিবর্তন / আপগ্রেড
+              Change / Upgrade Plan
             </button>
           </div>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:16px;">
             <div style="padding:14px; background:var(--bg-subtle); border-radius:8px; border:1px solid var(--border);">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">বর্তমান প্ল্যান</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Current Plan</div>
               <div style="font-size:18px; font-weight:800; color:${plan.color}; margin-top:4px;">${plan.label}</div>
             </div>
             <div style="padding:14px; background:var(--bg-subtle); border-radius:8px; border:1px solid var(--border);">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">মাসিক লেনদেন সীমা</div>
-              <div style="font-size:18px; font-weight:800; margin-top:4px;">${plan.txLimit === Infinity ? 'সীমাহীন (Unlimited)' : plan.txLimit + ' টি'}</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Monthly Transaction Limit</div>
+              <div style="font-size:18px; font-weight:800; margin-top:4px;">${plan.txLimit === Infinity ? 'Unlimited' : plan.txLimit + ' Txs'}</div>
             </div>
             <div style="padding:14px; background:var(--bg-subtle); border-radius:8px; border:1px solid var(--border);">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">ডিভাইস সীমা</div>
-              <div style="font-size:18px; font-weight:800; margin-top:4px;">${plan.deviceLimit === Infinity ? 'সীমাহীন' : plan.deviceLimit + ' টি সিম ফোন'}</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Device Limit</div>
+              <div style="font-size:18px; font-weight:800; margin-top:4px;">${plan.deviceLimit === Infinity ? 'Unlimited' : plan.deviceLimit + ' SIM Devices'}</div>
             </div>
             <div style="padding:14px; background:var(--bg-subtle); border-radius:8px; border:1px solid var(--border);">
-              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">মার্চেন্ট আইডি</div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Merchant ID</div>
               <div class="mono" style="font-size:14px; font-weight:700; margin-top:4px; color:var(--primary);">${session.merchantId || 'm_demo_101'}</div>
             </div>
           </div>
@@ -1707,17 +1727,17 @@ class PayFlowDashboardApp {
     const website = document.getElementById('settings-website-input')?.value.trim();
 
     if (!name || !business || !email) {
-      this.showToast('দয়া করে নাম, ব্যবসা ও ইমেইল পূরণ করুন', 'warning');
+      this.showToast('Please provide name, business, and email', 'warning');
       return;
     }
 
     auth.updateProfile({ name, business, email, phone, website });
     this.updateSidebarUser();
-    this.showToast('প্রোফাইল তথ্য সফলভাবে সংরক্ষিত হয়েছে!', 'success');
+    this.showToast('Profile information saved successfully!', 'success');
   }
 
   saveSecuritySettings() {
-    this.showToast('সিকিউরিটি ইঞ্জিন রুলস কার্যকর করা হয়েছে!', 'success');
+    this.showToast('Security engine rules updated successfully!', 'success');
   }
 
   // ==========================================
@@ -1866,7 +1886,7 @@ class PayFlowDashboardApp {
     const primaryDeviceId = (this.devices && this.devices[0] && this.devices[0].id) || 'dev_phone_1';
     const qrSlot = document.getElementById('add-device-qr-image-slot');
     if (qrSlot) {
-      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">QR Code তৈরি হচ্ছে...</div>`;
+      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">Generating QR Code...</div>`;
     }
 
     try {
@@ -1884,7 +1904,7 @@ class PayFlowDashboardApp {
       }
     } catch (e) {
       if (qrSlot) {
-        qrSlot.innerHTML = `<div style="color:var(--danger); padding:20px;">QR কোড লোড হতে পারেনি: ${e.message}</div>`;
+        qrSlot.innerHTML = `<div style="color:var(--danger); padding:20px;">Failed to load QR code: ${e.message}</div>`;
       }
     }
   }
@@ -1894,7 +1914,7 @@ class PayFlowDashboardApp {
     const sim = document.getElementById('dev-sim-input').value.trim();
 
     if (!name) {
-      this.showToast('ডিভাইসের নাম দেওয়া আবশ্যক', 'warning');
+      this.showToast('Device name is required', 'warning');
       return;
     }
 
@@ -1927,11 +1947,11 @@ class PayFlowDashboardApp {
     const modal = document.getElementById('modal-device-qr');
     if (!modal) return;
     const titleEl = document.getElementById('device-qr-title');
-    if (titleEl) titleEl.innerText = `কানেক্ট: ${deviceName || 'অ্যান্ড্রয়েড ফরওয়ার্ডার'}`;
+    if (titleEl) titleEl.innerText = `Connect: ${deviceName || 'Android Forwarder'}`;
 
     const qrSlot = document.getElementById('device-qr-image-slot');
     if (qrSlot) {
-      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">QR Code তৈরি হচ্ছে...</div>`;
+      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">Generating QR Code...</div>`;
     }
 
     modal.classList.add('active');
@@ -1951,7 +1971,7 @@ class PayFlowDashboardApp {
       }
     } catch (e) {
       if (qrSlot) {
-        qrSlot.innerHTML = `<div style="color:var(--danger); padding:20px;">QR কোড লোড হতে ব্যর্থ হয়েছে: ${e.message}</div>`;
+        qrSlot.innerHTML = `<div style="color:var(--danger); padding:20px;">Failed to load QR code: ${e.message}</div>`;
       }
     }
   }
@@ -1968,7 +1988,7 @@ class PayFlowDashboardApp {
     const webhook_url = document.getElementById('site-webhook-input')?.value.trim();
 
     if (!domain) {
-      this.showToast('ডোমেইন URL ইনপুট দেওয়া আবশ্যক', 'warning');
+      this.showToast('Domain URL is required', 'warning');
       return;
     }
 
@@ -1976,7 +1996,7 @@ class PayFlowDashboardApp {
       const res = await api.connectWebsite({ name, domain, platform, webhook_url });
       if (res.success) {
         this.closeAllModals();
-        this.showToast('নতুন ওয়েবসাইট সফলভাবে কানেক্ট করা হয়েছে!', 'success');
+        this.showToast('Website connected successfully!', 'success');
         await this.renderWebhooksView();
       }
     } catch (e) {
@@ -1999,7 +2019,7 @@ class PayFlowDashboardApp {
     const email = document.getElementById('reg-email')?.value.trim();
 
     if (!name || !email) {
-      this.showToast('মার্চেন্টের নাম ও ইমেইল ইনপুট দিন', 'warning');
+      this.showToast('Please enter merchant name and email', 'warning');
       return;
     }
 
@@ -2007,7 +2027,7 @@ class PayFlowDashboardApp {
       const res = await api.registerMerchant({ business_name, name, email });
       if (res.success) {
         this.closeAllModals();
-        this.showToast(`অভিনন্দন ${res.merchant.name}! নতুন মার্চেন্ট আইডি: ${res.merchant.id}`, 'success');
+        this.showToast(`Congratulations ${res.merchant.name}! New Merchant ID: ${res.merchant.id}`, 'success');
       }
     } catch (e) {
       this.showToast(e.message, 'error');
@@ -2015,12 +2035,12 @@ class PayFlowDashboardApp {
   }
 
   async removeDevice(id) {
-    if (!confirm('আপনি কি নিশ্চিত যে আপনি এই ডিভাইসটি ডিসকানেক্ট ও মুছে ফেলতে চান?')) return;
+    if (!confirm('Are you sure you want to disconnect and delete this device?')) return;
     try {
       await api.deleteDevice(id);
       this.devices = (this.devices || []).filter(d => d.id !== id);
       this.renderDevicesView();
-      this.showToast('ডিভাইসটি সফলভাবে মুছে ফেলা হয়েছে', 'success');
+      this.showToast('Device deleted successfully', 'success');
       await this.refreshAllData();
     } catch (e) {
       this.showToast(e.message, 'error');
@@ -2151,7 +2171,7 @@ class PayFlowDashboardApp {
   // ==========================================
   openAddPaymentMethodModal() {
     document.getElementById('pm-id').value = '';
-    document.getElementById('pm-modal-title').innerText = 'নতুন পেমেন্ট চ্যানেল ও নির্দেশিকা যুক্ত করুন';
+    document.getElementById('pm-modal-title').innerText = 'Add Payment Channel & Instructions';
     document.getElementById('pm-provider-type').value = 'bkash';
     document.getElementById('pm-account-number').value = '';
     document.getElementById('pm-account-name').value = '';
@@ -2172,13 +2192,13 @@ class PayFlowDashboardApp {
 
     if (type === 'bank') {
       bankFields.style.display = 'block';
-      labelNumber.innerText = 'ব্যাংক অ্যাকাউন্ট নম্বর *';
+      labelNumber.innerText = 'Bank Account Number *';
     } else if (type === 'binance') {
       bankFields.style.display = 'none';
       labelNumber.innerText = 'Binance Pay ID *';
     } else {
       bankFields.style.display = 'none';
-      labelNumber.innerText = 'মার্চেন্ট ফোন নম্বর *';
+      labelNumber.innerText = 'Merchant Phone Number *';
     }
 
     // Sync theme color input with text
@@ -2196,7 +2216,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#E2136E';
         document.getElementById('pm-sender-label').value = 'Your bKash Number *';
         document.getElementById('pm-trx-label').value = 'bKash TrxID *';
-        document.getElementById('pm-instructions').value = '১. bKash App খুলুন অথবা ডায়াল করুন *247#\n২. Payment এ গিয়ে মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে পেমেন্ট নিশ্চিত করুন';
+        document.getElementById('pm-instructions').value = '1. Open bKash App or dial *247#\n2. Select Payment and enter: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm payment';
       } else if (type === 'nagad') {
         document.getElementById('pm-title').value = 'Nagad';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2204,7 +2224,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#F7941D';
         document.getElementById('pm-sender-label').value = 'Your Nagad Number *';
         document.getElementById('pm-trx-label').value = 'Nagad TxnID *';
-        document.getElementById('pm-instructions').value = '১. Nagad App খুলুন অথবা ডায়াল করুন *167#\n২. Merchant Pay এ নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে নিশ্চিত করুন';
+        document.getElementById('pm-instructions').value = '1. Open Nagad App or dial *167#\n2. Select Merchant Pay and enter: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
       } else if (type === 'rocket') {
         document.getElementById('pm-title').value = 'Rocket';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2212,7 +2232,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#8C3494';
         document.getElementById('pm-sender-label').value = 'Your Rocket Number *';
         document.getElementById('pm-trx-label').value = 'Rocket TrxID *';
-        document.getElementById('pm-instructions').value = '১. Rocket App খুলুন অথবা ডায়াল করুন *322#\n২. Payment অপশনে নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে সম্পন্ন করুন';
+        document.getElementById('pm-instructions').value = '1. Open Rocket App or dial *322#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
       } else if (type === 'upay') {
         document.getElementById('pm-title').value = 'Upay';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2220,7 +2240,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#004F9F';
         document.getElementById('pm-sender-label').value = 'Your Upay Number *';
         document.getElementById('pm-trx-label').value = 'Upay TrxID *';
-        document.getElementById('pm-instructions').value = '১. Upay App খুলুন অথবা ডায়াল করুন *268#\n২. Payment এ মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে পেমেন্ট কনফার্ম করুন';
+        document.getElementById('pm-instructions').value = '1. Open Upay App or dial *268#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm payment';
       } else if (type === 'tap') {
         document.getElementById('pm-title').value = 'TAP';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2228,7 +2248,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#E4002B';
         document.getElementById('pm-sender-label').value = 'Your TAP Number *';
         document.getElementById('pm-trx-label').value = 'TAP TrxID *';
-        document.getElementById('pm-instructions').value = '১. TAP App খুলুন অথবা ডায়াল করুন *201#\n২. Payment অপশনে নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে সম্পন্ন করুন';
+        document.getElementById('pm-instructions').value = '1. Open TAP App or dial *201#\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
       } else if (type === 'islamic_wallet') {
         document.getElementById('pm-title').value = 'Islamic Wallet';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2236,7 +2256,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#008850';
         document.getElementById('pm-sender-label').value = 'Your Account Number *';
         document.getElementById('pm-trx-label').value = 'Islamic Wallet TrxID *';
-        document.getElementById('pm-instructions').value = '১. Islamic Wallet App খুলুন\n২. Payment অপশনে নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. T-PIN দিয়ে কনফার্ম করুন';
+        document.getElementById('pm-instructions').value = '1. Open Islamic Wallet App\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter T-PIN to confirm';
       } else if (type === 'mcash') {
         document.getElementById('pm-title').value = 'mCash';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2244,7 +2264,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#008542';
         document.getElementById('pm-sender-label').value = 'Your mCash Number *';
         document.getElementById('pm-trx-label').value = 'mCash TrxID *';
-        document.getElementById('pm-instructions').value = '১. CellFin বা mCash App খুলুন অথবা ডায়াল করুন *259#\n২. Payment এ নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে সম্পন্ন করুন';
+        document.getElementById('pm-instructions').value = '1. Open CellFin or mCash App (dial *259#)\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
       } else if (type === 'mycash') {
         document.getElementById('pm-title').value = 'MYCash';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2252,7 +2272,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#D32F2F';
         document.getElementById('pm-sender-label').value = 'Your MYCash Number *';
         document.getElementById('pm-trx-label').value = 'MYCash TrxID *';
-        document.getElementById('pm-instructions').value = '১. MYCash App খুলুন অথবা ডায়াল করুন *852#\n২. Payment এ নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে ভেরিফাই করুন';
+        document.getElementById('pm-instructions').value = '1. Open MYCash App or dial *852#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to verify';
       } else if (type === 'ok_wallet') {
         document.getElementById('pm-title').value = 'OK Wallet';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2260,7 +2280,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#1A237E';
         document.getElementById('pm-sender-label').value = 'Your OK Wallet Number *';
         document.getElementById('pm-trx-label').value = 'OK Wallet TrxID *';
-        document.getElementById('pm-instructions').value = '১. OK Wallet App খুলুন অথবা ডায়াল করুন *269#\n২. Payment এ নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে কনফার্ম করুন';
+        document.getElementById('pm-instructions').value = '1. Open OK Wallet App or dial *269#\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
       } else if (type === 'meghna_pay') {
         document.getElementById('pm-title').value = 'Meghna Pay';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2268,7 +2288,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#880E4F';
         document.getElementById('pm-sender-label').value = 'Your Account Number *';
         document.getElementById('pm-trx-label').value = 'Meghna Pay TrxID *';
-        document.getElementById('pm-instructions').value = '১. Meghna Pay App ওপেন করুন\n২. Payment এ নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে সফল করুন';
+        document.getElementById('pm-instructions').value = '1. Open Meghna Pay App\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
       } else if (type === 'telecash') {
         document.getElementById('pm-title').value = 'TeleCash';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2276,7 +2296,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#E65100';
         document.getElementById('pm-sender-label').value = 'Your TeleCash Number *';
         document.getElementById('pm-trx-label').value = 'TeleCash TrxID *';
-        document.getElementById('pm-instructions').value = '১. TeleCash App খুলুন অথবা ডায়াল করুন *376#\n২. Payment এ নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে সম্পন্ন করুন';
+        document.getElementById('pm-instructions').value = '1. Open TeleCash App or dial *376#\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
       } else if (type === 'surecash') {
         document.getElementById('pm-title').value = 'SureCash';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2284,7 +2304,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#0288D1';
         document.getElementById('pm-sender-label').value = 'Your SureCash Number *';
         document.getElementById('pm-trx-label').value = 'SureCash TrxID *';
-        document.getElementById('pm-instructions').value = '১. SureCash App খুলুন অথবা ডায়াল করুন *495#\n২. Payment অপশনে নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে পেমেন্ট করুন';
+        document.getElementById('pm-instructions').value = '1. Open SureCash App or dial *495#\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to make payment';
       } else if (type === 'rupali_surecash') {
         document.getElementById('pm-title').value = 'Rupali SureCash';
         document.getElementById('pm-badge').value = 'MFS';
@@ -2292,7 +2312,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#C2185B';
         document.getElementById('pm-sender-label').value = 'Your SureCash Number *';
         document.getElementById('pm-trx-label').value = 'SureCash TrxID *';
-        document.getElementById('pm-instructions').value = '১. SureCash ডায়াল করুন *375# অথবা App খুলুন\n২. Payment এ নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৪. পিন দিয়ে কনফার্ম করুন';
+        document.getElementById('pm-instructions').value = '1. Dial *375# or open SureCash App\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
       } else if (type === 'bank') {
         document.getElementById('pm-title').value = 'City Bank';
         document.getElementById('pm-badge').value = 'BANK';
@@ -2303,7 +2323,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-routing-number').value = '225271983';
         document.getElementById('pm-sender-label').value = 'Sender Bank / Account Name *';
         document.getElementById('pm-trx-label').value = 'Bank Transfer Ref / Slip No *';
-        document.getElementById('pm-instructions').value = '১. ব্যাংক অ্যাপ থেকে Fund Transfer (NPSB/BEFTN) করুন\n২. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue\n৩. অ্যাকাউন্ট: {ACCOUNT_NUMBER}, নাম: SyncPay Ltd\n৪. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৫. রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন';
+        document.getElementById('pm-instructions').value = '1. Transfer funds from Bank App (NPSB/BEFTN)\n2. Bank: City Bank PLC, Branch: Gulshan Avenue\n3. Account: {ACCOUNT_NUMBER}, Name: SyncPay Ltd\n4. Enter amount ৳ {AMOUNT} and reference {REF}\n5. Enter reference to verify';
       } else if (type === 'binance') {
         document.getElementById('pm-title').value = 'Binance Pay';
         document.getElementById('pm-badge').value = 'CRYPTO';
@@ -2311,7 +2331,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-theme-color-text').value = '#F3BA2F';
         document.getElementById('pm-sender-label').value = 'Your Binance Pay ID / Nickname *';
         document.getElementById('pm-trx-label').value = 'Binance Order ID / TxID *';
-        document.getElementById('pm-instructions').value = '১. Binance App খুলে Pay আইকনে চাপুন\n২. Send এ গিয়ে Pay ID দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ USDT দিয়ে Note এ রেফারেন্স {REF} দিন\n৪. Binance Order ID দিয়ে ভেরিফাই করুন';
+        document.getElementById('pm-instructions').value = '1. Open Binance App and tap Pay icon\n2. Select Send and enter Pay ID: {ACCOUNT_NUMBER}\n3. Enter USDT amount with reference {REF} in Note\n4. Enter Binance Order ID / TxID to verify';
       }
     }
   }
@@ -2321,7 +2341,7 @@ class PayFlowDashboardApp {
     if (!m) return;
 
     document.getElementById('pm-id').value = m.id;
-    document.getElementById('pm-modal-title').innerText = 'চ্যানেল সম্পাদনা';
+    document.getElementById('pm-modal-title').innerText = 'Edit Channel';
     document.getElementById('pm-provider-type').value = m.provider_type || 'bkash';
     document.getElementById('pm-title').value = m.title || '';
     document.getElementById('pm-account-number').value = m.account_number || '';
@@ -2370,7 +2390,7 @@ class PayFlowDashboardApp {
     const trxLabel = document.getElementById('pm-trx-label').value.trim();
 
     if (!title || !accountNumber) {
-      this.showToast('শিরোনাম ও অ্যাকাউন্ট নম্বর প্রদান করা আবশ্যক', 'error');
+      this.showToast('Title and Account Number are required', 'error');
       return;
     }
 
@@ -2393,15 +2413,15 @@ class PayFlowDashboardApp {
       });
 
       if (res.success) {
-        this.showToast('পেমেন্ট চ্যানেল সফলভাবে সংরক্ষিত হয়েছে', 'success');
+        this.showToast('Payment channel saved successfully', 'success');
         this.closeAllModals();
         this.paymentMethods = await api.getPaymentMethods();
         this.renderPaymentMethodsView();
       } else {
-        this.showToast(res.error || 'সংরক্ষণ ব্যর্থ হয়েছে', 'error');
+        this.showToast(res.error || 'Failed to save channel', 'error');
       }
     } catch (err) {
-      this.showToast('ত্রুটি: ' + err.message, 'error');
+      this.showToast('Error: ' + err.message, 'error');
     }
   }
 
@@ -2412,15 +2432,15 @@ class PayFlowDashboardApp {
         const item = this.paymentMethods.find(m => m.id === id);
         if (item) item.is_active = isActive ? 1 : 0;
         this.renderPaymentMethodsView();
-        this.showToast(isActive ? 'চ্যানেলটি সফলভাবে সক্রিয় করা হয়েছে' : 'চ্যানেলটি নিষ্ক্রিয় করা হয়েছে', 'success');
+        this.showToast(isActive ? 'Channel activated successfully' : 'Channel deactivated successfully', 'success');
       }
     } catch (err) {
-      this.showToast('আপডেট ব্যর্থ: ' + err.message, 'error');
+      this.showToast('Update failed: ' + err.message, 'error');
     }
   }
 
   async deletePaymentMethod(id, title) {
-    if (!confirm(`আপনি কি নিশ্চিতভাবে "${title}" চ্যানেলটি তালিকা থেকে মুছে ফেলতে চান?`)) {
+    if (!confirm(`Are you sure you want to delete the "${title}" channel?`)) {
       return;
     }
     try {
@@ -2428,10 +2448,10 @@ class PayFlowDashboardApp {
       if (res.success) {
         this.paymentMethods = this.paymentMethods.filter(m => m.id !== id);
         this.renderPaymentMethodsView();
-        this.showToast('চ্যানেল সফলভাবে মুছে ফেলা হয়েছে', 'success');
+        this.showToast('Channel deleted successfully', 'success');
       }
     } catch (err) {
-      this.showToast('মুছতে ব্যর্থ: ' + err.message, 'error');
+      this.showToast('Delete failed: ' + err.message, 'error');
     }
   }
 
@@ -2479,26 +2499,26 @@ class PayFlowDashboardApp {
           <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height:44px; width:auto; object-fit:contain;">
         </div>
         <div class="auth-tabs">
-          <button class="auth-tab active" id="tab-login" onclick="window.payflowApp.switchAuthTab('login')">লগইন</button>
-          <button class="auth-tab" id="tab-register" onclick="window.payflowApp.switchAuthTab('register')">রেজিস্টার</button>
+          <button class="auth-tab active" id="tab-login" onclick="window.payflowApp.switchAuthTab('login')">Login</button>
+          <button class="auth-tab" id="tab-register" onclick="window.payflowApp.switchAuthTab('register')">Register</button>
         </div>
 
         <!-- LOGIN FORM -->
         <div id="auth-login-form">
           <div class="auth-field">
-            <label>ইমেইল</label>
+            <label>Email</label>
             <input type="email" id="auth-email" class="form-control" placeholder="demo@syncpaybd.xyz" autocomplete="email">
           </div>
           <div class="auth-field">
-            <label>পাসওয়ার্ড</label>
+            <label>Password</label>
             <input type="password" id="auth-password" class="form-control" placeholder="••••••••" autocomplete="current-password">
           </div>
           <div id="auth-error" class="auth-error" style="display:none;"></div>
           <button class="btn btn-primary-action" style="width:100%; margin-top:8px;" onclick="window.payflowApp.doLogin()">
-            লগইন করুন →
+            Login →
           </button>
           <div class="auth-demo-hint">
-            <span>ডেমো অ্যাকাউন্ট:</span>
+            <span>Demo Accounts:</span>
             <button onclick="window.payflowApp.fillDemo('growth')">Growth Demo</button>
             <button onclick="window.payflowApp.fillDemo('starter')">Starter Demo</button>
             <button onclick="window.payflowApp.fillDemo('enterprise')">Enterprise Demo</button>
@@ -2508,41 +2528,60 @@ class PayFlowDashboardApp {
         <!-- REGISTER FORM -->
         <div id="auth-register-form" style="display:none;">
           <div class="auth-field">
-            <label>আপনার নাম</label>
+            <label>Your Full Name</label>
             <input type="text" id="reg-name" class="form-control" placeholder="Rahim Ahmed">
           </div>
           <div class="auth-field">
-            <label>ব্যবসার নাম</label>
+            <label>Business / Brand Name</label>
             <input type="text" id="reg-business" class="form-control" placeholder="My Shop BD">
           </div>
           <div class="auth-field">
-            <label>ইমেইল</label>
+            <label>Email</label>
             <input type="email" id="reg-email" class="form-control" placeholder="rahim@myshop.com">
           </div>
           <div class="auth-field">
-            <label>পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</label>
+            <label>Password (min 6 chars)</label>
             <input type="password" id="reg-password" class="form-control" placeholder="••••••••">
           </div>
           <div class="auth-field">
-            <label>প্যাকেজ বেছে নিন</label>
+            <label>Select Plan</label>
             <select id="reg-plan" class="form-control">
-              <option value="starter">🟢 Starter — ৳৯৯৯/মাস (৫০০ Tx, ১ ডিভাইস)</option>
-              <option value="growth" selected>🔵 Growth — ৳২,৯৯৯/মাস (৫০০০ Tx, ৩ ডিভাইস)</option>
-              <option value="enterprise">⚡ Enterprise — ৳৯,৯৯৯/মাস (Unlimited)</option>
+              <option value="starter">🟢 Starter 1 — ৳100/mo (1 Website, 500 Tx)</option>
+              <option value="pro">🔵 Pro 2 — ৳150/mo (2 Websites, Priority Support)</option>
+              <option value="business" selected>⭐ Business 3 — ৳200/mo (3 Websites, Unlimited)</option>
+              <option value="enterprise">⚡ Enterprise 5 — ৳300/mo (5 Websites, Premium Support)</option>
+              <option value="agency">🟣 Agency 4 — ৳250/mo (4 Websites)</option>
+              <option value="elite">👑 Elite 10 — ৳350/mo (10 Websites)</option>
+              <option value="growth">🔵 Growth 20 — ৳700/mo (20 Websites)</option>
+              <option value="scale">🚀 Scale 30 — ৳1,000/mo (30 Websites)</option>
+              <option value="mega">💎 Mega 50 — ৳2,000/mo (50 Websites)</option>
             </select>
           </div>
           <div id="auth-reg-error" class="auth-error" style="display:none;"></div>
           <button class="btn btn-primary-action" style="width:100%; margin-top:8px;" onclick="window.payflowApp.doRegister()">
-            অ্যাকাউন্ট তৈরি করুন →
+            Create Account →
           </button>
         </div>
 
         <div style="text-align:center; margin-top:16px;">
-          <a href="/" style="font-size:12px; color:var(--text-muted); text-decoration:none;">← SyncPay BD হোমপেজ</a>
+          <a href="/" style="font-size:12px; color:var(--text-muted); text-decoration:none;">← SyncPay BD Homepage</a>
         </div>
       </div>
     `;
     document.body.appendChild(overlay);
+
+    // Auto pre-select plan or tab if specified in URL query
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reqPlan = urlParams.get('plan');
+      const reqAction = urlParams.get('action');
+      if (reqPlan && document.getElementById('reg-plan')) {
+        document.getElementById('reg-plan').value = reqPlan;
+      }
+      if (reqAction === 'register') {
+        this.switchAuthTab('register');
+      }
+    } catch (e) {}
 
     // Add auth overlay styles
     if (!document.getElementById('auth-overlay-style')) {
@@ -2686,7 +2725,7 @@ class PayFlowDashboardApp {
     window.addEventListener('hashchange', () => this.handleHashChange());
     await this.refreshAllData();
     setInterval(() => this.pollLiveUpdates(), 4000);
-    this.showToast(`স্বাগতম, ${this.session.name}! 👋`, 'success');
+    this.showToast(`Welcome back, ${this.session.name}! 👋`, 'success');
   }
 
   async doRegister() {
@@ -2714,12 +2753,13 @@ class PayFlowDashboardApp {
     window.addEventListener('hashchange', () => this.handleHashChange());
     await this.refreshAllData();
     setInterval(() => this.pollLiveUpdates(), 4000);
-    this.showToast(`অ্যাকাউন্ট তৈরি সফল! স্বাগতম, ${name}! 🎉`, 'success');
+    this.showToast(`Account created successfully! Welcome, ${name}! 🎉`, 'success');
   }
 
   updateSidebarUser() {
     if (!this.session) return;
     const planInfo = auth.getPlan(this.session.plan);
+    const sub = auth.checkSubscription(this.session);
 
     // Update name + role
     const nameEl = document.querySelector('.user-name');
@@ -2727,17 +2767,30 @@ class PayFlowDashboardApp {
     const avatarEl = document.querySelector('.user-avatar');
 
     if (nameEl) nameEl.textContent = this.session.name;
-    if (roleEl) roleEl.innerHTML = `<span style="color:${planInfo.color};">${planInfo.badge}</span>`;
-    if (avatarEl) {
-      avatarEl.textContent = this.session.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-      avatarEl.style.background = `linear-gradient(135deg, ${planInfo.color}, ${planInfo.color}cc)`;
+    
+    if (roleEl) {
+      if (sub.isExpired) {
+        roleEl.innerHTML = `<span style="color:#ef4444; font-weight:800; font-size:11px; background:#fee2e2; padding:2px 8px; border-radius:6px;">🔴 EXPIRED</span>`;
+        this.renderExpiredBanner(sub);
+      } else {
+        roleEl.innerHTML = `<span style="color:${planInfo.color}; font-weight:700;">${planInfo.badge}</span> <span style="font-size:11px; color:#10b981; font-weight:700;">(${sub.daysLeft}d left)</span>`;
+        const oldBanner = document.getElementById('subscription-status-banner');
+        if (oldBanner) oldBanner.remove();
+      }
     }
 
-    // Lock nav items based on plan
+    if (avatarEl) {
+      avatarEl.textContent = this.session.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      avatarEl.style.background = sub.isExpired 
+        ? 'linear-gradient(135deg, #ef4444, #dc2626)' 
+        : `linear-gradient(135deg, ${planInfo.color}, ${planInfo.color}cc)`;
+    }
+
+    // Lock nav items based on plan or expiry
     document.querySelectorAll('.nav-item').forEach(el => {
       const target = el.getAttribute('href')?.replace('#', '');
       if (!target) return;
-      const locked = !auth.canAccess(target, this.session.plan);
+      const locked = sub.isExpired || !auth.canAccess(target, this.session.plan);
       el.classList.toggle('nav-locked', locked);
       const existingBadge = el.querySelector('.nav-lock-icon');
       if (locked && !existingBadge) {
@@ -2750,6 +2803,116 @@ class PayFlowDashboardApp {
         existingBadge.remove();
       }
     });
+  }
+
+  renderExpiredBanner(sub) {
+    const mainContent = document.getElementById('main-content') || document.querySelector('.main-content');
+    if (!mainContent) return;
+    let banner = document.getElementById('subscription-status-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'subscription-status-banner';
+      mainContent.prepend(banner);
+    }
+    const planInfo = auth.getPlan(this.session.plan);
+    const price = this.session.planPrice || 200;
+    banner.innerHTML = `
+      <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:14px; padding:16px 20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 4px 16px rgba(239, 68, 68, 0.12);">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:26px;">⚠️</span>
+          <div>
+            <div style="font-weight:800; color:#991b1b; font-size:15px;">Subscription Expired! (Service Suspended)</div>
+            <div style="font-size:13px; color:#b91c1c; margin-top:2px;">Your payment verification service and webhooks are temporarily suspended. Renew now to restore access.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary-action" style="background:#dc2626; border-color:#b91c1c; font-size:13px; padding:9px 18px; font-weight:800; cursor:pointer;" onclick="window.payflowApp.openRenewModal()">
+          💳 Renew Now (৳${price}) →
+        </button>
+      </div>
+    `;
+  }
+
+  openRenewModal() {
+    const old = document.getElementById('renew-modal-overlay');
+    if (old) old.remove();
+
+    const planInfo = auth.getPlan(this.session.plan);
+    const price = this.session.planPrice || 200;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'renew-modal-overlay';
+    overlay.style.cssText = 'position:fixed; inset:0; z-index:999999; background:rgba(6,13,31,0.82); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:#ffffff; border-radius:20px; width:100%; max-width:460px; padding:28px; box-shadow:0 25px 60px rgba(0,0,0,0.4); text-align:left; position:relative;">
+        <button onclick="document.getElementById('renew-modal-overlay').remove()" style="position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; background:#f1f5f9; border:none; color:#64748b; font-size:18px; cursor:pointer;">&times;</button>
+        <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:4px;">Subscription Renewal & Payment</h3>
+        <p style="font-size:13px; color:#64748b; margin-bottom:16px;">Extend your active plan for another 30 days.</p>
+        
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px;">
+            <span style="color:#64748b;">Plan:</span>
+            <strong style="color:#0f172a;">${planInfo.label || this.session.plan}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
+            <span style="color:#64748b;">Extended Duration:</span>
+            <span style="color:#10b981; font-weight:700;">+30 Days</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:16px; border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:4px;">
+            <span style="font-weight:700; color:#0f172a;">Renewal Fee:</span>
+            <strong style="color:#0284c7; font-size:18px;">৳${price}.00</strong>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px; font-size:12px; color:#475569; background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:10px 12px; line-height:1.5;">
+          📌 Send Money to <span style="font-weight:800; color:#0f172a;">01712345678</span> via bKash or Nagad and submit TrxID below.
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Transaction ID (TrxID)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="renew-trx-input" class="form-control" placeholder="e.g., BL78A4982J" style="font-family:monospace; text-transform:uppercase;">
+            <button type="button" class="btn btn-secondary-action" style="white-space:nowrap; padding:0 12px; font-size:12px;" onclick="document.getElementById('renew-trx-input').value='BL'+Math.random().toString(36).slice(2,10).toUpperCase()">⚡ Auto TrxID</button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary-action" style="width:100%; height:44px; font-size:14px;" onclick="window.payflowApp.submitRenewPayment(${price})">
+          Verify Payment & Activate Service →
+        </button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  submitRenewPayment(amount) {
+    const trx = (document.getElementById('renew-trx-input')?.value || '').trim().toUpperCase();
+    if (!trx || trx.length < 6) {
+      alert('Please enter a valid TrxID.');
+      return;
+    }
+    const res = auth.activatePaidPlan(this.session.plan, this.session.billingCycle || 'monthly', trx, amount);
+    if (res.ok) {
+      this.session = res.session;
+      const overlay = document.getElementById('renew-modal-overlay');
+      if (overlay) overlay.remove();
+      const banner = document.getElementById('subscription-status-banner');
+      if (banner) banner.remove();
+      this.updateSidebarUser();
+      const expFormatted = new Date(res.expiresAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+      this.showToast(`Subscription renewed successfully! Expiry: ${expFormatted} (${res.durationDays} days). 🎉`, 'success');
+      this.refreshAllData();
+    }
+  }
+
+  simulateSubscriptionDays(days) {
+    const sub = auth.simulateExpiry(days);
+    this.session = auth.getSession();
+    this.updateSidebarUser();
+    if (sub.isExpired) {
+      this.showToast('Simulation: Subscription expired (Service Off).', 'error');
+    } else {
+      this.showToast(`Simulation: Subscription set to ${days} days (Service Active).`, 'success');
+    }
+    this.refreshAllData();
   }
 
   doLogout() {

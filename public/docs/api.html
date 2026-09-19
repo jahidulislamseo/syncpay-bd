@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Documentation | SyncPay BD</title>
-  <meta name="description" content="SyncPay BD API — invoice তৈরি, payment verify এবং webhook সংক্রান্ত সম্পূর্ণ ডকুমেন্টেশন।">
+  <meta name="description" content="SyncPay BD API — Complete documentation for invoice creation, payment verification, and webhooks.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -73,7 +73,7 @@
         <a href="/docs/api" style="color:var(--primary)">API Docs</a>
         <a href="/docs/trx-verification">Verification</a>
         <a href="/docs/webhook">Webhook</a>
-        <a href="/" class="btn-back">← হোম</a>
+        <a href="/" class="btn-back">← Home</a>
       </div>
     </div>
   </header>
@@ -84,7 +84,7 @@
       <ul>
         <li><a href="#overview" class="active">Overview</a></li>
         <li><a href="#authentication">Authentication</a></li>
-        <li><a href="#create-invoice">Invoice তৈরি</a></li>
+        <li><a href="#create-invoice">Create Invoice</a></li>
         <li><a href="#verify-payment">Payment Verify</a></li>
         <div class="sidebar-divider"></div>
         <li><a href="/docs/trx-verification">Transaction Verification</a></li>
@@ -95,7 +95,7 @@
     <main class="content">
       <div class="page-chip">API Documentation</div>
       <h1>SyncPay BD API</h1>
-      <p class="lead">একটিমাত্র REST API দিয়ে আপনার যেকোনো platform-এ bKash, Nagad, Rocket ও Upay payment verification যোগ করুন। JSON-based, সহজ authentication, real-time response।</p>
+      <p class="lead">Add bKash, Nagad, Rocket, and Upay payment verification to any platform via a single REST API. JSON-based, simple authentication, and real-time response.</p>
 
       <div class="doc-links">
         <a href="/docs/trx-verification" class="doc-link-card">Transaction Verification API →</a>
@@ -108,35 +108,35 @@
       </div>
 
       <h2 id="overview">Overview</h2>
-      <p>SyncPay BD API একটি RESTful HTTP API। সব request ও response JSON format-এ। HTTPS বাধ্যতামূলক।</p>
+      <p>The SyncPay BD API is a RESTful HTTP API. All requests and responses are in JSON format. HTTPS is required.</p>
       <ul>
         <li>Content-Type: <code>application/json</code></li>
-        <li>সব response-এ <code>success: true/false</code> থাকে</li>
+        <li>All responses include <code>success: true/false</code></li>
         <li>Rate limit: 100 req/minute per API key</li>
         <li>Sandbox: <code>https://sandbox.syncpaybd.xyz/v1</code></li>
       </ul>
       <div class="alert alert-info">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span>প্রথমে <strong>Sandbox</strong> environment-এ test করুন। Live API key dashboard থেকে পাবেন।</span>
+        <span>Test in the <strong>Sandbox</strong> environment first. Get your live API key from the dashboard.</span>
       </div>
 
       <h2 id="authentication">Authentication</h2>
-      <p>প্রতিটি request-এ <code>Authorization</code> header-এ Bearer token পাঠান।</p>
-      <div class="code-block"><pre><span class="c-cmt"># সব request-এ এই header যোগ করুন</span>
+      <p>Send a Bearer token in the <code>Authorization</code> header with every request.</p>
+      <div class="code-block"><pre><span class="c-cmt"># Add this header to all requests</span>
 <span class="c-key">Authorization</span>: <span class="c-str">Bearer pf_live_xxxxxxxxxxxxxxxx</span>
 <span class="c-key">Content-Type</span>: <span class="c-str">application/json</span></pre></div>
 
-      <h2 id="create-invoice">Invoice তৈরি</h2>
-      <p>নতুন payment invoice তৈরি করুন। Customer-কে এই invoice-এর বিপরীতে payment করতে বলুন।</p>
+      <h2 id="create-invoice">Create Invoice</h2>
+      <p>Create a new payment invoice. Ask the customer to pay against this invoice.</p>
       <div class="endpoint-row"><span class="method post">POST</span><span class="ep-url"><span>/invoice/create</span></span></div>
       <h3>Request Body</h3>
       <table class="param-table">
-        <thead><tr><th>Parameter</th><th>Type</th><th>বিবরণ</th><th></th></tr></thead>
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th><th></th></tr></thead>
         <tbody>
-          <tr><td>amount</td><td>number</td><td>টাকার পরিমাণ</td><td><span class="tag-req">required</span></td></tr>
+          <tr><td>amount</td><td>number</td><td>Amount in BDT</td><td><span class="tag-req">required</span></td></tr>
           <tr><td>provider</td><td>string</td><td>bKash | Nagad | Rocket | Upay</td><td><span class="tag-req">required</span></td></tr>
-          <tr><td>order_id</td><td>string</td><td>আপনার system-এর order ID</td><td><span class="tag-opt">optional</span></td></tr>
-          <tr><td>expires_in</td><td>number</td><td>মেয়াদ (seconds), default: 1800</td><td><span class="tag-opt">optional</span></td></tr>
+          <tr><td>order_id</td><td>string</td><td>Internal order ID from your system</td><td><span class="tag-opt">optional</span></td></tr>
+          <tr><td>expires_in</td><td>number</td><td>Expiry time (seconds), default: 1800</td><td><span class="tag-opt">optional</span></td></tr>
         </tbody>
       </table>
       <div class="code-block"><pre><span class="c-fn">POST</span> /v1/invoice/create
@@ -155,14 +155,14 @@
 }</pre></div>
 
       <h2 id="verify-payment">Payment Verify</h2>
-      <p>Customer-এর payment transaction verify করুন।</p>
+      <p>Verify customer payment transaction.</p>
       <div class="endpoint-row"><span class="method post">POST</span><span class="ep-url"><span>/verify</span></span></div>
       <h3>Request Body</h3>
       <table class="param-table">
-        <thead><tr><th>Parameter</th><th>Type</th><th>বিবরণ</th><th></th></tr></thead>
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th><th></th></tr></thead>
         <tbody>
           <tr><td>trx_id</td><td>string</td><td>MFS transaction ID</td><td><span class="tag-req">required</span></td></tr>
-          <tr><td>amount</td><td>number</td><td>expected টাকার পরিমাণ</td><td><span class="tag-req">required</span></td></tr>
+          <tr><td>amount</td><td>number</td><td>Expected amount in BDT</td><td><span class="tag-req">required</span></td></tr>
           <tr><td>provider</td><td>string</td><td>bKash | Nagad | Rocket | Upay</td><td><span class="tag-req">required</span></td></tr>
         </tbody>
       </table>

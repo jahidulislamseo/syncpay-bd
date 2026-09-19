@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SyncPay BD — Merchant Production Dashboard</title>
+  <title>Merchant Dashboard | SyncPay BD</title>
   <meta name="description" content="Production Merchant Dashboard for SyncPay BD Payment Gateway (syncpaybd.xyz). Real-time MFS telephony stream, transactions ledger, invoices, forwarder devices and API keys.">
   <link rel="icon" type="image/png" href="/images/syncpay-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,7 @@
 
       <!-- Nav Links Menu -->
       <nav class="sidebar-nav">
-        <div class="nav-section-title" data-i18n="nav.dashboard">ড্যাশবোর্ড</div>
+        <div class="nav-section-title" data-i18n="nav.dashboard">Dashboard</div>
         <a href="#home" class="nav-item active">
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
@@ -39,7 +39,7 @@
           <span data-i18n="nav.dashboard">Dashboard</span>
         </a>
 
-        <div class="nav-section-title" data-i18n="nav.payments">পেমেন্ট ও আয়</div>
+        <div class="nav-section-title" data-i18n="nav.payments">Payments & Finance</div>
         <a href="#transactions" class="nav-item">
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -56,16 +56,16 @@
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="7" cy="15" r="1.5"/><circle cx="12" cy="15" r="1.5"/></svg>
           </span>
-          <span data-i18n="nav.paymentMethods">পেমেন্ট চ্যানেল ও নির্দেশিকা</span>
+          <span data-i18n="nav.paymentMethods">Payment Channels</span>
         </a>
         <a href="#quick-verify" class="nav-item">
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="m9 11 2 2 4-4"/></svg>
           </span>
-          <span data-i18n="nav.quickVerify">কুইক TrxID ম্যাচ</span>
+          <span data-i18n="nav.quickVerify">Quick TrxID Match</span>
         </a>
 
-        <div class="nav-section-title" data-i18n="nav.devices">ডিভাইস ও সিম</div>
+        <div class="nav-section-title" data-i18n="nav.devices">Devices & SIM</div>
         <a href="#devices" class="nav-item">
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
@@ -77,10 +77,10 @@
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></svg>
           </span>
-          <span data-i18n="nav.smsLogs">লাইভ SMS লগ</span>
+          <span data-i18n="nav.smsLogs">Live SMS Logs</span>
         </a>
 
-        <div class="nav-section-title" data-i18n="nav.apiDevelopers">API ও ডেভেলপার্স</div>
+        <div class="nav-section-title" data-i18n="nav.apiDevelopers">API & Developers</div>
         <a href="#api-keys" class="nav-item">
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3"/></svg>
@@ -103,10 +103,10 @@
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
           </span>
-          <span data-i18n="nav.plugins">প্লাগইন ও SDKs</span>
+          <span data-i18n="nav.plugins">Plugins & SDKs</span>
         </a>
 
-        <div class="nav-section-title" data-i18n="nav.reports">রিপোর্টস ও অডিট</div>
+        <div class="nav-section-title" data-i18n="nav.reports">Reports & Audit</div>
         <a href="#reports" class="nav-item">
           <span class="nav-item-icon">
             <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -115,7 +115,7 @@
         </a>
         <a href="#settings" class="nav-item">
           <span class="nav-item-icon">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1z"/></svg>
           </span>
           <span data-i18n="nav.settings">Settings</span>
         </a>
@@ -124,7 +124,7 @@
 
     <!-- Bottom User Profile & Logout -->
     <div class="sidebar-footer">
-      <div class="user-snippet" style="cursor:pointer;" onclick="window.payflowApp.openMerchantAuthModal()" title="মার্চেন্ট অ্যাকাউন্ট তথ্য">
+      <div class="user-snippet" style="cursor:pointer;" onclick="window.payflowApp.openMerchantAuthModal()" title="Merchant Account Info">
         <div class="user-avatar">DM</div>
         <div class="user-details">
           <div class="user-name">Demo Merchant</div>
@@ -157,7 +157,7 @@
       <div class="topbar-actions">
         <!-- Language Switcher -->
         <button class="btn-topbar-tool" id="btn-lang-toggle" title="Switch Language">
-          বাংলা (BN)
+          English (EN)
         </button>
 
         <!-- Theme Switcher -->
@@ -176,7 +176,7 @@
         <!-- Landing Page Quick Link -->
         <a href="/" class="btn-topbar-tool" style="text-decoration: none;" title="Go to Public Landing Page">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          <span style="font-size: 12px;">ওয়েবসাইট</span>
+          <span style="font-size: 12px;">Website</span>
         </a>
       </div>
     </header>
@@ -307,7 +307,7 @@
           </div>
           <button class="btn btn-primary-action" onclick="window.payflowApp.openAddDeviceModal()" style="display:inline-flex; align-items:center; gap:8px;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            <span>📱 ডিভাইস কানেক্ট / QR Code</span>
+            <span>📱 Connect Device / QR Code</span>
           </button>
         </div>
 
@@ -376,17 +376,17 @@
       <section id="view-payment-methods" class="view-panel">
         <div class="view-header">
           <div>
-            <h1 class="view-title">পেমেন্ট চ্যানেল</h1>
-            <p class="view-subtitle">সক্রিয় চ্যানেলগুলো চেকআউটে প্রদর্শিত হবে।</p>
+            <h1 class="view-title">Payment Channels</h1>
+            <p class="view-subtitle">Active payment channels will be available on the checkout page.</p>
           </div>
           <div class="view-actions" style="display:flex; gap:8px; flex-wrap:wrap;">
             <a href="/checkout" target="_blank" class="btn btn-secondary-action" style="display:inline-flex; align-items:center; gap:5px; text-decoration:none;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              <span>প্রিভিউ</span>
+              <span>Preview</span>
             </a>
             <button class="btn btn-primary-action" onclick="window.payflowApp.openAddPaymentMethodModal()" style="display:inline-flex; align-items:center; gap:5px;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ চ্যানেল</span>
+              <span>+ Add Channel</span>
             </button>
           </div>
         </div>
@@ -414,8 +414,8 @@
       <section id="view-quick-verify" class="view-panel">
         <div class="view-header">
           <div>
-            <h1 class="view-title">কুইক TrxID ম্যাচ ও ভেরিফাই</h1>
-            <p class="view-subtitle">সরাসরি TrxID বা ইনভয়েস দিয়ে এসএমএস ভেরিফিকেশন ও ১-ক্লিক অনুমোদন করুন।</p>
+            <h1 class="view-title">Quick TrxID Match & Verify</h1>
+            <p class="view-subtitle">Instant SMS verification and 1-click manual reconciliation by TrxID or invoice.</p>
           </div>
         </div>
         <div id="quick-verify-view-slot"></div>
@@ -427,13 +427,13 @@
       <section id="view-sms-logs" class="view-panel">
         <div class="view-header">
           <div>
-            <h1 class="view-title">লাইভ SMS লগ ও ফরোয়ার্ডার স্ট্রিম</h1>
-            <p class="view-subtitle">আপনার অ্যান্ড্রয়েড সিম কার্ডে আসা প্রতিটি ইনকামিং কাঁচা এসএমএস ও পার্সিং স্ট্যাটাস।</p>
+            <h1 class="view-title">Live SMS Logs & Forwarder Stream</h1>
+            <p class="view-subtitle">Real-time incoming telephony SMS logs captured by your forwarder devices.</p>
           </div>
           <div class="view-actions">
             <button class="btn btn-secondary-action" onclick="window.payflowApp.renderSmsLogsView()" style="display:inline-flex; align-items:center; gap:6px;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              <span>রিফ্রেশ</span>
+              <span>Refresh</span>
             </button>
           </div>
         </div>
@@ -446,8 +446,8 @@
       <section id="view-plugins" class="view-panel">
         <div class="view-header">
           <div>
-            <h1 class="view-title">প্লাগইন ও ডেভেলপার SDKs</h1>
-            <p class="view-subtitle">WordPress/WooCommerce, WHMCS, PHP ও Node.js রেডিমেড ইন্টিগ্রেশন প্যাকেজ।</p>
+            <h1 class="view-title">Plugins & Developer SDKs</h1>
+            <p class="view-subtitle">Ready-made integration packages for WordPress/WooCommerce, WHMCS, PHP, and Node.js.</p>
           </div>
         </div>
         <div id="plugins-view-slot"></div>
@@ -545,89 +545,89 @@
   <div class="modal-overlay" id="modal-add-device">
     <div class="modal-dialog" style="max-width:500px;">
       <div class="modal-header">
-        <h3 class="modal-title">ডিভাইস কানেক্ট ও পেয়ারিং (QR Code)</h3>
+        <h3 class="modal-title">Connect & Pair Forwarder (QR Code)</h3>
         <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
       </div>
       <div class="modal-body">
         <!-- Modal Tabs -->
         <div class="modal-tabs">
           <button class="modal-tab-btn active" id="tab-btn-qr" onclick="window.payflowApp.switchDeviceModalTab('qr')">
-            📱 ইনস্ট্যান্ট QR কোড
+            📱 Instant QR Code
           </button>
           <button class="modal-tab-btn" id="tab-btn-form" onclick="window.payflowApp.switchDeviceModalTab('form')">
-            ➕ নতুন ডিভাইস রেজিস্টার
+            ➕ Register New Device
           </button>
         </div>
 
         <!-- TAB 1: INSTANT QR PAIRING -->
         <div id="device-tab-qr-content" style="text-align:center;">
           <p style="font-size:13px; color:var(--text-secondary); margin-bottom:10px;">
-            ফোনে <strong>SyncPay Forwarder</strong> অ্যাপটি ওপেন করে নিচের QR কোডটি স্ক্যান করুন।
+            Open <strong>SyncPay Forwarder</strong> on your Android device and scan the QR code below.
           </p>
 
           <div class="qr-code-box" id="add-device-qr-image-slot">
-            <div style="padding:40px; color:var(--text-muted);">QR Code লোড হচ্ছে...</div>
+            <div style="padding:40px; color:var(--text-muted);">Loading QR Code...</div>
           </div>
 
           <div style="text-align:left; margin-top:14px;">
             <div class="pairing-info-row">
               <div>
-                <div class="pairing-info-label">সার্ভার URL (Server URL)</div>
+                <div class="pairing-info-label">Server URL</div>
                 <div class="pairing-info-val" id="add-qr-server-url">http://localhost:4000</div>
               </div>
               <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('add-qr-server-url').innerText)">
-                কপি
+                Copy
               </button>
             </div>
 
             <div class="pairing-info-row">
               <div>
-                <div class="pairing-info-label">পেয়ারিং টোকেন (Pairing Token)</div>
+                <div class="pairing-info-label">Pairing Token</div>
                 <div class="pairing-info-val" id="add-qr-device-token">token_phone_primary</div>
               </div>
               <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('add-qr-device-token').innerText)">
-                কপি
+                Copy
               </button>
             </div>
 
             <div class="pairing-info-row">
               <div>
-                <div class="pairing-info-label">মার্চেন্ট আইডি (Merchant ID)</div>
+                <div class="pairing-info-label">Merchant ID</div>
                 <div class="pairing-info-val" id="add-qr-merchant-id">m_demo_101</div>
               </div>
               <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('add-qr-merchant-id').innerText)">
-                কপি
+                Copy
               </button>
             </div>
           </div>
 
           <div style="background:var(--primary-subtle); border:1px solid var(--primary-border); border-radius:8px; padding:10px; font-size:12px; color:var(--primary); text-align:left; margin-top:12px;">
-            ⚡ অ্যাপ না থাকলে উপরে থাকা <strong>"১-ক্লিকে APK ডাউনলোড করুন"</strong> বাটনে ক্লিক করে ফোনে ইন্সটল করে নিন।
+            ⚡ Need the Android app? Click <strong>"1-Click APK Download"</strong> at the top to install it on your device.
           </div>
         </div>
 
         <!-- TAB 2: REGISTER NEW DEVICE -->
         <div id="device-tab-form-content" style="display:none;">
           <div class="form-group">
-            <label class="form-label">ডিভাইসের নাম / মডেল (Device Label)</label>
+            <label class="form-label">Device Label / Model</label>
             <input type="text" id="dev-name-input" class="form-control" placeholder="e.g. Samsung Galaxy S23 (bKash)">
           </div>
           <div class="form-group">
-            <label class="form-label">সিম নম্বর (SIM Phone Number)</label>
+            <label class="form-label">SIM Phone Number</label>
             <input type="text" id="dev-sim-input" class="form-control mono" placeholder="01712345678">
           </div>
           <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
-            নতুন ডিভাইস রেজিস্টার করলে সাথে সাথে তার জন্য ইউনিক পেয়ারিং টোকেন এবং QR কোড তৈরি হবে।
+            Registering generates a unique pairing token and persistent QR code for this phone.
           </p>
           <div style="margin-top:16px;">
             <button class="btn btn-primary-action" style="width:100%;" onclick="window.payflowApp.submitAddDevice()">
-              রেজিস্টার করুন এবং QR কোড দেখুন →
+              Register Device & Show QR →
             </button>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">বন্ধ করুন</button>
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Close</button>
       </div>
     </div>
   </div>
@@ -638,58 +638,58 @@
   <div class="modal-overlay" id="modal-device-qr">
     <div class="modal-dialog" style="max-width:480px;">
       <div class="modal-header">
-        <h3 class="modal-title" id="device-qr-title">কানেক্ট অ্যান্ড্রয়েড ফরওয়ার্ডার</h3>
+        <h3 class="modal-title" id="device-qr-title">Connect Android Forwarder</h3>
         <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
       </div>
       <div class="modal-body" style="text-align:center;">
         <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
-          আপনার ফোনে <strong>SyncPay Forwarder</strong> অ্যাপটি খুলুন এবং নিচে থাকা QR কোডটি স্ক্যান করুন অথবা টোকেন কপি করে পেস্ট করুন।
+          Open <strong>SyncPay Forwarder</strong> on your phone and scan the QR code below, or paste the pairing token manually.
         </p>
 
         <!-- QR Image Slot -->
         <div class="qr-code-box" id="device-qr-image-slot">
-          <div style="padding:40px; color:var(--text-muted);">QR Code লোড হচ্ছে...</div>
+          <div style="padding:40px; color:var(--text-muted);">Loading QR Code...</div>
         </div>
 
         <div style="text-align:left; margin-top:16px;">
           <div class="pairing-info-row">
             <div>
-              <div class="pairing-info-label">সার্ভার URL (Server URL)</div>
+              <div class="pairing-info-label">Server URL</div>
               <div class="pairing-info-val" id="qr-server-url">http://localhost:4000</div>
             </div>
             <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('qr-server-url').innerText)">
-              কপি
+              Copy
             </button>
           </div>
 
           <div class="pairing-info-row">
             <div>
-              <div class="pairing-info-label">ডিভাইস টোকেন (Pairing Token)</div>
+              <div class="pairing-info-label">Pairing Token</div>
               <div class="pairing-info-val" id="qr-device-token">token_phone_primary</div>
             </div>
             <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('qr-device-token').innerText)">
-              কপি
+              Copy
             </button>
           </div>
 
           <div class="pairing-info-row">
             <div>
-              <div class="pairing-info-label">মার্চেন্ট আইডি (Merchant ID)</div>
+              <div class="pairing-info-label">Merchant ID</div>
               <div class="pairing-info-val" id="qr-merchant-id">m_demo_101</div>
             </div>
             <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('qr-merchant-id').innerText)">
-              কপি
+              Copy
             </button>
           </div>
         </div>
 
         <div style="background:var(--primary-subtle); border:1px solid var(--primary-border); border-radius:8px; padding:12px; font-size:12px; color:var(--primary); text-align:left; margin-top:14px;">
-          💡 <strong>পরামর্শ:</strong> অ্যাপে কানেক্ট করার পর SMS Read পারমিশন এবং Battery Optimization 'Don't Optimize' সিলেক্ট নিশ্চিত করুন যেন ব্যাকগ্রাউন্ডে নিরবচ্ছিন্ন সিগন্যাল পায়।
+          💡 <strong>Tip:</strong> After connecting, grant SMS Read permissions and select Battery Optimization 'Don't Optimize' to guarantee uninterrupted background forwarding.
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary-action" onclick="window.payflowApp.closeAllModals()">
-          বুঝেছি / সম্পন্ন
+          Done / Close
         </button>
       </div>
     </div>
@@ -701,20 +701,20 @@
   <div class="modal-overlay" id="modal-connect-website">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3 class="modal-title">নতুন ওয়েবসাইট কানেক্ট করুন</h3>
+        <h3 class="modal-title">Connect New Website</h3>
         <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">ওয়েবসাইটের নাম (Store Name)</label>
+          <label class="form-label">Store / Website Name</label>
           <input type="text" id="site-name-input" class="form-control" placeholder="e.g. My Gadget Shop">
         </div>
         <div class="form-group">
-          <label class="form-label">ডোমেইন URL (Website Domain)</label>
+          <label class="form-label">Website Domain URL</label>
           <input type="text" id="site-domain-input" class="form-control mono" placeholder="https://gadgetshop.com.bd">
         </div>
         <div class="form-group">
-          <label class="form-label">প্ল্যাটফর্ম (Platform Engine)</label>
+          <label class="form-label">Platform Engine</label>
           <select id="site-platform-select" class="form-control">
             <option value="WooCommerce">WooCommerce (WordPress Plugin)</option>
             <option value="WordPress">WordPress</option>
@@ -724,17 +724,17 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">ওয়েবহুক কলব্যাক URL (ঐচ্ছিক)</label>
+          <label class="form-label">Webhook Callback URL (Optional)</label>
           <input type="text" id="site-webhook-input" class="form-control mono" placeholder="https://gadgetshop.com.bd/api/webhook">
         </div>
         <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
-          আপনার বর্তমান Growth প্যাকেজে সর্বোচ্চ ৫টি ওয়েবসাইট যুক্ত করতে পারবেন।
+          Your current plan allows connecting up to 5 production websites.
         </p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">বাতিল</button>
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Cancel</button>
         <button class="btn btn-primary-action" onclick="window.payflowApp.submitConnectWebsite()">
-          কানেক্ট করুন
+          Connect Website
         </button>
       </div>
     </div>
@@ -746,12 +746,12 @@
   <div class="modal-overlay" id="modal-merchant-auth">
     <div class="modal-dialog" style="max-width:520px;">
       <div class="modal-header">
-        <h3 class="modal-title">মার্চেন্ট অ্যাকাউন্ট ও লগইন তথ্য</h3>
+        <h3 class="modal-title">Merchant Credentials & Registration</h3>
         <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
       </div>
       <div class="modal-body">
         <div style="background:var(--bg-subtle); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:20px;">
-          <h4 style="font-size:13px; font-weight:800; color:var(--text-primary); margin-bottom:10px;">বর্তমান সক্রিয় মার্চেন্ট ক্রেডেনশিয়াল</h4>
+          <h4 style="font-size:13px; font-weight:800; color:var(--text-primary); margin-bottom:10px;">Active Merchant Credentials</h4>
           <div class="detail-item" style="display:flex; justify-content:space-between; margin-bottom:6px;">
             <span class="detail-key">Merchant ID:</span>
             <span class="mono" style="font-weight:700; color:var(--primary);">m_demo_101</span>
@@ -771,40 +771,40 @@
         </div>
 
         <div style="border-top:1px solid var(--border-subtle); padding-top:16px;">
-          <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">নতুন মার্চেন্ট রেজিস্ট্রেশন</h4>
+          <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">New Merchant Registration</h4>
           <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
-            আপনার নিজস্ব ব্যবসার জন্য নতুন মার্চেন্ট অ্যাকাউন্ট তৈরি করুন।
+            Create a new merchant account for your business.
           </p>
           <div class="form-group">
-            <label class="form-label">ব্যবসার নাম (Business Name)</label>
+            <label class="form-label">Business Name</label>
             <input type="text" id="reg-biz-name" class="form-control" placeholder="e.g. Dhaka Electronics">
           </div>
           <div class="form-group">
-            <label class="form-label">মার্চেন্টের নাম (Owner Name)</label>
+            <label class="form-label">Owner Name</label>
             <input type="text" id="reg-owner-name" class="form-control" placeholder="e.g. Jahidul Islam">
           </div>
           <div class="form-group">
-            <label class="form-label">ইমেইল ঠিকানা (Email)</label>
+            <label class="form-label">Email Address</label>
             <input type="email" id="reg-email" class="form-control" placeholder="merchant@dhakaelectronics.com">
           </div>
           <button class="btn btn-primary-action" style="width:100%; margin-top:10px;" onclick="window.payflowApp.submitRegisterMerchant()">
-            + নতুন মার্চেন্ট অ্যাকাউন্ট খুলুন
+            + Register Merchant Account
           </button>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">বন্ধ করুন</button>
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Close</button>
       </div>
     </div>
   </div>
 
   <!-- =====================================
-       MODAL 6: ADD / EDIT PAYMENT CHANNEL
+       MODAL 7: ADD / EDIT PAYMENT CHANNEL
        ===================================== -->
   <div class="modal-overlay" id="modal-payment-method">
     <div class="modal-dialog" style="max-width:620px; max-height:90vh; overflow-y:auto;">
       <div class="modal-header">
-        <h3 class="modal-title" id="pm-modal-title">পেমেন্ট চ্যানেল</h3>
+        <h3 class="modal-title" id="pm-modal-title">Payment Channel</h3>
         <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
       </div>
       <div class="modal-body">
@@ -812,14 +812,14 @@
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group">
-            <label class="form-label">চ্যানেল ধরণ *</label>
+            <label class="form-label">Channel Type *</label>
             <select id="pm-provider-type" class="form-control" onchange="window.payflowApp.onPaymentTypeChange()">
-              <optgroup label="অনুমোদিত MFS">
-                <option value="bkash">bKash (বিকাশ)</option>
-                <option value="nagad">Nagad (নগদ)</option>
-                <option value="rocket">Rocket (রকেট)</option>
-                <option value="upay">Upay (উপায়)</option>
-                <option value="tap">TAP (ট্যাপ)</option>
+              <optgroup label="Supported MFS">
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="rocket">Rocket</option>
+                <option value="upay">Upay</option>
+                <option value="tap">TAP</option>
                 <option value="islamic_wallet">Islamic Wallet</option>
                 <option value="mcash">mCash</option>
                 <option value="mycash">MYCash</option>
@@ -829,75 +829,75 @@
                 <option value="surecash">SureCash</option>
                 <option value="rupali_surecash">Rupali SureCash</option>
               </optgroup>
-              <optgroup label="অন্যান্য">
-                <option value="bank">Bank Transfer (ব্যাংক)</option>
-                <option value="binance">Binance Pay (ক্রিপ্টো)</option>
-                <option value="custom">অন্যান্য (Custom)</option>
+              <optgroup label="Other Channels">
+                <option value="bank">Bank Transfer</option>
+                <option value="binance">Binance Pay (Crypto)</option>
+                <option value="custom">Custom Channel</option>
               </optgroup>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">ডিসপ্লে নাম *</label>
+            <label class="form-label">Display Title *</label>
             <input type="text" id="pm-title" class="form-control" placeholder="e.g. bKash">
           </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:12px;">
           <div class="form-group">
-            <label class="form-label" id="pm-label-number">অ্যাকাউন্ট / নম্বর *</label>
+            <label class="form-label" id="pm-label-number">Account / Phone Number *</label>
             <input type="text" id="pm-account-number" class="form-control mono" placeholder="01580397069">
           </div>
           <div class="form-group">
-            <label class="form-label">মার্চেন্ট / অ্যাকাউন্টের নাম</label>
+            <label class="form-label">Merchant / Account Name</label>
             <input type="text" id="pm-account-name" class="form-control" placeholder="bdshop24">
           </div>
         </div>
 
         <!-- Bank Specific Fields (Conditional) -->
         <div id="pm-bank-fields" style="display:none; background:var(--bg-subtle, #f8fafc); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:12px;">
-          <div style="font-weight:700; font-size:12.5px; color:var(--text-primary); margin-bottom:8px;">ব্যাংক বিস্তারিত তথ্য</div>
+          <div style="font-weight:700; font-size:12.5px; color:var(--text-primary); margin-bottom:8px;">Bank Details</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">ব্যাংক নাম *</label>
+              <label class="form-label">Bank Name *</label>
               <input type="text" id="pm-bank-name" class="form-control" placeholder="City Bank PLC">
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">ব্রাঞ্চ নাম</label>
+              <label class="form-label">Branch Name</label>
               <input type="text" id="pm-branch-name" class="form-control" placeholder="Gulshan Branch">
             </div>
           </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">রাউটিং নম্বর</label>
+            <label class="form-label">Routing Number</label>
             <input type="text" id="pm-routing-number" class="form-control mono" placeholder="225271983">
           </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
           <div class="form-group">
-            <label class="form-label">ব্যাজ</label>
+            <label class="form-label">Badge</label>
             <input type="text" id="pm-badge" class="form-control" placeholder="MFS">
           </div>
           <div class="form-group">
-            <label class="form-label">ব্র্যান্ড রঙ</label>
+            <label class="form-label">Brand Color</label>
             <div style="display:flex; align-items:center; gap:6px;">
               <input type="color" id="pm-theme-color" value="#E2136E" style="width:36px; height:36px; border:none; border-radius:6px; cursor:pointer; background:none;">
               <input type="text" id="pm-theme-color-text" class="form-control mono" value="#E2136E" style="flex:1;">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">স্ট্যাটাস</label>
+            <label class="form-label">Status</label>
             <select id="pm-is-active" class="form-control">
-              <option value="1">সক্রিয়</option>
-              <option value="0">বন্ধ</option>
+              <option value="1">Active</option>
+              <option value="0">Disabled</option>
             </select>
           </div>
         </div>
 
         <div class="form-group" style="margin-top:2px;">
-          <label class="form-label">পেমেন্ট নির্দেশিকা (প্রতি লাইনে ১টি ধাপ)</label>
-          <textarea id="pm-instructions" class="form-control" rows="4" style="font-family:inherit; line-height:1.5;" placeholder="১. অ্যাপ খুলুন&#10;২. মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}&#10;৩. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন&#10;৪. পিন দিয়ে কনফার্ম করুন"></textarea>
+          <label class="form-label">Payment Instructions (1 step per line)</label>
+          <textarea id="pm-instructions" class="form-control" rows="4" style="font-family:inherit; line-height:1.5;" placeholder="1. Open App&#10;2. Enter Merchant Number: {ACCOUNT_NUMBER}&#10;3. Enter Amount ৳ {AMOUNT} and Reference {REF}&#10;4. Enter PIN to complete"></textarea>
           <div style="display:flex; align-items:center; gap:6px; margin-top:5px; flex-wrap:wrap;">
-            <span style="font-size:11px; color:var(--text-muted);">ভ্যারিয়েবল:</span>
+            <span style="font-size:11px; color:var(--text-muted);">Variables:</span>
             <button type="button" class="btn btn-secondary-action" style="padding:1px 6px; font-size:11px;" onclick="window.payflowApp.insertInstructionVar('{ACCOUNT_NUMBER}')">{ACCOUNT_NUMBER}</button>
             <button type="button" class="btn btn-secondary-action" style="padding:1px 6px; font-size:11px;" onclick="window.payflowApp.insertInstructionVar('{AMOUNT}')">{AMOUNT}</button>
             <button type="button" class="btn btn-secondary-action" style="padding:1px 6px; font-size:11px;" onclick="window.payflowApp.insertInstructionVar('{REF}')">{REF}</button>
@@ -906,19 +906,19 @@
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group">
-            <label class="form-label">সেন্ডার নম্বর লেবেল</label>
+            <label class="form-label">Sender Number Label</label>
             <input type="text" id="pm-sender-label" class="form-control" placeholder="Your Number *">
           </div>
           <div class="form-group">
-            <label class="form-label">TrxID লেবেল</label>
+            <label class="form-label">TrxID Label</label>
             <input type="text" id="pm-trx-label" class="form-control" placeholder="TrxID *">
           </div>
         </div>
       </div>
       <div class="modal-footer" style="display:flex; justify-content:space-between;">
-        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">বাতিল</button>
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Cancel</button>
         <button class="btn btn-primary-action" onclick="window.payflowApp.savePaymentMethod()">
-          সংরক্ষণ
+          Save Channel
         </button>
       </div>
     </div>

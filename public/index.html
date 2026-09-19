@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SyncPay BD | পার্সোনাল নাম্বারে অটো পেমেন্ট ভেরিফিকেশন</title>
+  <title>SyncPay BD | Automated MFS Payment Verification & Gateway</title>
   <meta name="description" content="Personal-number payment automation for Bangladesh. Instant bKash, Nagad, Rocket and Upay verification with zero per-transaction fee (syncpaybd.xyz).">
   <link rel="icon" type="image/png" href="/images/syncpay-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -564,34 +564,95 @@
       border-color: rgba(255, 255, 255, 0.3);
       color: #ffffff;
     }
-    .hero-chips-wrap {
+    /* Hero MFS Logo Ticker Slider */
+    .mfs-ticker-section {
+      position: relative;
+      z-index: 2;
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      width: 100%;
+    }
+    .mfs-ticker-label-wrap {
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
     }
-    .hero-chips-label {
+    .mfs-ticker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.9);
+      animation: pulseTickerDot 2s ease-in-out infinite;
+    }
+    @keyframes pulseTickerDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    .mfs-ticker-label {
       font-size: 12px;
-      color: #64748b;
       font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
-    .hero-chip {
+    .mfs-marquee-container {
+      overflow: hidden;
+      width: 100%;
+      position: relative;
+      padding: 6px 0 12px;
+      mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    }
+    .mfs-marquee-track {
+      display: flex;
+      gap: 18px;
+      width: max-content;
+      animation: mfsMarqueeScroll 26s linear infinite;
+      will-change: transform;
+    }
+    .mfs-marquee-track:hover {
+      animation-play-state: paused;
+    }
+    @keyframes mfsMarqueeScroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    .mfs-logo-card {
+      flex-shrink: 0;
+      height: 52px;
+      min-width: 150px;
+      padding: 0 20px;
+      background: #ffffff;
+      border-radius: 12px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+      cursor: pointer;
     }
-    .hero-chip.bkash { color: #f43f5e; border-color: rgba(244, 63, 94, 0.25); background: rgba(244, 63, 94, 0.08); }
-    .hero-chip.nagad { color: #f97316; border-color: rgba(249, 115, 22, 0.25); background: rgba(249, 115, 22, 0.08); }
-    .hero-chip.rocket { color: #a855f7; border-color: rgba(168, 85, 247, 0.25); background: rgba(168, 85, 247, 0.08); }
-    .hero-chip.upay { color: #10b981; border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.08); }
+    .mfs-logo-card:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 22px rgba(2, 132, 199, 0.35);
+    }
+    .mfs-logo-img {
+      max-height: 28px;
+      max-width: 110px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
 
     /* Hero Right Showcase Mockup */
     .hero-right {
@@ -1380,7 +1441,7 @@
       display: block;
       width: 100%;
       text-align: center;
-      padding: 10px;
+      padding: 11px 16px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-subtle);
       background: #f8fafc;
@@ -1389,6 +1450,8 @@
       font-weight: 700;
       text-decoration: none;
       transition: all 0.15s;
+      cursor: pointer;
+      font-family: inherit;
     }
     .plan-card.featured .btn-choose-plan {
       background: var(--primary);
@@ -1398,6 +1461,283 @@
     .btn-choose-plan:hover {
       background: var(--text-main);
       color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    /* === PLAN AUTH MODAL DIALOG === */
+    .plan-auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: rgba(6, 13, 31, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .plan-auth-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+    .plan-auth-card {
+      position: relative;
+      background: #ffffff;
+      border-radius: 22px;
+      width: 100%;
+      max-width: 490px;
+      box-shadow: 0 30px 65px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(226, 232, 240, 0.9);
+      padding: 32px 28px 28px;
+      transform: scale(0.94) translateY(12px);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+    .plan-auth-overlay.active .plan-auth-card {
+      transform: scale(1) translateY(0);
+    }
+    .plan-auth-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      color: #64748b;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .plan-auth-close:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .plan-banner-highlight {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border: 1px solid rgba(2, 132, 199, 0.22);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+    .plan-banner-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .plan-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #0284c7;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .plan-badge-pill .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+    .plan-banner-price {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .plan-banner-price span {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .plan-banner-desc {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.45;
+    }
+    .modal-auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .modal-tab-btn {
+      padding: 9px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .modal-tab-btn.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .modal-form-group {
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .modal-form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    .modal-input {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #ffffff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .modal-input:focus {
+      outline: none;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
+    }
+    .modal-error-box {
+      padding: 10px 14px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      color: #dc2626;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: none;
+      text-align: left;
+    }
+    .btn-modal-submit {
+      width: 100%;
+      height: 44px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+      transition: all 0.18s;
+    }
+    .btn-modal-submit:hover {
+      background: linear-gradient(135deg, #0369a1, #075985);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+    }
+    .modal-demo-bar {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      text-align: center;
+    }
+    .modal-demo-bar span {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .modal-demo-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .modal-demo-btn {
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .modal-demo-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+    .modal-logged-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .modal-logged-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7, #10b981);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+    .modal-logged-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .modal-logged-email {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+    .modal-logged-chips {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-bottom: 18px;
+    }
+    .modal-logged-chip {
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #e2e8f0;
+      color: #334155;
+      font-weight: 700;
+    }
+    .modal-logged-chip.new {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
     }
 
     /* Secondary Plans Expander */
@@ -1600,11 +1940,11 @@
       </a>
 
       <ul class="nav-links">
-        <li><a href="#how-it-works">কীভাবে কাজ করে</a></li>
-        <li><a href="#pricing">প্রাইসিং</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li class="nav-dropdown">
-          <a href="#developers">ডেভেলপার</a>
+          <a href="#developers">Developers</a>
           <div class="dropdown-menu">
             <a href="/docs/api" class="dropdown-item">
               <div class="dropdown-item-icon">
@@ -1612,7 +1952,7 @@
               </div>
               <div class="dropdown-item-text">
                 <strong>API Documentation</strong>
-                <span>Invoice, payment verification ও webhook সব কিছু।</span>
+                <span>Invoice, payment verification, and webhook guides.</span>
               </div>
             </a>
             <div class="dropdown-divider"></div>
@@ -1632,7 +1972,7 @@
               </div>
               <div class="dropdown-item-text">
                 <strong>Webhook API</strong>
-                <span>Real-time SMS payment events আপনার URL-এ পাঠান।</span>
+                <span>Send real-time SMS payment events to your URL.</span>
               </div>
             </a>
           </div>
@@ -1640,14 +1980,14 @@
       </ul>
 
       <div class="nav-cta-wrap">
-        <a href="/dashboard" class="btn-subtle" style="display:inline-flex; align-items:center; gap:6px;">
+        <button type="button" onclick="openPlanAuthModal('business', 'login')" class="btn-subtle" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-family:inherit; border:none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-          <span>লগইন</span>
-        </a>
-        <a href="/dashboard" class="btn-primary" style="display:inline-flex; align-items:center; gap:6px;">
+          <span>Login</span>
+        </button>
+        <button type="button" onclick="openPlanAuthModal('business', 'register')" class="btn-primary" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-family:inherit; border:none;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          শুরু করুন
-        </a>
+          Get Started
+        </button>
       </div>
     </div>
   </header>
@@ -1665,46 +2005,25 @@
             </div>
 
             <h1 class="hero-h1">
-              পার্সোনাল নাম্বারে অটো পেমেন্ট ভেরিফিকেশন<br>
+              Automate MFS Payments on Personal Numbers<br>
               <span class="gradient-text">bKash • Nagad • Rocket • Upay</span>
             </h1>
 
             <p class="hero-sub">
-              কোনো অফিশিয়াল মার্চেন্ট অ্যাকাউন্ট বা ট্রেড লাইসেন্স ছাড়াই বিকাশ ও নগদে আসা পেমেন্ট সেকেন্ডের মধ্যে ভেরিফাই করুন।
-              গ্রাহকের TrxID ও অ্যামাউন্ট মিলিয়ে অটোমেটিক ইনস্ট্যান্ট ডেলিভারি—প্রতি লেনদেনে ০% ফি।
+              Verify incoming bKash, Nagad, and Rocket payments in seconds without requiring official merchant accounts or trade licenses. Automatic instant delivery with TrxID and amount verification—0% per-transaction fee.
             </p>
 
             <div class="hero-actions">
               <a href="#hub" class="btn-hero-main">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                <span>লাইভ স্যান্ডবক্স টেস্ট করুন</span>
+                <span>Test Live Sandbox</span>
               </a>
               <a href="#pricing" class="btn-hero-alt">
-                <span>প্ল্যান ও সাবস্ক্রিপশন দেখুন</span>
+                <span>View Pricing Plans</span>
                 <span>→</span>
               </a>
             </div>
 
-            <!-- Supported Wallets -->
-            <div class="hero-chips-wrap">
-              <span class="hero-chips-label">সাপোর্টেড ওয়ালেট:</span>
-              <span class="hero-chip bkash">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-                bKash
-              </span>
-              <span class="hero-chip nagad">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-                Nagad
-              </span>
-              <span class="hero-chip rocket">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-                Rocket
-              </span>
-              <span class="hero-chip upay">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-                Upay
-              </span>
-            </div>
           </div>
 
           <!-- Right Showcase Mockup with Floating Status Badges -->
@@ -1734,6 +2053,39 @@
           </div>
         </div>
       </div>
+
+      <!-- Supported MFS Infinite Logo Marquee Slider -->
+      <div class="mfs-ticker-section">
+        <div class="mfs-marquee-container">
+          <div class="mfs-marquee-track">
+            <!-- Set A -->
+            <div class="mfs-logo-card" title="bKash"><img src="/images/bkash.svg" alt="bKash" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Nagad"><img src="/images/nagad.svg" alt="Nagad" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Rocket (DBBL)"><img src="/images/rocket.svg" alt="Rocket" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Upay (UCB)"><img src="/images/upay.svg" alt="Upay" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="CellFin (IBBL)"><img src="/images/cellfin.svg" alt="CellFin" class="mfs-logo-img"></div>
+
+            <div class="mfs-logo-card" title="bKash"><img src="/images/bkash.svg" alt="bKash" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Nagad"><img src="/images/nagad.svg" alt="Nagad" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Rocket (DBBL)"><img src="/images/rocket.svg" alt="Rocket" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Upay (UCB)"><img src="/images/upay.svg" alt="Upay" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="CellFin (IBBL)"><img src="/images/cellfin.svg" alt="CellFin" class="mfs-logo-img"></div>
+
+            <!-- Set B (Identical for smooth infinite loop) -->
+            <div class="mfs-logo-card" title="bKash"><img src="/images/bkash.svg" alt="bKash" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Nagad"><img src="/images/nagad.svg" alt="Nagad" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Rocket (DBBL)"><img src="/images/rocket.svg" alt="Rocket" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Upay (UCB)"><img src="/images/upay.svg" alt="Upay" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="CellFin (IBBL)"><img src="/images/cellfin.svg" alt="CellFin" class="mfs-logo-img"></div>
+
+            <div class="mfs-logo-card" title="bKash"><img src="/images/bkash.svg" alt="bKash" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Nagad"><img src="/images/nagad.svg" alt="Nagad" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Rocket (DBBL)"><img src="/images/rocket.svg" alt="Rocket" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="Upay (UCB)"><img src="/images/upay.svg" alt="Upay" class="mfs-logo-img"></div>
+            <div class="mfs-logo-card" title="CellFin (IBBL)"><img src="/images/cellfin.svg" alt="CellFin" class="mfs-logo-img"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Compact Trust Metrics Strip -->
@@ -1741,19 +2093,19 @@
       <div class="metrics-bar">
         <div class="metric-col">
           <div class="metric-val">756+</div>
-          <div class="metric-lbl">অ্যাক্টিভ মার্চেন্ট</div>
+          <div class="metric-lbl">Active Merchants</div>
         </div>
         <div class="metric-col">
           <div class="metric-val">231,133+</div>
-          <div class="metric-lbl">পেমেন্ট ভেরিফাইড</div>
+          <div class="metric-lbl">Payments Verified</div>
         </div>
         <div class="metric-col">
           <div class="metric-val">৳ 97M+</div>
-          <div class="metric-lbl">ট্রানজ্যাকশন ভলিউম</div>
+          <div class="metric-lbl">Transaction Volume</div>
         </div>
         <div class="metric-col">
           <div class="metric-val" style="color: #10b981;">0%</div>
-          <div class="metric-lbl">প্রতি লেনদেনে শতাংশ ফি নেই</div>
+          <div class="metric-lbl">0% Per-Transaction Fee</div>
         </div>
       </div>
     </div>
@@ -1765,10 +2117,10 @@
         <div class="hub-nav">
           <div class="hub-tabs">
             <button class="hub-tab active" id="tab-btn-demo" onclick="switchHubTab('demo')">
-              SMS ও কাস্টমার চেকআউট ডেমো
+              SMS & Customer Checkout Demo
             </button>
             <button class="hub-tab" id="tab-btn-api" onclick="switchHubTab('api')">
-              ডেভেলপার স্যান্ডবক্স API v1.0
+              Developer Sandbox API v1.0
             </button>
           </div>
           <div class="hub-status">
@@ -1803,25 +2155,25 @@
               <div class="feed-box">
                 <div class="feed-head">
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <span>ইনকামিং SMS টেলিফোনি স্ট্রিম</span>
-                    <span style="font-size: 11px; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 999px; font-weight: 600;">ক্লিক করে টেস্ট করুন</span>
+                    <span>Incoming SIM Telephony Stream</span>
+                    <span style="font-size: 11px; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 999px; font-weight: 600;">Click to test</span>
                   </div>
-                  <button class="btn-refresh" onclick="fetchFeed()">↻ রিফ্রেশ</button>
+                  <button class="btn-refresh" onclick="fetchFeed()">↻ Refresh</button>
                 </div>
                 <div class="feed-table-scroll">
                   <table>
                     <thead>
                       <tr>
-                        <th>মেথড</th>
+                        <th>Method</th>
                         <th>TrxID</th>
-                        <th>অ্যামাউন্ট</th>
-                        <th>স্ট্যাটাস</th>
+                        <th>Amount</th>
+                        <th>Status</th>
                       </tr>
                     </thead>
                     <tbody id="tx-tbody">
                       <tr>
                         <td colspan="4" style="text-align: center; color: var(--text-light); padding: 24px;">
-                          SMS ইভেন্টের জন্য অপেক্ষা করা হচ্ছে...
+                          Waiting for SMS payment events...
                         </td>
                       </tr>
                     </tbody>
@@ -1831,7 +2183,7 @@
 
               <!-- Quick SMS Simulator Strip -->
               <div class="sim-strip">
-                <span class="sim-strip-title">1-Click টেস্ট SMS পাঠান:</span>
+                <span class="sim-strip-title">1-Click Test SMS:</span>
                 <div class="sim-btns">
                   <button class="btn-sim-send" style="color: #db2777;" onclick="triggerSimSms('bKash', 1500)">
                     + bKash ৳1,500
@@ -1849,12 +2201,12 @@
             <!-- Right: Interactive Customer Checkout Box -->
             <div class="checkout-wrap">
               <div class="checkout-header">
-                <strong style="font-size: 15px; color: var(--text-main);">কাস্টমার চেকআউট ডেমো</strong>
-                <span class="badge-pill">অর্ডার #ORD-8821</span>
+                <strong style="font-size: 15px; color: var(--text-main);">Customer Checkout Demo</strong>
+                <span class="badge-pill">Order #ORD-8821</span>
               </div>
               
               <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
-                পরিশোধযোগ্য অ্যামাউন্ট: <strong style="color: #0f172a; font-size: 16px;" id="disp-amount">৳ 1,500.00</strong>
+                Payable Amount: <strong style="color: #0f172a; font-size: 16px;" id="disp-amount">৳ 1,500.00</strong>
               </div>
 
               <div class="mfs-toggle-group">
@@ -1867,14 +2219,14 @@
               </div>
 
               <div class="inst-box" id="instruction-box">
-                ১. আপনার <strong>bKash App</strong>-এ গিয়ে <strong>Send Money</strong> করুন।<br>
-                ২. <strong>৳1,500.00</strong> পাঠান এই নাম্বারে: <span class="copy-chip mono">01712345678</span><br>
-                ৩. প্রাপ্ত SMS থেকে <strong>TrxID</strong> নিচে ইনপুট দিন।
+                1. Open your <strong>bKash App</strong> and select <strong>Send Money</strong>.<br>
+                2. Send <strong>৳1,500.00</strong> to: <span class="copy-chip mono">01712345678</span><br>
+                3. Enter the received <strong>TrxID</strong> below.
               </div>
 
               <div class="input-row">
                 <label class="input-lbl">Transaction ID (TrxID)</label>
-                <input type="text" id="input-trx" class="input-ctrl mono" placeholder="উদাঃ BL78A4982J">
+                <input type="text" id="input-trx" class="input-ctrl mono" placeholder="e.g., BL78A4982J">
               </div>
 
               <div class="input-row">
@@ -1882,13 +2234,13 @@
                 <input type="number" id="input-amount" class="input-ctrl mono" value="1500" readonly>
               </div>
 
-              <button class="btn-checkout" onclick="submitVerification()">ভেরিফাই ও অর্ডার সম্পন্ন করুন</button>
+              <button class="btn-checkout" onclick="submitVerification()">Verify & Complete Order</button>
 
               <div class="msg-banner msg-success" id="alert-success">
-                <strong>পেমেন্ট সফলভাবে ভেরিফাইড!</strong> অর্ডার অনুমোদিত হয়েছে।
+                <strong>Payment Verified Successfully!</strong> Order has been approved.
               </div>
               <div class="msg-banner msg-error" id="alert-error">
-                <strong id="error-title">ভেরিফিকেশন ব্যর্থ</strong>
+                <strong id="error-title">Verification Failed</strong>
                 <div id="error-msg"></div>
               </div>
             </div>
@@ -1925,7 +2277,7 @@
               <div class="code-view" id="pf-create-response">// Response JSON will appear here</div>
               
               <div id="pf-paylink-wrap" style="display:none; margin-top:10px; font-size:12px;">
-                পেমেন্ট লিঙ্ক: <a id="pf-paylink-anchor" href="#" class="mono" style="color:#0284c7;"></a>
+                Payment Link: <a id="pf-paylink-anchor" href="#" class="mono" style="color:#0284c7;"></a>
               </div>
             </div>
 
@@ -1938,7 +2290,7 @@
 
               <div class="input-row">
                 <label class="input-lbl">Invoice ID</label>
-                <input type="text" id="pf-verify-id" class="input-ctrl mono" placeholder="উদাঃ PF98X2K9L">
+                <input type="text" id="pf-verify-id" class="input-ctrl mono" placeholder="e.g., PF98X2K9L">
               </div>
 
               <button class="btn-checkout" style="background:#10b981; padding: 9px;" onclick="testSyncPayVerifyInvoice()">
@@ -1958,10 +2310,10 @@
         <div>
           <span class="sec-tag">Enterprise Security</span>
           <h2 class="sec-title" style="text-align: left; margin-top: 6px;">
-            অ্যান্ড্রয়েড টেলিফোনি ফরওয়ার্ড ও এন্ড-টু-এন্ড এনক্রিপশন
+            Android Telephony Forwarder & End-to-End Encryption
           </h2>
           <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">
-            গ্রাহক যখনই আপনার bKash বা Nagad পার্সোনাল নাম্বারে টাকা পাঠায়, আমাদের অ্যান্ড্রয়েড ব্যাকগ্রাউন্ড ডেমন তাৎক্ষণিক SMS ক্যাপচার করে ব্যাংকিং-গ্রেড এনক্রিপশনে ক্লাউড ড্যাশবোর্ডে ফরোয়ার্ড করে।
+            Whenever a customer transfers money to your bKash or Nagad personal number, our Android telephony daemon captures the incoming SMS in real-time and securely forwards it to your cloud dashboard.
           </p>
 
           <div class="feature-list-item">
@@ -1969,8 +2321,8 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
             <div>
-              <strong style="font-size: 14px; color: var(--text-main);">ডাবল-স্পেন্ড ও ফেক TrxID প্রটেকশন</strong>
-              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">একই TrxID একাধিকবার বা অন্য অর্ডারে ব্যবহার করা অসম্ভব।</p>
+              <strong style="font-size: 14px; color: var(--text-main);">Double-Spend & Fake TrxID Protection</strong>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Strictly locks each TrxID to prevent duplicate usage or replay attempts across orders.</p>
             </div>
           </div>
 
@@ -1979,8 +2331,8 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div>
-              <strong style="font-size: 14px; color: var(--text-main);">১০ মিনিটের সেশন উইন্ডো ও অ্যামাউন্ট ম্যাচ</strong>
-              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">অর্ডারের সঠিক অ্যামাউন্ট ম্যাচ না হলে পেমেন্ট এপ্রুভ হয় না।</p>
+              <strong style="font-size: 14px; color: var(--text-main);">10-Minute Session Window & Strict Amount Match</strong>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Orders are rejected if the sent amount does not strictly match the expected order total.</p>
             </div>
           </div>
 
@@ -1989,8 +2341,8 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div>
-              <strong style="font-size: 14px; color: var(--text-main);">মাল্টি-ডিভাইস ও টিম পারমিশন</strong>
-              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">পাসওয়ার্ড শেয়ার না করেই একাধিক ফোন ও সিম একসাথে ট্র্যাক করুন।</p>
+              <strong style="font-size: 14px; color: var(--text-main);">Multi-Device & SIM Forwarder Clustering</strong>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Track multiple phones and SIMs simultaneously with automated failover and clustering.</p>
             </div>
           </div>
         </div>
@@ -2005,35 +2357,35 @@
     <section id="how-it-works" class="container">
       <div class="sec-head">
         <span class="sec-tag" data-i18n="how_tag">Workflow</span>
-        <h2 class="sec-title" data-i18n="how_h2">৫ ধাপে সহজ অটোমেশন প্রক্রিয়া</h2>
-        <p class="sec-sub" data-i18n="how_sub">ম্যানুয়াল স্ক্রিনশট দেখা বা অ্যাপ খুলে SMS খোঁজার ঝামেলা চিরতরে বন্ধ করুন।</p>
+        <h2 class="sec-title" data-i18n="how_h2">5-Step Seamless Automation Process</h2>
+        <p class="sec-sub" data-i18n="how_sub">Eliminate manual screenshot checks and tedious SMS searching forever।</p>
       </div>
 
       <div class="steps-grid">
         <div class="step-item">
           <div class="step-badge">1</div>
-          <h4 class="step-h4" data-i18n="step1_title">কাস্টমার চেকআউট</h4>
-          <p class="step-p" data-i18n="step1_text">ওয়েবসাইট, অ্যাপ বা পেমেন্ট লিংক থেকে অর্ডারের অ্যামাউন্ট নিয়ে পেমেন্ট পেজে আসে।</p>
+          <h4 class="step-h4" data-i18n="step1_title">Customer Checkout</h4>
+          <p class="step-p" data-i18n="step1_text">Customer proceeds to checkout with order total from website, app, or payment link.</p>
         </div>
         <div class="step-item">
           <div class="step-badge">2</div>
-          <h4 class="step-h4" data-i18n="step2_title">সেশন তৈরি</h4>
-          <p class="step-p" data-i18n="step2_text">bKash বা Nagad বেছে নেওয়ার সাথে সাথে নির্দিষ্ট ১০ মিনিটের টাইম-উইন্ডো সেশন লক হয়।</p>
+          <h4 class="step-h4" data-i18n="step2_title">Session Creation</h4>
+          <p class="step-p" data-i18n="step2_text">Selecting bKash or Nagad locks a secure 10-minute session window for the transaction.</p>
         </div>
         <div class="step-item">
           <div class="step-badge">3</div>
-          <h4 class="step-h4" data-i18n="step3_title">পেমেন্ট সেন্ড</h4>
-          <p class="step-p" data-i18n="step3_text">কাস্টমার নির্দিষ্ট নাম্বারে টাকা পাঠিয়ে প্রাপ্ত TrxID ইনপুট বক্সে সাবমিট করে।</p>
+          <h4 class="step-h4" data-i18n="step3_title">Payment Sent</h4>
+          <p class="step-p" data-i18n="step3_text">Customer sends money to your personal number and submits the received TrxID.</p>
         </div>
         <div class="step-item">
           <div class="step-badge">4</div>
-          <h4 class="step-h4" data-i18n="step4_title">অটো ভেরিফাই</h4>
-          <p class="step-p" data-i18n="step4_text">অ্যামাউন্ট, TrxID ও সেশন ম্যাচ হলে সিস্টেম ১ সেকেন্ডের মধ্যে অর্ডার ভেরিফাই করে।</p>
+          <h4 class="step-h4" data-i18n="step4_title">Instant Verification</h4>
+          <p class="step-p" data-i18n="step4_text">System validates the TrxID and amount against SIM forwarder SMS in under 1 second.</p>
         </div>
         <div class="step-item">
           <div class="step-badge">5</div>
-          <h4 class="step-h4" data-i18n="step5_title">ইনস্ট্যান্ট ডেলিভারি</h4>
-          <p class="step-p" data-i18n="step5_text">অর্ডার অটো পেইড মার্ক হয় এবং ডিজিটাল প্রোডাক্ট বা সার্ভিস সাথে সাথে ডেলিভার হয়।</p>
+          <h4 class="step-h4" data-i18n="step5_title">Instant Fulfillment</h4>
+          <p class="step-p" data-i18n="step5_text">Order automatically marks as paid, triggers webhook, and delivers digital service.</p>
         </div>
       </div>
     </section>
@@ -2042,15 +2394,15 @@
     <section id="comparison" class="container">
       <div class="sec-head">
         <span class="sec-tag" data-i18n="comp_tag">Comparison</span>
-        <h2 class="sec-title" data-i18n="comp_h2">SyncPay BD বনাম ট্র্যাডিশনাল পেমেন্ট গেটওয়ে</h2>
-        <p class="sec-sub" data-i18n="comp_sub">কাস্টোডিয়াল গেটওয়ের জটিলতা ছাড়া সম্পূর্ণ নিজস্ব নিয়ন্ত্রণে অটোমেশন চালান।</p>
+        <h2 class="sec-title" data-i18n="comp_h2">SyncPay BD vs Traditional Payment Gateways</h2>
+        <p class="sec-sub" data-i18n="comp_sub">Run fast payments under your full control without custodial gatekeeper complications.</p>
       </div>
 
       <div class="comp-wrap">
         <table class="comp-tbl">
           <thead>
             <tr>
-              <th data-i18n="comp_th_feature">বৈশিষ্ট্য</th>
+              <th data-i18n="comp_th_feature">Features</th>
               <th class="comp-col-syncpay" data-i18n="comp_th_syncpay">⚡ SyncPay BD</th>
               <th data-i18n="comp_th_trad">🏦 Traditional Gateway</th>
             </tr>
@@ -2058,28 +2410,28 @@
           <tbody>
             <tr>
               <td><strong data-i18n="comp_row1_title">Transaction Fees</strong></td>
-              <td class="comp-col-syncpay" data-i18n="comp_row1_pf">ফ্ল্যাট সাবস্ক্রিপশন (প্রতি অর্ডারে ০% ফি)</td>
-              <td data-i18n="comp_row1_tr">প্রতি অর্ডারে ১.৫% – ৩.৫% ফি কাটা হয়</td>
+              <td class="comp-col-syncpay" data-i18n="comp_row1_pf">Flat Subscription (0% Per-Transaction Fee)</td>
+              <td data-i18n="comp_row1_tr">1.5% – 3.5% deducted from every order</td>
             </tr>
             <tr>
-              <td><strong data-i18n="comp_row2_title">অ্যাকাউন্ট রিকোয়ারমেন্ট</strong></td>
-              <td class="comp-col-syncpay" data-i18n="comp_row2_pf">Personal, Agent বা Merchant নাম্বার সাপোর্টেড</td>
-              <td data-i18n="comp_row2_tr">বাধ্যতামূলক ট্রেড লাইসেন্স ও মার্চেন্ট অনুমোদন</td>
+              <td><strong data-i18n="comp_row2_title">Account Requirements</strong></td>
+              <td class="comp-col-syncpay" data-i18n="comp_row2_pf">Personal, Agent, or Merchant Numbers Supported</td>
+              <td data-i18n="comp_row2_tr">Mandatory Trade License & Official Merchant Approval</td>
             </tr>
             <tr>
-              <td><strong data-i18n="comp_row3_title">টাকা পাওয়ার সময়</strong></td>
-              <td class="comp-col-syncpay" data-i18n="comp_row3_pf">তাৎক্ষণিক সরাসরি আপনার ব্যক্তিগত ওয়ালেটে</td>
-              <td data-i18n="comp_row3_tr">৩ থেকে ৭ দিন ব্যাংকে টাকা আটকে থাকে</td>
+              <td><strong data-i18n="comp_row3_title">Payout Settlement Time</strong></td>
+              <td class="comp-col-syncpay" data-i18n="comp_row3_pf">Instant — Direct to your personal mobile wallet</td>
+              <td data-i18n="comp_row3_tr">Funds locked in gateway bank for 3 to 7 business days</td>
             </tr>
             <tr>
-              <td><strong data-i18n="comp_row4_title">লেনদেনের লিমিট</strong></td>
-              <td class="comp-col-syncpay" data-i18n="comp_row4_pf">আনলিমিটেড ট্রানজ্যাকশন ভেরিফিকেশন</td>
-              <td data-i18n="comp_row4_tr">ভলিউম লিমিট ও মাসিক এক্সট্রা চার্জ</td>
+              <td><strong data-i18n="comp_row4_title">Transaction Limits</strong></td>
+              <td class="comp-col-syncpay" data-i18n="comp_row4_pf">Unlimited Transaction Verifications</td>
+              <td data-i18n="comp_row4_tr">Volume caps and recurring monthly maintenance surcharges</td>
             </tr>
             <tr>
-              <td><strong data-i18n="comp_row5_title">ডাবল স্পেন্ড প্রটেকশন</strong></td>
-              <td class="comp-col-syncpay" data-i18n="comp_row5_pf">একই TrxID পুনর্ব্যবহার সম্পূর্ণ অটোমেটিক ব্লক</td>
-              <td data-i18n="comp_row5_tr">ম্যানুয়াল SMS চেকিংয়ে ভুয়া স্ক্রিনশটের ঝুঁকি</td>
+              <td><strong data-i18n="comp_row5_title">Double-Spend Protection</strong></td>
+              <td class="comp-col-syncpay" data-i18n="comp_row5_pf">Strict Automatic Duplicate TrxID Lockout</td>
+              <td data-i18n="comp_row5_tr">Manual SMS inspection vulnerable to fake receipt generators</td>
             </tr>
           </tbody>
         </table>
@@ -2090,14 +2442,14 @@
     <section id="pricing" class="container">
       <div class="sec-head">
         <span class="sec-tag">Pricing</span>
-        <h2 class="sec-title">সহজ ও সাশ্রয়ী সাবস্ক্রিপশন প্ল্যান</h2>
-        <p class="sec-sub">কোনো পার-ট্রানজ্যাকশন কমিশন নেই। আনলিমিটেড ভেরিফিকেশন ও ৩ দিনের মানি-ব্যাক।</p>
+        <h2 class="sec-title">Simple & Transparent Pricing Plans</h2>
+        <p class="sec-sub">Zero transaction fees. Unlimited verifications and 3-day money-back guarantee.</p>
       </div>
 
       <div class="pricing-toggle">
-        <button class="btn-toggle active" id="btn-monthly" onclick="setBillingCycle('monthly')">মাসিক বিলিং</button>
-        <button class="btn-toggle" id="btn-yearly" onclick="setBillingCycle('yearly')">বাৎসরিক বিলিং</button>
-        <span class="badge-save">বাৎসরিকে ৫০% ছাড়</span>
+        <button class="btn-toggle active" id="btn-monthly" onclick="setBillingCycle('monthly')">Monthly Billing</button>
+        <button class="btn-toggle" id="btn-yearly" onclick="setBillingCycle('yearly')">Yearly Billing</button>
+        <span class="badge-save">Save 50% on Yearly</span>
       </div>
 
       <!-- Core 4 Plans Grid -->
@@ -2108,7 +2460,7 @@
       <!-- Secondary High-Volume Plans Toggle -->
       <div class="plans-expander">
         <button class="btn-expand-plans" id="btn-toggle-extra" onclick="toggleExtraPlans()">
-          + আরও বড় প্ল্যান দেখুন (Elite, Growth, Scale, Mega)
+          + View High-Volume Plans (Elite, Growth, Scale, Mega)
         </button>
         <div class="secondary-plans-wrap" id="extra-plans-container">
           <!-- Injected via JS -->
@@ -2120,8 +2472,8 @@
     <section id="integrations" class="container">
       <div class="sec-head">
         <span class="sec-tag">Plugins & SDKs</span>
-        <h2 class="sec-title">জনপ্রিয় প্ল্যাটফর্মে সহজে সংযুক্ত করুন</h2>
-        <p class="sec-sub">রেডিমেড ওয়ার্ডপ্রেস প্লাগইন ও ফ্রেমওয়ার্ক লাইব্রেরি দিয়ে ৫ মিনিটে শুরু করুন।</p>
+        <h2 class="sec-title">Seamless Integration Across Platforms</h2>
+        <p class="sec-sub">Get started in under 5 minutes with our ready-made WordPress plugins and developer SDKs.</p>
       </div>
 
       <div class="integrations-grid">
@@ -2130,7 +2482,7 @@
             <img src="/images/woocommerce.svg" alt="WooCommerce" class="int-logo-img">
           </div>
           <div class="int-title">WooCommerce Plugin</div>
-          <p class="int-desc">WordPress ই-কমার্সে ১ ক্লিকে পার্সোনাল bKash/Nagad গেটওয়ে চালু করুন।</p>
+          <p class="int-desc">1-Click bKash/Nagad gateway setup for WordPress and WooCommerce stores.</p>
         </div>
 
         <div class="int-card">
@@ -2138,7 +2490,7 @@
             <img src="/images/laravel.svg" alt="Laravel" class="int-logo-img">
           </div>
           <div class="int-title">Laravel SDK</div>
-          <p class="int-desc">লারাভেল অ্যাপের জন্য কম্পোজার প্যাকেজ ও সাইনড ওয়েবহুক কন্ট্রোলার।</p>
+          <p class="int-desc">Composer package and signed webhook controllers for Laravel & PHP apps.</p>
         </div>
 
         <div class="int-card">
@@ -2146,7 +2498,7 @@
             <img src="/images/wordpress.svg" alt="WordPress" class="int-logo-img">
           </div>
           <div class="int-title">WordPress Gateway</div>
-          <p class="int-desc">কাস্টম ফর্ম ও কোর্স রেজিস্ট্রেশন প্লাগইনের সাথে সরাসরি ইন্টিগ্রেশন।</p>
+          <p class="int-desc">Direct integration for custom forms, LMS course registrations, and web apps.</p>
         </div>
 
         <div class="int-card">
@@ -2154,7 +2506,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
           </div>
           <div class="int-title">SMM Panel Module v2</div>
-          <p class="int-desc">SMM প্যানেলে ইনস্ট্যান্ট অটো ফান্ড অ্যাড—ভুয়া TrxID সম্পূর্ণ ব্লক।</p>
+          <p class="int-desc">Instant auto-fund credit for SMM panels with complete fake TrxID blocking.</p>
         </div>
       </div>
     </section>
@@ -2163,47 +2515,47 @@
     <section id="faq" class="container">
       <div class="sec-head">
         <span class="sec-tag">FAQ</span>
-        <h2 class="sec-title">প্রায় জিজ্ঞাসিত প্রশ্নাবলী</h2>
+        <h2 class="sec-title">Frequently Asked Questions</h2>
       </div>
 
       <div class="faq-container">
         <div class="faq-card active">
           <div class="faq-q" onclick="toggleFaq(this)">
-            <span>পার্সোনাল নাম্বার দিয়ে কি পেমেন্ট অটোমেশন চালানো যায়?</span>
+            <span>Can payment automation run on personal numbers?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            হ্যাঁ, ১০০% সম্ভব। অফিশিয়াল মার্চেন্ট অ্যাকাউন্ট বা ট্রেড লাইসেন্স ছাড়াই সাধারণ পার্সোনাল নাম্বারে আসা SMS টেলিফোনি ফরওয়ার্ডারের মাধ্যমে পড়ে তাৎক্ষণিক ভেরিফাই করা যায়।
+            Yes, 100% possible. SyncPay BD reads incoming SMS on standard personal numbers via Android forwarder to instantly verify payments without trade licenses.
           </div>
         </div>
 
         <div class="faq-card">
           <div class="faq-q" onclick="toggleFaq(this)">
-            <span>SyncPay কি কাস্টোডিয়াল পেমেন্ট গেটওয়ে?</span>
+            <span>Is SyncPay BD a custodial payment gateway?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            না। কাস্টোডিয়াল গেটওয়ে টাকা ব্যাংকে আটকে রাখে এবং দিন শেষে ফি কাটে। SyncPay কোনো টাকা ধরে রাখে না—গ্রাহক সরাসরি আপনার ওয়ালেটে টাকা পাঠায়, আর সিস্টেম শুধু স্বয়ংক্রিয়ভাবে অর্ডার কনফার্ম করে।
+            No. Custodial gateways hold your funds for days and deduct commissions. SyncPay BD never holds your funds—customers pay directly into your wallet, and our system verifies orders.
           </div>
         </div>
 
         <div class="faq-card">
           <div class="faq-q" onclick="toggleFaq(this)">
-            <span>WooCommerce বা SMM প্যানেলে কি প্লাগইন লাগানো যায়?</span>
+            <span>Is there plugin support for WooCommerce or SMM panels?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            হ্যাঁ। আমাদের তৈরি রেডিমেড WooCommerce প্লাগইন, SMM প্যানেল মডিউল (v2), Laravel SDK এবং REST API দিয়ে কয়েক মিনিটে কানেক্ট করা যায়।
+            Yes. Our ready-made WooCommerce plugins, SMM panel modules, Laravel SDK, and REST APIs allow you to connect in under 5 minutes.
           </div>
         </div>
 
         <div class="faq-card">
           <div class="faq-q" onclick="toggleFaq(this)">
-            <span>টাকা রিফান্ড বা মানি-ব্যাক গ্যারান্টি আছে কি?</span>
+            <span>Is there a refund or money-back guarantee?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            মাসিক প্ল্যানের ক্ষেত্রে ৩ দিন এবং বাৎসরিক প্ল্যানের ক্ষেত্রে ১৫ দিনের ফুল মানি-ব্যাক গ্যারান্টি রয়েছে।
+            We provide a 3-day full money-back guarantee on monthly plans and 15 days on yearly plans with zero hassle.
           </div>
         </div>
       </div>
@@ -2211,11 +2563,11 @@
 
     <!-- Developer Section -->
     <section id="developers" class="dev-section container">
-      <div class="dev-section-label">ডেভেলপার ইন্টিগ্রেশন</div>
-      <h2>যেকোনো Platform-এ সংযুক্ত করুন</h2>
+      <div class="dev-section-label">Developer Integration</div>
+      <h2>Integrate on Any Platform</h2>
       <p class="dev-section-sub">
-        মাত্র একটি API দিয়ে আপনার website, app বা e-commerce store-এ payment verification যোগ করুন।
-        WordPress, Shopify থেকে custom backend — সবখানে কাজ করে।
+        Add instant payment verification to your website, app, or e-commerce store with a single REST API.
+        Works across WordPress, Shopify, custom backends, and frameworks.
       </p>
 
       <!-- 3 API Cards -->
@@ -2225,24 +2577,24 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
           <h3>API Documentation</h3>
-          <p>Invoice তৈরি, payment verify ও webhook handle করার সম্পূর্ণ গাইড।</p>
-          <span class="dev-link">দেখুন →</span>
+          <p>Complete guide to invoice creation, payment verification, and webhook handling.</p>
+          <span class="dev-link">Explore Docs →</span>
         </a>
         <a href="/docs/trx-verification" class="dev-api-card">
           <div class="dev-api-card-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
           </div>
           <h3>Transaction Verification API</h3>
-          <p>Backend থেকে সরাসরি advanced payment verification করুন।</p>
-          <span class="dev-link">দেখুন →</span>
+          <p>Perform direct server-to-server transaction verification from your backend.</p>
+          <span class="dev-link">Explore Docs →</span>
         </a>
         <a href="/docs/webhook" class="dev-api-card">
           <div class="dev-api-card-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 16.98h4v5h-4z"/><path d="M2 16.98h4v5H2z"/><path d="M10 2h4v5h-4z"/><path d="M12 7v5"/><path d="M5 12v5"/><path d="M19 12v5"/><path d="M5 12h14"/></svg>
           </div>
           <h3>Webhook API</h3>
-          <p>Real-time payment SMS events আপনার নিজের URL-এ পাঠান।</p>
-          <span class="dev-link">দেখুন →</span>
+          <p>Receive real-time payment SMS events delivered to your webhook URL.</p>
+          <span class="dev-link">Explore Docs →</span>
         </a>
       </div>
 
@@ -2256,7 +2608,7 @@
         </div>
 
         <div id="tab-php" class="code-body active">
-          <pre><span class="c-cmt">// Payment Verify করুন — PHP</span>
+          <pre><span class="c-cmt">// Verify Payment — PHP</span>
 <span class="c-var">$response</span> = <span class="c-fn">file_get_contents</span>(<span class="c-str">'https://syncpaybd.xyz/api/v1/payment/verify'</span>,
   <span class="c-kw">false</span>,
   <span class="c-fn">stream_context_create</span>([
@@ -2273,12 +2625,12 @@
 );
 <span class="c-var">$data</span> = <span class="c-fn">json_decode</span>(<span class="c-var">$response</span>, <span class="c-kw">true</span>);
 <span class="c-kw">if</span> (<span class="c-var">$data</span>[<span class="c-str">'verified'</span>] === <span class="c-kw">true</span>) {
-  <span class="c-cmt">// Payment confirmed — order process করুন</span>
+  <span class="c-cmt">// Payment confirmed — process order fulfillment</span>
 }</pre>
         </div>
 
         <div id="tab-js" class="code-body">
-          <pre><span class="c-cmt">// Payment Verify করুন — JavaScript (fetch)</span>
+          <pre><span class="c-cmt">// Verify Payment — JavaScript (fetch)</span>
 <span class="c-kw">const</span> <span class="c-var">res</span> = <span class="c-kw">await</span> <span class="c-fn">fetch</span>(<span class="c-str">'https://syncpaybd.xyz/api/v1/payment/verify'</span>, {
   method: <span class="c-str">'POST'</span>,
   headers: {
@@ -2316,7 +2668,7 @@
         </div>
 
         <div id="tab-python" class="code-body">
-          <pre><span class="c-cmt"># Payment Verify করুন — Python (requests)</span>
+          <pre><span class="c-cmt"># Verify Payment — Python (requests)</span>
 <span class="c-kw">import</span> requests
 
 <span class="c-var">res</span> = requests.<span class="c-fn">post</span>(
@@ -2336,7 +2688,7 @@
 
       <!-- Platform pills -->
       <div class="dev-platforms">
-        <p>যেকোনো platform-এ কাজ করে:</p>
+        <p>Supported platforms & environments:</p>
         <div class="platform-pills">
           <div class="platform-pill">WordPress / WooCommerce</div>
           <div class="platform-pill">Shopify</div>
@@ -2361,37 +2713,37 @@
             <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height: 46px; width: auto; object-fit: contain; display: block;">
           </div>
           <p style="font-size: 13px; color: var(--text-light); max-width: 320px;">
-            বাংলাদেশি ক্ষুদ্র উদ্যোক্তা, ফ্রিল্যান্সার ও ই-কমার্স সাইটের জন্য পার্সোনাল নাম্বার পেমেন্ট অটোমেশন ইঞ্জিন।
+            Automated personal MFS payment verification engine for Bangladeshi entrepreneurs, freelancers, and e-commerce stores.
           </p>
         </div>
 
         <div>
-          <h4>কুইক লিংকস</h4>
+          <h4>Quick Links</h4>
           <ul class="footer-links">
-            <li><a href="#hub">লাইভ ডেমো</a></li>
-            <li><a href="#forwarder">সিকিউরিটি</a></li>
-            <li><a href="#pricing">প্রাইসিং</a></li>
-            <li><a href="#how-it-works">ওয়ার্কফ্লো</a></li>
-            <li><a href="#comparison">গেটওয়ে তুলনা</a></li>
+            <li><a href="#hub">Live Demo</a></li>
+            <li><a href="#forwarder">Security</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#how-it-works">Workflow</a></li>
+            <li><a href="#comparison">Gateway Comparison</a></li>
           </ul>
         </div>
 
         <div>
-          <h4>ডেভেলপার্স</h4>
+          <h4>Developers</h4>
           <ul class="footer-links">
             <li><a href="#hub">Sandbox API</a></li>
             <li><a href="#integrations">WooCommerce Plugin</a></li>
             <li><a href="#integrations">Laravel SDK</a></li>
-            <li><a href="#faq">সাপোর্ট FAQ</a></li>
+            <li><a href="#faq">Support FAQ</a></li>
           </ul>
         </div>
 
         <div>
-          <h4>যোগাযোগ</h4>
+          <h4>Contact</h4>
           <div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">
-            <strong>হটলাইন:</strong> +8809638445387<br>
-            <strong>ইমেইল:</strong> support@syncpaybd.xyz<br>
-            <strong>এনক্রিপশন:</strong> Bank-Grade HMAC SHA-256
+            <strong>Hotline:</strong> +8809638445387<br>
+            <strong>Email:</strong> support@syncpaybd.xyz<br>
+            <strong>Encryption:</strong> Bank-Grade HMAC SHA-256
           </div>
         </div>
       </div>
@@ -2440,7 +2792,7 @@
               <div class="plan-title">${p.name}</div>
               <div class="plan-amount-wrap">
                 <span class="plan-price">৳${price}</span>
-                <span class="plan-dur">${isYearly ? '/মাস (বাৎসরিক)' : '/মাস'}</span>
+                <span class="plan-dur">${isYearly ? '/mo (Yearly)' : '/mo'}</span>
               </div>
               <ul class="plan-bullets">
                 <li><span class="chk">✓</span> ${p.sites} Integration</li>
@@ -2451,7 +2803,7 @@
                 <li><span class="chk">✓</span> ${isYearly ? '15' : '3'} Days Money Back</li>
               </ul>
             </div>
-            <a href="#hub" class="btn-choose-plan">শুরু করুন →</a>
+            <button type="button" class="btn-choose-plan" onclick="openPlanAuthModal('${p.id}')">Get Started →</button>
           </div>
         `;
       }).join('');
@@ -2463,12 +2815,12 @@
             <div class="plan-title">${p.name}</div>
             <div class="plan-amount-wrap" style="margin: 8px 0;">
               <span class="plan-price" style="font-size:24px;">৳${price}</span>
-              <span class="plan-dur">${isYearly ? '/মাস' : '/মাস'}</span>
+              <span class="plan-dur">${isYearly ? '/mo' : '/mo'}</span>
             </div>
             <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
               ✓ ${p.sites} • 24/7 Dedicated Support
             </div>
-            <a href="#hub" class="btn-choose-plan" style="padding: 7px; font-size:12px;">বাছাই করুন</a>
+            <button type="button" class="btn-choose-plan" style="padding: 7px; font-size:12px;" onclick="openPlanAuthModal('${p.id}')">Select Plan</button>
           </div>
         `;
       }).join('');
@@ -2486,10 +2838,10 @@
       const btn = document.getElementById('btn-toggle-extra');
       if (wrap.style.display === 'grid') {
         wrap.style.display = 'none';
-        btn.innerText = '+ আরও বড় প্ল্যান দেখুন (Elite, Growth, Scale, Mega)';
+        btn.innerText = '+ View High-Volume Plans (Elite, Growth, Scale, Mega)';
       } else {
         wrap.style.display = 'grid';
-        btn.innerText = '- হাই-ভলিউম প্ল্যান লুকান';
+        btn.innerText = '- Hide High-Volume Plans';
       }
     }
 
@@ -2524,17 +2876,17 @@
         bBtn.className = 'btn-mfs active-bkash';
         nBtn.className = 'btn-mfs';
         box.innerHTML = `
-          ১. আপনার <strong>bKash App</strong>-এ গিয়ে <strong>Send Money</strong> করুন।<br>
-          ২. <strong>৳1,500.00</strong> পাঠান এই নাম্বারে: <span class="copy-chip mono">01712345678</span><br>
-          ৩. প্রাপ্ত SMS থেকে <strong>TrxID</strong> নিচে ইনপুট দিন।
+          1. Open your <strong>bKash App</strong> and select <strong>Send Money</strong>.<br>
+          2. Send <strong>৳1,500.00</strong> to: <span class="copy-chip mono">01712345678</span><br>
+          3. Enter the received <strong>TrxID</strong> below.
         `;
       } else {
         bBtn.className = 'btn-mfs';
         nBtn.className = 'btn-mfs active-nagad';
         box.innerHTML = `
-          ১. আপনার <strong>Nagad App</strong>-এ গিয়ে <strong>Send Money</strong> করুন।<br>
-          ২. <strong>৳1,500.00</strong> পাঠান এই নাম্বারে: <span class="copy-chip mono">01712345678</span><br>
-          ৩. প্রাপ্ত SMS থেকে <strong>TxnID</strong> নিচে ইনপুট দিন।
+          1. Open your <strong>Nagad App</strong> and select <strong>Send Money</strong>.<br>
+          2. Send <strong>৳1,500.00</strong> to: <span class="copy-chip mono">01712345678</span><br>
+          3. Enter the received <strong>TxnID</strong> below.
         `;
       }
     }
@@ -2588,7 +2940,7 @@
     function renderTable(txs) {
       const tbody = document.getElementById('tx-tbody');
       if (!txs || txs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light); padding: 20px;">কোনো লেনদেন পাওয়া যায়নি</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-light); padding: 20px;">No transactions found</td></tr>`;
         return;
       }
 
@@ -2602,7 +2954,7 @@
         const sText = tx.is_verified === 1 ? 'VERIFIED' : 'PENDING';
 
         return `
-          <tr onclick="selectDemoTxn('${tx.trx_id}', ${tx.amount}, '${tx.provider}')" title="ক্লিক করে ডানপাশের চেকআউটে টেস্ট করুন">
+          <tr onclick="selectDemoTxn('${tx.trx_id}', ${tx.amount}, '${tx.provider}')" title="Click to test in checkout panel">
             <td>
               <div class="table-logo-cell">
                 <img src="${logoSrc}" alt="${tx.provider}" class="mfs-mini-img">
@@ -2649,8 +3001,8 @@
 
       if (!trxId) {
         alertError.style.display = 'block';
-        document.getElementById('error-title').innerText = 'TrxID প্রয়োজন';
-        document.getElementById('error-msg').innerText = 'দয়া করে ট্রানজ্যাকশন আইডি লিখুন।';
+        document.getElementById('error-title').innerText = 'TrxID Required';
+        document.getElementById('error-msg').innerText = 'Please enter a valid Transaction ID.';
         return;
       }
 
@@ -2672,12 +3024,12 @@
           fetchFeed();
         } else {
           alertError.style.display = 'block';
-          document.getElementById('error-title').innerText = 'ভেরিফিকেশন ব্যর্থ';
-          document.getElementById('error-msg').innerText = data.message || 'ট্রানজ্যাকশনটি ভেরিফাই করা যায়নি।';
+          document.getElementById('error-title').innerText = 'Verification Failed';
+          document.getElementById('error-msg').innerText = data.message || 'Could not verify transaction.';
         }
       } catch (err) {
         alertError.style.display = 'block';
-        document.getElementById('error-title').innerText = 'নেটওয়ার্ক এরর';
+        document.getElementById('error-title').innerText = 'Network Error';
         document.getElementById('error-msg').innerText = err.message;
       }
     }
@@ -2731,7 +3083,7 @@
       const resEl = document.getElementById('pf-verify-response');
 
       if (!invoiceId) {
-        alert('ইনভয়েস আইডি প্রদান করুন।');
+        alert('Please provide an invoice ID.');
         return;
       }
 
@@ -2766,10 +3118,629 @@
       btn.classList.add('active');
     }
 
+    // ==========================================
+    // PLAN AUTH & ACTIVATION MODAL CONTROLLER
+    // ==========================================
+    let selectedPlanForAuth = 'business';
+
+    function getSelectedPlanDetails(planId) {
+      const allPlans = [...primaryPlans, ...extraPlans];
+      return allPlans.find(p => p.id === planId) || primaryPlans[2];
+    }
+
+    function openPlanAuthModal(planId = 'business', preferredTab = 'login') {
+      selectedPlanForAuth = planId;
+      const plan = getSelectedPlanDetails(planId);
+      const isYearly = currentBilling === 'yearly';
+      const price = isYearly ? plan.yearly : plan.monthly;
+      const billingLabel = isYearly ? '/mo (Yearly Billing)' : '/mo (Monthly Billing)';
+
+      // Populate plan banner
+      const badgeEl = document.getElementById('modal-plan-badge');
+      const priceEl = document.getElementById('modal-plan-price');
+      const durEl = document.getElementById('modal-plan-dur');
+      const titleEl = document.getElementById('modal-plan-title');
+      const descEl = document.getElementById('modal-plan-desc');
+
+      if (badgeEl) badgeEl.textContent = `Selected Plan: ${plan.name}`;
+      if (priceEl) priceEl.textContent = `৳${price}`;
+      if (durEl) durEl.textContent = billingLabel;
+      if (titleEl) titleEl.textContent = plan.name;
+      if (descEl) descEl.textContent = `${plan.sites || '1 Website'} Integration • ${plan.bonus || 'Standard Features'} • Unlimited Transactions • Full API + Support`;
+
+      // Check current login session in localStorage
+      let session = null;
+      try {
+        session = JSON.parse(localStorage.getItem('syncpay_session'));
+      } catch (e) {}
+
+      const alreadyLoggedBox = document.getElementById('modal-already-logged');
+      const authFormsBox = document.getElementById('modal-auth-forms');
+
+      if (session && session.email) {
+        // User is ALREADY logged in
+        alreadyLoggedBox.style.display = 'block';
+        authFormsBox.style.display = 'none';
+
+        document.getElementById('modal-user-name').textContent = session.name || 'Merchant User';
+        document.getElementById('modal-user-email').textContent = session.email;
+        const initials = (session.name || 'MU').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        document.getElementById('modal-user-avatar').textContent = initials;
+        document.getElementById('modal-current-plan').textContent = `Current: ${session.plan || 'starter'}`;
+        document.getElementById('modal-target-plan').textContent = `New: ${plan.name} (৳${price})`;
+      } else {
+        // User needs to Login or Register
+        alreadyLoggedBox.style.display = 'none';
+        authFormsBox.style.display = 'block';
+        switchModalAuthTab(preferredTab);
+      }
+
+      // Open Modal
+      const modal = document.getElementById('plan-auth-modal');
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('active'), 10);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePlanAuthModal() {
+      const modal = document.getElementById('plan-auth-modal');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 250);
+    }
+
+    function handleModalBackdropClick(e) {
+      if (e.target.id === 'plan-auth-modal') {
+        closePlanAuthModal();
+      }
+    }
+
+    function switchModalAuthTab(tab) {
+      const loginForm = document.getElementById('modal-login-form');
+      const regForm = document.getElementById('modal-reg-form');
+      const tabLogin = document.getElementById('modal-tab-btn-login');
+      const tabReg = document.getElementById('modal-tab-btn-reg');
+      const loginErr = document.getElementById('modal-login-error');
+      const regErr = document.getElementById('modal-reg-error');
+
+      if (loginErr) loginErr.style.display = 'none';
+      if (regErr) regErr.style.display = 'none';
+
+      if (tab === 'register') {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+        tabLogin.classList.remove('active');
+        tabReg.classList.add('active');
+      } else {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+        tabLogin.classList.add('active');
+        tabReg.classList.remove('active');
+      }
+    }
+
+    function fillModalDemo(email, password) {
+      document.getElementById('modal-login-email').value = email;
+      document.getElementById('modal-login-password').value = password;
+      switchModalAuthTab('login');
+    }
+
+    function confirmLoggedPlanUpgrade() {
+      try {
+        let session = JSON.parse(localStorage.getItem('syncpay_session'));
+        if (session) {
+          const plan = getSelectedPlanDetails(selectedPlanForAuth);
+          session.plan = selectedPlanForAuth;
+          session.billing = currentBilling;
+          session.planActivatedAt = new Date().toISOString();
+          localStorage.setItem('syncpay_session', JSON.stringify(session));
+
+          const accounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
+          const idx = accounts.findIndex(a => a.email === session.email);
+          if (idx !== -1) {
+            accounts[idx].plan = selectedPlanForAuth;
+            localStorage.setItem('syncpay_accounts', JSON.stringify(accounts));
+          }
+
+          localStorage.setItem('syncpay_toast', JSON.stringify({
+            message: `Congratulations! Your ${plan.name} plan has been activated. 🎉`,
+            type: 'success'
+          }));
+
+          window.location.href = '/dashboard';
+        }
+      } catch (e) {
+        window.location.href = '/dashboard';
+      }
+    }
+
+    function handleModalLogout() {
+      localStorage.removeItem('syncpay_session');
+      document.getElementById('modal-already-logged').style.display = 'none';
+      document.getElementById('modal-auth-forms').style.display = 'block';
+      switchModalAuthTab('login');
+    }
+
+    function handleModalLogin(e) {
+      e.preventDefault();
+      const emailInput = document.getElementById('modal-login-email').value.trim().toLowerCase();
+    // ==========================================
+    // PLAN AUTH & PAYMENT ACTIVATION CONTROLLER
+    // ==========================================
+    let selectedPlanForAuth = 'business';
+    let pendingMerchantSession = null;
+
+    function getSelectedPlanDetails(planId) {
+      const allPlans = [...primaryPlans, ...extraPlans];
+      return allPlans.find(p => p.id === planId) || primaryPlans[2];
+    }
+
+    function openPlanAuthModal(planId = 'business', preferredTab = 'login') {
+      selectedPlanForAuth = planId;
+      const plan = getSelectedPlanDetails(planId);
+      const isYearly = currentBilling === 'yearly';
+      const price = isYearly ? plan.yearly : plan.monthly;
+      const billingLabel = isYearly ? '/mo (Yearly Billing)' : '/mo (Monthly Billing)';
+
+      // Reset views
+      document.getElementById('modal-payment-step').style.display = 'none';
+      const alreadyLoggedBox = document.getElementById('modal-already-logged');
+      const authFormsBox = document.getElementById('modal-auth-forms');
+
+      // Populate plan banner
+      const badgeEl = document.getElementById('modal-plan-badge');
+      const priceEl = document.getElementById('modal-plan-price');
+      const durEl = document.getElementById('modal-plan-dur');
+      const titleEl = document.getElementById('modal-plan-title');
+      const descEl = document.getElementById('modal-plan-desc');
+
+      if (badgeEl) badgeEl.textContent = `Selected Plan: ${plan.name}`;
+      if (priceEl) priceEl.textContent = `৳${price}`;
+      if (durEl) durEl.textContent = billingLabel;
+      if (titleEl) titleEl.textContent = plan.name;
+      if (descEl) descEl.textContent = `${plan.sites || '1 Website'} Integration • ${plan.bonus || 'Standard Features'} • Unlimited Transactions • Full API + Support`;
+
+      // Check current login session in localStorage
+      let session = null;
+      try {
+        session = JSON.parse(localStorage.getItem('syncpay_session'));
+      } catch (e) {}
+
+      if (session && session.email) {
+        // User is ALREADY logged in -> Show upgrade with payment step
+        alreadyLoggedBox.style.display = 'block';
+        authFormsBox.style.display = 'none';
+
+        document.getElementById('modal-user-name').textContent = session.name || 'Merchant User';
+        document.getElementById('modal-user-email').textContent = session.email;
+        const initials = (session.name || 'MU').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        document.getElementById('modal-user-avatar').textContent = initials;
+        document.getElementById('modal-current-plan').textContent = `Current: ${session.plan || 'starter'}`;
+        document.getElementById('modal-target-plan').textContent = `New: ${plan.name} (৳${price})`;
+        pendingMerchantSession = session;
+      } else {
+        // User needs to Login or Register first
+        alreadyLoggedBox.style.display = 'none';
+        authFormsBox.style.display = 'block';
+        switchModalAuthTab(preferredTab);
+      }
+
+      // Open Modal
+      const modal = document.getElementById('plan-auth-modal');
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('active'), 10);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePlanAuthModal() {
+      const modal = document.getElementById('plan-auth-modal');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 250);
+    }
+
+    function handleModalBackdropClick(e) {
+      if (e.target.id === 'plan-auth-modal') {
+        closePlanAuthModal();
+      }
+    }
+
+    function switchModalAuthTab(tab) {
+      const loginForm = document.getElementById('modal-login-form');
+      const regForm = document.getElementById('modal-reg-form');
+      const tabLogin = document.getElementById('modal-tab-btn-login');
+      const tabReg = document.getElementById('modal-tab-btn-reg');
+      const loginErr = document.getElementById('modal-login-error');
+      const regErr = document.getElementById('modal-reg-error');
+
+      if (loginErr) loginErr.style.display = 'none';
+      if (regErr) regErr.style.display = 'none';
+
+      if (tab === 'register') {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+        tabLogin.classList.remove('active');
+        tabReg.classList.add('active');
+      } else {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+        tabLogin.classList.add('active');
+        tabReg.classList.remove('active');
+      }
+    }
+
+    function fillModalDemo(email, password) {
+      document.getElementById('modal-login-email').value = email;
+      document.getElementById('modal-login-password').value = password;
+      switchModalAuthTab('login');
+    }
+
+    function showPaymentStep(session) {
+      pendingMerchantSession = session;
+      const plan = getSelectedPlanDetails(selectedPlanForAuth);
+      const isYearly = currentBilling === 'yearly';
+      const price = isYearly ? plan.yearly : plan.monthly;
+      const days = isYearly ? 365 : 30;
+
+      // Hide auth and already logged boxes
+      document.getElementById('modal-auth-forms').style.display = 'none';
+      document.getElementById('modal-already-logged').style.display = 'none';
+
+      // Setup Payment Step Details
+      document.getElementById('modal-payment-step').style.display = 'block';
+      document.getElementById('pay-inv-id').textContent = 'SUB_' + Math.random().toString(36).slice(2, 8).toUpperCase();
+      document.getElementById('pay-plan-name').textContent = plan.name;
+      document.getElementById('pay-plan-dur').textContent = isYearly ? '1 Year (365 Days)' : '1 Month (30 Days)';
+      document.getElementById('pay-plan-amount').textContent = `৳${price}.00`;
+      document.getElementById('pay-merchant-name').textContent = session.name + ' (' + session.email + ')';
+      document.getElementById('modal-pay-trxid').value = '';
+      const payErr = document.getElementById('modal-pay-error');
+      if (payErr) payErr.style.display = 'none';
+    }
+
+    function fillAutoTestTrx() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let rnd = 'BL';
+      for (let i = 0; i < 8; i++) rnd += chars.charAt(Math.floor(Math.random() * chars.length));
+      document.getElementById('modal-pay-trxid').value = rnd;
+    }
+
+    function submitSubscriptionPayment() {
+      const trxInput = document.getElementById('modal-pay-trxid').value.trim().toUpperCase();
+      const errEl = document.getElementById('modal-pay-error');
+
+      if (!trxInput || trxInput.length < 6) {
+        errEl.textContent = 'Please enter a valid TrxID or click "⚡ Auto TrxID".';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      errEl.style.display = 'none';
+      const plan = getSelectedPlanDetails(selectedPlanForAuth);
+      const isYearly = currentBilling === 'yearly';
+      const price = isYearly ? plan.yearly : plan.monthly;
+      const durationDays = isYearly ? 365 : 30;
+      const now = new Date();
+      const expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
+
+      // Activate Plan with exact 30-day expiration
+      const session = pendingMerchantSession || JSON.parse(localStorage.getItem('syncpay_session') || '{}');
+      session.plan = selectedPlanForAuth;
+      session.planStatus = 'ACTIVE';
+      session.billingCycle = currentBilling;
+      session.planPrice = price;
+      session.planActivatedAt = now.toISOString();
+      session.expiresAt = expiresAt;
+      session.lastPaidTrx = trxInput;
+      session.lastPaidAmount = price;
+
+      localStorage.setItem('syncpay_session', JSON.stringify(session));
+
+      // Update in stored accounts list
+      const accounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
+      const idx = accounts.findIndex(a => a.email === session.email);
+      if (idx !== -1) {
+        accounts[idx].plan = selectedPlanForAuth;
+        accounts[idx].planStatus = 'ACTIVE';
+        accounts[idx].expiresAt = expiresAt;
+        accounts[idx].billingCycle = currentBilling;
+        localStorage.setItem('syncpay_accounts', JSON.stringify(accounts));
+      }
+
+      // Success toast with renewal notice
+      const expDateFormatted = new Date(expiresAt).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+      localStorage.setItem('syncpay_toast', JSON.stringify({
+        message: `Payment Verified! Your ${plan.name} plan has been activated. Expiry: ${expDateFormatted} (${durationDays} days). 🎉`,
+        type: 'success'
+      }));
+
+      window.location.href = '/dashboard';
+    }
+
+    function confirmLoggedPlanUpgrade() {
+      const session = JSON.parse(localStorage.getItem('syncpay_session'));
+      if (session) {
+        showPaymentStep(session);
+      }
+    }
+
+    function handleModalLogout() {
+      localStorage.removeItem('syncpay_session');
+      pendingMerchantSession = null;
+      document.getElementById('modal-already-logged').style.display = 'none';
+      document.getElementById('modal-payment-step').style.display = 'none';
+      document.getElementById('modal-auth-forms').style.display = 'block';
+      switchModalAuthTab('login');
+    }
+
+    function handleModalLogin(e) {
+      e.preventDefault();
+      const emailInput = document.getElementById('modal-login-email').value.trim().toLowerCase();
+      const passInput = document.getElementById('modal-login-password').value;
+      const errEl = document.getElementById('modal-login-error');
+
+      const DEFAULT_ACCOUNTS = [
+        { id: 'm_demo_101', email: 'demo@syncpaybd.xyz', password: 'demo1234', name: 'Demo Merchant', business: 'Demo Store BD', apiKey: 'live_sk_demo_99410abc' },
+        { id: 'm_starter_001', email: 'starter@test.com', password: 'test1234', name: 'Starter User', business: 'My Small Shop', apiKey: 'live_sk_starter_11111' },
+        { id: 'm_ent_001', email: 'enterprise@test.com', password: 'ent1234', name: 'Enterprise Corp', business: 'BigCorp BD Ltd', apiKey: 'live_sk_ent_999abc' }
+      ];
+
+      const storedAccounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
+      const storedEmails = storedAccounts.map(a => a.email);
+      const allAccounts = [...DEFAULT_ACCOUNTS.filter(d => !storedEmails.includes(d.email)), ...storedAccounts];
+
+      const merchant = allAccounts.find(a => a.email === emailInput);
+      if (!merchant) {
+        errEl.textContent = 'Email not found. Please enter valid credentials or register.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if (merchant.password !== passInput) {
+        errEl.textContent = 'Incorrect password. Please try again.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // Step 1 Passed: Proceed to Step 2 (Subscription Payment)
+      const session = {
+        merchantId: merchant.id,
+        email: merchant.email,
+        name: merchant.name,
+        business: merchant.business,
+        plan: selectedPlanForAuth,
+        planStatus: 'PENDING_PAYMENT',
+        apiKey: merchant.apiKey || ('live_sk_' + Math.random().toString(36).slice(2, 18)),
+        billing: currentBilling,
+        loginAt: new Date().toISOString()
+      };
+      localStorage.setItem('syncpay_session', JSON.stringify(session));
+
+      showPaymentStep(session);
+    }
+
+    function handleModalRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('modal-reg-name').value.trim();
+      const business = document.getElementById('modal-reg-business').value.trim();
+      const email = document.getElementById('modal-reg-email').value.trim().toLowerCase();
+      const password = document.getElementById('modal-reg-password').value;
+      const errEl = document.getElementById('modal-reg-error');
+
+      const DEFAULT_EMAILS = ['demo@syncpaybd.xyz', 'starter@test.com', 'enterprise@test.com'];
+      const storedAccounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
+      if (DEFAULT_EMAILS.includes(email) || storedAccounts.some(a => a.email === email)) {
+        errEl.textContent = 'An account with this email already exists. Please log in.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      if (password.length < 6) {
+        errEl.textContent = 'Password must be at least 6 characters long.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const id = 'm_' + Math.random().toString(36).slice(2, 9);
+      const apiKey = 'live_sk_' + Math.random().toString(36).slice(2, 18);
+
+      const newMerchant = {
+        id,
+        name,
+        business,
+        email,
+        password,
+        plan: selectedPlanForAuth,
+        planStatus: 'PENDING_PAYMENT',
+        billing: currentBilling,
+        joinedAt: new Date().toISOString().slice(0, 10),
+        apiKey
+      };
+
+      storedAccounts.push(newMerchant);
+      localStorage.setItem('syncpay_accounts', JSON.stringify(storedAccounts));
+
+      const session = {
+        merchantId: id,
+        email,
+        name,
+        business,
+        plan: selectedPlanForAuth,
+        planStatus: 'PENDING_PAYMENT',
+        apiKey,
+        billing: currentBilling,
+        loginAt: new Date().toISOString()
+      };
+      localStorage.setItem('syncpay_session', JSON.stringify(session));
+
+      // Step 1 Passed: Proceed to Step 2 (Subscription Payment)
+      showPaymentStep(session);
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePlanAuthModal();
+    });
+
     // Init
     renderPricing();
     fetchFeed();
     setInterval(fetchFeed, 3000);
   </script>
+
+  <!-- Plan Authentication & Activation Modal -->
+  <div id="plan-auth-modal" class="plan-auth-overlay" onclick="handleModalBackdropClick(event)">
+    <div class="plan-auth-card">
+      <button type="button" class="plan-auth-close" onclick="closePlanAuthModal()" title="Close">&times;</button>
+      
+      <!-- Selected Plan Banner -->
+      <div class="plan-banner-highlight">
+        <div class="plan-banner-top">
+          <div class="plan-badge-pill">
+            <span class="pill-dot"></span>
+            <span id="modal-plan-badge">Selected Plan</span>
+          </div>
+          <div class="plan-banner-price">
+            <span id="modal-plan-price">৳200</span><span id="modal-plan-dur">/mo</span>
+          </div>
+        </div>
+        <div id="modal-plan-title" style="font-weight: 800; font-size: 16px; color: #0f172a; margin-bottom: 2px;">Business 3</div>
+        <div id="modal-plan-desc" class="plan-banner-desc">3 Website Integrations • 1 Landing Page Bonus • Unlimited Transactions</div>
+      </div>
+
+      <!-- ALREADY LOGGED IN VIEW -->
+      <div id="modal-already-logged" style="display:none;">
+        <div class="modal-logged-box">
+          <div class="modal-logged-avatar" id="modal-user-avatar">RA</div>
+          <div class="modal-logged-title" id="modal-user-name">Rahim Ahmed</div>
+          <div class="modal-logged-email" id="modal-user-email">rahim@myshop.com</div>
+          <div class="modal-logged-chips">
+            <div class="modal-logged-chip" id="modal-current-plan">Current: Starter 1</div>
+            <div style="align-self:center; color:#94a3b8;">→</div>
+            <div class="modal-logged-chip new" id="modal-target-plan">New: Business 3</div>
+          </div>
+          <button type="button" class="btn-modal-submit" onclick="confirmLoggedPlanUpgrade()">
+            <span>💳 Proceed to Payment & Activate Plan</span>
+            <span>→</span>
+          </button>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:12px;">
+          <a href="/dashboard" style="color:var(--primary); font-weight:700; text-decoration:none;">Go to Dashboard →</a>
+          <button type="button" onclick="handleModalLogout()" style="background:none; border:none; color:#ef4444; font-weight:700; cursor:pointer; font-family:inherit;">Switch Account / Logout</button>
+        </div>
+      </div>
+
+      <!-- LOGIN & REGISTER FORMS (Step 1) -->
+      <div id="modal-auth-forms">
+        <div class="modal-auth-tabs">
+          <button type="button" class="modal-tab-btn active" id="modal-tab-btn-login" onclick="switchModalAuthTab('login')">Login</button>
+          <button type="button" class="modal-tab-btn" id="modal-tab-btn-reg" onclick="switchModalAuthTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="modal-login-form" onsubmit="handleModalLogin(event)">
+          <div class="modal-form-group">
+            <label>Your Email</label>
+            <input type="email" id="modal-login-email" class="modal-input" placeholder="demo@syncpaybd.xyz" required autocomplete="email">
+          </div>
+          <div class="modal-form-group">
+            <label>Password</label>
+            <input type="password" id="modal-login-password" class="modal-input" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+          <div id="modal-login-error" class="modal-error-box"></div>
+          <button type="submit" class="btn-modal-submit" id="modal-login-submit-btn">
+            <span>Next: Payment & Activation</span>
+            <span>→</span>
+          </button>
+          
+          <div class="modal-demo-bar">
+            <span>Quick Test Demo Accounts:</span>
+            <div class="modal-demo-btns">
+              <button type="button" class="modal-demo-btn" onclick="fillModalDemo('demo@syncpaybd.xyz','demo1234')">⚡ Demo Merchant</button>
+              <button type="button" class="modal-demo-btn" onclick="fillModalDemo('starter@test.com','test1234')">Starter User</button>
+              <button type="button" class="modal-demo-btn" onclick="fillModalDemo('enterprise@test.com','ent1234')">Enterprise Corp</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="modal-reg-form" onsubmit="handleModalRegister(event)" style="display:none;">
+          <div class="modal-form-group">
+            <label>Your Name</label>
+            <input type="text" id="modal-reg-name" class="modal-input" placeholder="e.g., John Doe" required autocomplete="name">
+          </div>
+          <div class="modal-form-group">
+            <label>Business / Website Name</label>
+            <input type="text" id="modal-reg-business" class="modal-input" placeholder="e.g., My Online Store" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Email Address</label>
+            <input type="email" id="modal-reg-email" class="modal-input" placeholder="rahim@gmail.com" required autocomplete="email">
+          </div>
+          <div class="modal-form-group">
+            <label>Password (min 6 characters)</label>
+            <input type="password" id="modal-reg-password" class="modal-input" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+          </div>
+          <div id="modal-reg-error" class="modal-error-box"></div>
+          <button type="submit" class="btn-modal-submit" id="modal-reg-submit-btn">
+            <span>Create Account & Proceed to Payment</span>
+            <span>→</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- PAYMENT CHECKOUT STEP (Step 2: Payment Gateway) -->
+      <div id="modal-payment-step" style="display:none;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:14px; text-align:left;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:12px; font-weight:700; color:#64748b;">Subscription Invoice:</span>
+            <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-weight:800; font-size:11px; padding:2px 8px; border-radius:6px;" id="pay-inv-id">SUB_INV_9921</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
+            <span style="color:#64748b;">Merchant:</span>
+            <strong id="pay-merchant-name" style="color:#0f172a;">Demo Merchant</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
+            <span style="color:#64748b;">Selected Plan:</span>
+            <strong id="pay-plan-name" style="color:#0f172a;">Business 3</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+            <span style="color:#64748b;">Duration:</span>
+            <span id="pay-plan-dur" style="color:#10b981; font-weight:700;">1 Month (30 Days)</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:15px; border-top:1px dashed #cbd5e1; padding-top:8px; margin-top:6px;">
+            <span style="font-weight:700; color:#0f172a;">Total Payable:</span>
+            <strong id="pay-plan-amount" style="color:#0284c7; font-size:18px;">৳200.00</strong>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px; font-size:12px; color:#475569; background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:10px 12px; line-height:1.5; text-align:left;">
+          📌 <strong>Payment Instructions:</strong> Send Money to <span class="mono" style="font-weight:800; color:#0f172a; background:#fef08a; padding:1px 6px; border-radius:4px;">01712345678</span> via bKash or Nagad, then enter the received <strong>TrxID</strong> below to complete verification.
+        </div>
+
+        <div class="modal-form-group">
+          <label>Transaction ID (TrxID)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="modal-pay-trxid" class="modal-input" placeholder="e.g., BL78A4982J" style="font-family:monospace; text-transform:uppercase;">
+            <button type="button" class="modal-demo-btn" style="white-space:nowrap; padding:0 12px;" onclick="fillAutoTestTrx()">⚡ Auto TrxID</button>
+          </div>
+        </div>
+
+        <div id="modal-pay-error" class="modal-error-box"></div>
+
+        <button type="button" class="btn-modal-submit" onclick="submitSubscriptionPayment()">
+          <span>Verify & Activate Plan (30 Days)</span>
+          <span>→</span>
+        </button>
+
+        <div style="text-align:center; margin-top:12px;">
+          <button type="button" onclick="closePlanAuthModal()" style="background:none; border:none; color:#64748b; font-size:12px; cursor:pointer;">Pay Later (Cancel)</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

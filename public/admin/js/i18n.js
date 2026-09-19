@@ -218,12 +218,13 @@ export const translations = {
 
 class I18nManager {
   constructor() {
-    this.currentLang = localStorage.getItem('payflow_admin_lang') || 'en';
+    this.currentLang = localStorage.getItem('syncpay_admin_lang') || localStorage.getItem('payflow_admin_lang') || 'en';
   }
 
   setLanguage(lang) {
     if (translations[lang]) {
       this.currentLang = lang;
+      localStorage.setItem('syncpay_admin_lang', lang);
       localStorage.setItem('payflow_admin_lang', lang);
       this.translateDOM();
     }

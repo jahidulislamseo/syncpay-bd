@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,23 +91,60 @@
       z-index: 1;
     }
 
-    .header-logo-link {
-      display: inline-flex;
+    /* Merchant brand in header */
+    .merchant-brand-box {
+      display: flex;
       align-items: center;
-      text-decoration: none;
-      transition: opacity 0.2s;
+      gap: 9px;
+      padding: 7px 14px 7px 10px;
+      border-radius: 50px;
+      border: 1.5px solid var(--border);
+      background: #f8fafc;
+      transition: all 0.2s;
     }
-
-    .header-logo-link:hover {
-      opacity: 0.85;
+    .merchant-brand-box:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
     }
-
-    .header-brand-logo {
-      height: 32px;
-      width: auto;
-      max-width: 140px;
+    .merchant-brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+      overflow: hidden;
+    }
+    .merchant-brand-icon img {
+      width: 100%;
+      height: 100%;
       object-fit: contain;
-      display: block;
+    }
+    .merchant-brand-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .merchant-brand-skeleton {
+      width: 110px;
+      height: 18px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
     .header-icon-box {
@@ -261,9 +298,9 @@
       .provider-bar {
         padding: 10px 16px;
       }
-      .header-brand-logo {
-        height: 26px;
-        max-width: 110px;
+      .merchant-brand-name {
+        max-width: 120px;
+        font-size: 12.5px;
       }
     }
 
@@ -805,11 +842,16 @@
         </div>
       </div>
 
-      <!-- Centered Brand Logo -->
-      <div class="header-center">
-        <a href="/" target="_blank" title="SyncPay BD" class="header-logo-link">
-          <img src="/images/syncpay-logo.png" alt="SyncPay BD" class="header-brand-logo">
-        </a>
+      <!-- Centered Merchant Branding -->
+      <div class="header-center" id="header-merchant-brand">
+        <div class="merchant-brand-box">
+          <div class="merchant-brand-icon" id="merchant-brand-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <span class="merchant-brand-name" id="merchant-brand-name">
+            <span class="merchant-brand-skeleton"></span>
+          </span>
+        </div>
       </div>
 
       <div class="header-right">
@@ -835,7 +877,7 @@
         <!-- Official Merchant Number Card -->
         <div class="merchant-card">
           <div class="merchant-card-header">
-            <span class="merchant-tag" id="merchant-tag-label">মার্চেন্ট নম্বর</span>
+            <span class="merchant-tag" id="merchant-tag-label">Merchant Number</span>
             <button class="btn-copy-red" onclick="copyNumber()" id="btn-copy">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               <span>Copy</span>
@@ -857,7 +899,7 @@
             </button>
             <button class="sub-tab-btn" id="sub-tab-steps" onclick="switchSubTab('steps')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-              <span>পেমেন্ট ধাপ</span>
+              <span>Payment Steps</span>
             </button>
           </div>
 
@@ -876,7 +918,7 @@
               <div class="qr-sub-actions" style="justify-content:center;">
                 <span style="font-size:12px; color:#64748b; font-weight:600; display:inline-flex; align-items:center; gap:5px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                  ট্যাপ করে বড় করুন
+                  Tap to enlarge
                 </span>
               </div>
             </div>
@@ -886,11 +928,11 @@
           <div class="sub-tab-content" id="content-steps" style="display:none; align-items:flex-start;">
             <div class="steps-list-container" id="steps-list">
               <ol>
-                <li>অ্যাপ ওপেন করে <strong class="highlight-val">Make Payment</strong> সিলেক্ট করুন</li>
-                <li>মার্চেন্ট নম্বর দিন: <strong class="highlight-val" id="step-number-val">01580397069</strong></li>
-                <li>পরিমাণ দিন: <strong class="highlight-val" id="step-amount-val">৳ ২৯৯</strong></li>
-                <li>রেফারেন্স: <strong class="highlight-val" id="step-ref-val">PF-ORD-101</strong></li>
-                <li>পিন দিয়ে পেমেন্ট সম্পন্ন করুন</li>
+                <li>Open your app and select <strong class="highlight-val">Make Payment</strong></li>
+                <li>Enter merchant number: <strong class="highlight-val" id="step-number-val">01580397069</strong></li>
+                <li>Enter amount: <strong class="highlight-val" id="step-amount-val">৳ 299</strong></li>
+                <li>Enter reference: <strong class="highlight-val" id="step-ref-val">PF-ORD-101</strong></li>
+                <li>Enter your PIN to complete the payment</li>
               </ol>
             </div>
           </div>
@@ -904,23 +946,23 @@
         
         <div class="verification-card-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>পেমেন্ট ভেরিফিকেশন</span>
+          <span>Payment Verification</span>
         </div>
 
         <div class="status-alert success" id="alert-success">
-          🎉 <strong>পেমেন্ট সফলভাবে ভেরিফাই হয়েছে!</strong> অনুগ্রহ করে অপেক্ষা করুন...
+          🎉 <strong>Payment verified successfully!</strong> Please wait...
         </div>
         <div class="status-alert error" id="alert-error">
-          ⚠️ <strong>ভেরিফিকেশন ব্যর্থ হয়েছে:</strong> <span id="error-msg"></span>
+          ⚠️ <strong>Verification failed:</strong> <span id="error-msg"></span>
         </div>
 
         <div class="form-group-block">
-          <label class="field-label" id="label-sender">আপনার নম্বর / Pay ID *</label>
+          <label class="field-label" id="label-sender">Your Sender Number / Pay ID *</label>
           <input type="text" class="field-input" id="input-sender" placeholder="017XXXXXXXX" maxlength="25">
         </div>
 
         <div class="form-group-block">
-          <label class="field-label" id="label-trx">ট্রানজ্যাকশন আইডি (TrxID) *</label>
+          <label class="field-label" id="label-trx">Transaction ID (TrxID) *</label>
           <input type="text" class="field-input" id="input-trx" placeholder="e.g. BAX892K1L" maxlength="30" style="text-transform:uppercase;">
         </div>
 
@@ -930,7 +972,7 @@
         </div>
 
         <button class="btn-verify-action" id="btn-submit" onclick="submitVerification()">
-          <span>পেমেন্ট নিশ্চিত করুন</span>
+          <span>Confirm & Verify Payment</span>
         </button>
 
         <div class="trust-footer-line" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px;">
@@ -1050,7 +1092,7 @@
           theme_color: '#E2136E',
           sender_label: 'Your bKash Number *',
           trx_label: 'bKash TrxID *',
-          instructions: '১. আপনার bKash App ওপেন করুন অথবা ডায়াল করুন *247#\n২. Make Payment সিলেক্ট করুন\n৩. মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৪. পরিমাণ দিন: ৳ {AMOUNT}\n৫. রেফারেন্স (Ref): {REF}\n৬. PIN নম্বর দিয়ে পেমেন্ট কনফার্ম করুন',
+          instructions: '1. Open your bKash App or dial *247#\n2. Select Make Payment\n3. Enter Merchant Number: {ACCOUNT_NUMBER}\n4. Enter Amount: ৳ {AMOUNT}\n5. Enter Reference (Ref): {REF}\n6. Enter your PIN to confirm payment',
         },
         {
           id: 'pm_nagad_default',
@@ -1062,7 +1104,7 @@
           theme_color: '#F7941D',
           sender_label: 'Your Nagad Number *',
           trx_label: 'Nagad TxnID *',
-          instructions: '১. আপনার Nagad App ওপেন করুন অথবা ডায়াল করুন *167#\n২. Merchant Payment অপশন বেছে নিন\n৩. মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৪. পরিমাণ লিখুন: ৳ {AMOUNT}\n৫. কাউন্টার নং 1 ও রেফারেন্স: {REF} দিন\n৬. গোপন পিন নম্বর দিয়ে সেন্ড করুন',
+          instructions: '1. Open your Nagad App or dial *167#\n2. Select Merchant Payment\n3. Enter Merchant Number: {ACCOUNT_NUMBER}\n4. Enter Amount: ৳ {AMOUNT}\n5. Enter Counter 1 and Reference: {REF}\n6. Enter your secret PIN to send',
         },
         {
           id: 'pm_rocket_default',
@@ -1074,7 +1116,7 @@
           theme_color: '#8C3494',
           sender_label: 'Your Rocket Number *',
           trx_label: 'Rocket TrxID *',
-          instructions: '১. আপনার Rocket App ওপেন করুন অথবা ডায়াল করুন *322#\n২. Merchant Payment সিলেক্ট করুন\n৩. মার্চেন্ট নম্বর দিন: {ACCOUNT_NUMBER}\n৪. পরিমাণ দিন: ৳ {AMOUNT}\n৫. রেফারেন্সে দিন: {REF}\n৬. আপনার সিকিউরিটি পিন দিয়ে সম্পন্ন করুন',
+          instructions: '1. Open your Rocket App or dial *322#\n2. Select Merchant Payment\n3. Enter Merchant Number: {ACCOUNT_NUMBER}\n4. Enter Amount: ৳ {AMOUNT}\n5. Enter Reference: {REF}\n6. Enter your 4-digit PIN to complete',
         },
         {
           id: 'pm_bank_default',
@@ -1089,7 +1131,7 @@
           theme_color: '#005A9C',
           sender_label: 'Sender Bank / Account Name *',
           trx_label: 'Bank Transfer Ref / Slip No *',
-          instructions: '১. আপনার ব্যাংক অ্যাপ (যেমন Citytouch, EBL SKYBANKING ইত্যাদি) লগইন করুন\n২. Fund Transfer -> Other Bank Transfer (NPSB / BEFTN) বেছে নিন\n৩. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue Branch দিন\n৪. অ্যাকাউন্ট নং: {ACCOUNT_NUMBER} এবং নাম: SyncPay BD Technologies Ltd লিখুন\n৫. পরিমাণ: ৳ {AMOUNT} এবং রেফারেন্সে {REF} দিন\n৬. ট্রান্সফার শেষে প্রাপ্ত রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন',
+          instructions: '1. Log in to your banking app (Citytouch, EBL SKYBANKING, etc.)\n2. Choose Fund Transfer -> Other Bank Transfer (NPSB / BEFTN)\n3. Bank: City Bank PLC, Branch: Gulshan Avenue Branch\n4. A/C Number: {ACCOUNT_NUMBER} and A/C Name: SyncPay BD Technologies Ltd\n5. Amount: ৳ {AMOUNT} and Reference: {REF}\n6. Complete transfer and verify with your reference / slip number',
         },
         {
           id: 'pm_binance_default',
@@ -1101,7 +1143,7 @@
           theme_color: '#F3BA2F',
           sender_label: 'Your Binance Pay ID / Nickname *',
           trx_label: 'Binance Order ID / Internal TxID *',
-          instructions: '১. Binance App খুলে ডানপাশে Pay আইকনে চাপুন\n২. Send অপশন নির্বাচন করে Pay ID সিলেক্ট করুন\n৩. মার্চেন্ট Pay ID দিন: {ACCOUNT_NUMBER}\n৪. কারেন্সি USDT নির্বাচন করে পরিমাণ দিন\n৫. Note / Memo তে রেফারেন্স: {REF} লিখুন\n৬. পেমেন্ট শেষে প্রাপ্ত Binance Order ID দিয়ে ভেরিফাই করুন',
+          instructions: '1. Open Binance App and tap Pay icon on top right\n2. Select Send and choose Pay ID\n3. Enter Merchant Pay ID: {ACCOUNT_NUMBER}\n4. Select currency USDT and enter payment amount\n5. Add Reference to Note / Memo: {REF}\n6. Complete payment and verify with your Binance Order ID / TxID',
         }
       ];
     }
@@ -1135,6 +1177,19 @@
       document.getElementById('display-amount').innerText = `৳ ${amt}`;
       document.getElementById('display-email').innerText = invoiceData.customer_email || 'customer@myshop.com';
       document.getElementById('order-subtitle').innerText = `Invoice #${invoiceData.id || invoiceData.invoice_id || 'PFMU80DZWXUWMB'}`;
+
+      // --- Merchant Brand in Header Center ---
+      const nameEl = document.getElementById('merchant-brand-name');
+      const iconEl = document.getElementById('merchant-brand-icon');
+      const merchantName = invoiceData.merchant_name || invoiceData.customer_name || 'Store';
+      const merchantLogo = invoiceData.merchant_logo_url || null;
+
+      if (nameEl) {
+        nameEl.textContent = merchantName;
+      }
+      if (iconEl && merchantLogo) {
+        iconEl.innerHTML = `<img src="${merchantLogo}" alt="${merchantName}" onerror="this.parentElement.innerHTML='<svg width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.2\'><path d=\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\'/><polyline points=\'9 22 9 12 15 12 15 22\'/></svg>'">`;
+      }
     }
 
     function renderProviderBar() {
@@ -1222,11 +1277,11 @@
       // Update Merchant Card Header & Number
       const tagLabel = document.getElementById('merchant-tag-label');
       if (type === 'bank') {
-        tagLabel.innerText = 'ব্যাংক অ্যাকাউন্ট নম্বর';
+        tagLabel.innerText = 'Bank Account Number';
       } else if (type === 'binance') {
         tagLabel.innerText = 'Binance Pay ID';
       } else {
-        tagLabel.innerText = 'মার্চেন্ট নম্বর';
+        tagLabel.innerText = 'Merchant Number';
       }
 
       document.getElementById('merchant-number').innerText = activeMethod.account_number;
@@ -1257,7 +1312,7 @@
 
       let rawInstructions = activeMethod.instructions || '';
       if (!rawInstructions.trim()) {
-        rawInstructions = `১. ${shortName} অ্যাপ ওপেন করুন\n২. পেমেন্ট সিলেক্ট করে নম্বর দিন: {ACCOUNT_NUMBER}\n৩. পরিমাণ দিন: ৳ {AMOUNT} এবং রেফারেন্স: {REF}\n৪. পিন নম্বর দিয়ে সম্পন্ন করুন`;
+        rawInstructions = `1. Open your ${shortName} App\n2. Select Make Payment and enter number: {ACCOUNT_NUMBER}\n3. Enter amount: ৳ {AMOUNT} and reference: {REF}\n4. Enter your PIN to complete the payment`;
       }
 
       // Format lines with variable replacement
@@ -1280,17 +1335,17 @@
       const trxInput = document.getElementById('input-trx');
 
       if (type === 'bank') {
-        senderLabelEl.innerText = 'প্রেরকের নাম / ব্যাংক অ্যাকাউন্ট *';
-        trxLabelEl.innerText = 'ট্রানজ্যাকশন আইডি / স্লিপ নম্বর *';
-        senderInput.placeholder = 'আপনার নাম বা অ্যাকাউন্ট নম্বর';
+        senderLabelEl.innerText = 'Sender Name / Account Number *';
+        trxLabelEl.innerText = 'Transaction Reference / Slip No *';
+        senderInput.placeholder = 'Your name or account number';
         trxInput.placeholder = 'e.g. REF-CITY-98214';
       } else if (type === 'binance') {
-        senderLabelEl.innerText = 'আপনার Pay ID / Nickname *';
+        senderLabelEl.innerText = 'Your Binance Pay ID / Nickname *';
         trxLabelEl.innerText = 'Binance Order ID / TxID *';
         senderInput.placeholder = 'e.g. 829301948';
         trxInput.placeholder = 'e.g. 21903940182';
       } else {
-        senderLabelEl.innerText = `আপনার ${shortName} নম্বর *`;
+        senderLabelEl.innerText = `Your ${shortName} Number *`;
         trxLabelEl.innerText = `${shortName} TrxID *`;
         senderInput.placeholder = '017XXXXXXXX';
         trxInput.placeholder = 'e.g. BAX892K1L';
@@ -1361,7 +1416,7 @@
 
       if (!trxId) {
         alertError.style.display = 'block';
-        document.getElementById('error-msg').innerText = 'অনুগ্রহ করে Transaction ID (TrxID) ইনপুট দিন।';
+        document.getElementById('error-msg').innerText = 'Please enter the Transaction ID (TrxID).';
         return;
       }
 
@@ -1396,13 +1451,13 @@
           }
         } else {
           alertError.style.display = 'block';
-          document.getElementById('error-msg').innerText = data.message || 'ট্রানজ্যাকশন আইডি মেলেনি। টাকা পাঠানোর পর সঠিক TrxID দিন।';
+          document.getElementById('error-msg').innerText = data.message || 'Transaction ID did not match. Please submit after sending funds.';
           btn.disabled = false;
           btn.innerHTML = `<span>Verify Payment & Activate Plan</span>`;
         }
       } catch (err) {
         alertError.style.display = 'block';
-        document.getElementById('error-msg').innerText = 'নেটওয়ার্ক সংযোগ ব্যর্থ: ' + err.message;
+        document.getElementById('error-msg').innerText = 'Network connection failed: ' + err.message;
         btn.disabled = false;
         btn.innerHTML = `<span>Verify Payment & Activate Plan</span>`;
       }

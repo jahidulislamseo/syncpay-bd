@@ -49,7 +49,7 @@ class AdminApp {
     i18n.setLanguage(nextLang);
     const langBtn = document.getElementById('langToggleBtn');
     if (langBtn) {
-      langBtn.textContent = nextLang === 'en' ? 'বাংলা' : 'English';
+      langBtn.textContent = nextLang === 'en' ? 'BN' : 'EN';
     }
     this.showToast(`Language switched to ${nextLang.toUpperCase()}`);
     this.renderCurrentView();

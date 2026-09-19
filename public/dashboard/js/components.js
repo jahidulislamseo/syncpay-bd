@@ -1,5 +1,6 @@
 // PayFlow MFS — Production Dashboard Reusable UI Components
 import { i18n } from './i18n.js';
+import { auth } from './auth.js';
 
 export const components = {
   // 1. Stat Card Renderer
@@ -229,8 +230,8 @@ export const components = {
           <div class="empty-state-icon" style="color:var(--text-light); margin-bottom:12px;">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-          <div class="empty-state-title">কোনো ইনভয়েস তৈরি করা হয়নি</div>
-          <div class="empty-state-desc">নতুন গ্রাহকের জন্য পেমেন্ট লিংক তৈরি করতে '+ Create Invoice' বাটনে চাপ দিন।</div>
+          <div class="empty-state-title">No Invoices Found</div>
+          <div class="empty-state-desc">Click '+ Create Invoice' to generate a payment link for customers.</div>
         </div>
       `;
     }
@@ -258,10 +259,10 @@ export const components = {
             <div style="display:flex; gap:6px; align-items:center;">
               <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" onclick="window.payflowApp.copyText('${link}')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                <span>কপি লিংক</span>
+                <span>Copy Link</span>
               </button>
               <a href="${link}" target="_blank" class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px; text-decoration:none;">
-                ↗ খুলুন
+                ↗ Open
               </a>
             </div>
           </td>
@@ -274,12 +275,12 @@ export const components = {
         <table class="data-table">
           <thead>
             <tr>
-              <th>ইনভয়েস আইডি</th>
-              <th>গ্রাহকের তথ্য</th>
-              <th>অ্যামাউন্ট</th>
-              <th>স্ট্যাটাস</th>
-              <th>তৈরির তারিখ</th>
-              <th>পেমেন্ট লিংক</th>
+              <th>Invoice ID</th>
+              <th>Customer Info</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Payment Link</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -299,18 +300,18 @@ export const components = {
           </div>
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0;">PayFlow Android Forwarder APK</h3>
-              <span class="badge badge-completed" style="font-size: 10px;">v1.2.0 STABLE</span>
+              <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0;">SyncPay Android Forwarder APK</h3>
+              <span class="badge badge-completed" style="font-size: 10px;">v1.0.0 STABLE</span>
             </div>
             <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0 0;">
-              আপনার সিম সম্বলিত অ্যান্ড্রয়েড ফোনে অ্যাপটি ইনস্টল করুন। বিকাশ ও নগদ SMS স্বয়ংক্রিয়ভাবে প্রসেস হয়ে গেটওয়েতে যুক্ত হবে।
+              Install on your SIM-enabled Android phone. bKash, Nagad, and Rocket SMS are automatically captured and verified.
             </p>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-          <a href="/downloads/payflow-forwarder.apk" download="payflow-forwarder.apk" class="btn btn-primary-action" style="background: #10b981; border-color: #059669; padding: 10px 20px; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); display: inline-flex; align-items: center; gap: 8px;">
+          <a href="/downloads/syncpay-forwarder.apk" download="syncpay-forwarder.apk" class="btn btn-primary-action" style="background: #10b981; border-color: #059669; padding: 10px 20px; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); display: inline-flex; align-items: center; gap: 8px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>⚡ ১-ক্লিকে APK ডাউনলোড করুন (78 MB)</span>
+            <span>⚡ 1-Click APK Download (75 MB)</span>
           </a>
         </div>
       </div>
@@ -330,20 +331,20 @@ export const components = {
               </div>
               <div class="details-list" style="margin-top:16px;">
                 <div class="detail-item">
-                  <span class="detail-key">সাপোর্টেড ওয়ালেট</span>
+                  <span class="detail-key">Supported Wallets</span>
                   <span class="detail-val">bKash / Nagad / Rocket</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-key">সর্বশেষ সিগন্যাল</span>
+                  <span class="detail-key">Last Heartbeat</span>
                   <span class="detail-val" style="font-size:12px;">${(() => {
-                    if (!d.last_seen) return 'সক্রিয়';
+                    if (!d.last_seen) return 'Active';
                     const s = typeof d.last_seen === 'string' ? d.last_seen.replace(' ', 'T') : d.last_seen;
                     const parsed = new Date(s);
-                    return isNaN(parsed.getTime()) ? 'সক্রিয় (Active)' : parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    return isNaN(parsed.getTime()) ? 'Active' : parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                   })()}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-key">প্রসেসকৃত SMS</span>
+                  <span class="detail-key">Processed SMS</span>
                   <span class="detail-val" style="color:var(--primary); font-weight:700;">${d.sms_count || 1284}</span>
                 </div>
               </div>
@@ -351,13 +352,13 @@ export const components = {
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px; flex-wrap:wrap;">
               <button class="btn btn-primary-action" style="padding:6px 12px; font-size:12px; background:var(--primary); display:inline-flex; align-items:center; gap:6px;" onclick="window.payflowApp.showDeviceQrModal('${d.id}', '${d.device_name}')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                <span>📱 কানেক্ট / QR Code</span>
+                <span>📱 Connect / QR Code</span>
               </button>
               <button class="btn btn-secondary-action" style="padding:6px 12px; font-size:12px;" onclick="window.payflowApp.showToast('Device status refreshed', 'info')">
-                পিংক টেস্ট
+                Ping Test
               </button>
               <button class="btn btn-danger-action" style="padding:6px 12px; font-size:12px;" onclick="window.payflowApp.removeDevice('${d.id}')">
-                ডিসকানেক্ট
+                Disconnect
               </button>
             </div>
           </div>
@@ -384,22 +385,22 @@ export const components = {
       <div class="table-card">
         <div class="table-toolbar">
           <div>
-            <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin:0;">সক্রিয় API অথেনটিকেশন চাবি</h4>
-            <span style="font-size:12px; color:var(--text-muted);">ব্যাকএন্ড ও প্লাগিন থেকে নিরাপদ লেনদেন ভেরিফিকেশনের জন্য ব্যবহৃত চাবি</span>
+            <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin:0;">Active API Authentication Keys</h4>
+            <span style="font-size:12px; color:var(--text-muted);">Cryptographic keys used to securely verify backend transactions and plugins</span>
           </div>
           <button class="btn btn-primary-action" onclick="window.payflowApp.openCreateApiKeyModal()">
-            + নতুন API Key
+            + New API Key
           </button>
         </div>
         <div class="table-responsive">
           <table class="data-table">
             <thead>
               <tr>
-                <th>চাবির নাম</th>
-                <th>এনভায়রনমেন্ট</th>
-                <th>সিক্রেট কী</th>
-                <th>তৈরির তারিখ</th>
-                <th>অ্যাকশন</th>
+                <th>Key Name</th>
+                <th>Environment</th>
+                <th>Secret Key</th>
+                <th>Created At</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -422,17 +423,17 @@ export const components = {
                           ${prefix}••••••••••••••••
                         </span>
                         <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Reveal Key" onclick="window.payflowApp.toggleKeyReveal('${k.id}', '${secret}', '${prefix}')">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 backward" style="display:none;"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                         <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Copy Secret" onclick="window.payflowApp.copyText('${secret}')">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         </button>
                       </div>
                     </td>
-                    <td><span style="font-size:12px; color:var(--text-muted);">${k.created_at || 'সম্প্রতি'}</span></td>
+                    <td><span style="font-size:12px; color:var(--text-muted);">${k.created_at || 'Recently'}</span></td>
                     <td>
                       <button class="btn btn-danger-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.showToast('Key revocation request recorded', 'warning')">
-                        বাতিল
+                        Revoke
                       </button>
                     </td>
                   </tr>
@@ -462,65 +463,84 @@ export const components = {
       ]
     };
 
+    const activeSession = window.payflowApp?.session;
+    const subInfo = activeSession ? auth.checkSubscription(activeSession) : { status: s.status, daysLeft: 30, isExpired: false, expiresAt: s.renews_at };
+    const planKey = activeSession?.plan || 'business';
+    const planConfig = auth.getPlan(planKey);
+    const statusColor = subInfo.isExpired ? '#ef4444' : '#10b981';
+    const statusBg = subInfo.isExpired ? '#fee2e2' : '#ecfdf5';
+    const statusLabel = subInfo.isExpired ? '● EXPIRED (Suspended)' : `● ACTIVE (${subInfo.daysLeft} days left)`;
+    const expiryFormatted = subInfo.expiresAt ? new Date(subInfo.expiresAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Oct 19, 2026';
+
     return `
       <!-- Subscription Plan & Quota Card -->
       <div class="quota-card">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-bottom:1px solid var(--border-subtle); padding-bottom:16px;">
           <div>
             <div style="display:flex; align-items:center; gap:8px;">
-              <h3 style="font-size:16px; font-weight:800; color:var(--text-primary); margin:0;">সাবস্ক্রিপশন প্যাকেজ ও লিমিট</h3>
-              <span class="badge" style="background:var(--primary-subtle); color:var(--primary); font-size:11px;">${s.plan_name} (${s.tier})</span>
-              <span class="badge badge-completed" style="font-size:10px;">● ${s.status}</span>
+              <h3 style="font-size:16px; font-weight:800; color:var(--text-primary); margin:0;">Subscription Plan & Quotas</h3>
+              <span class="badge" style="background:var(--primary-subtle); color:var(--primary); font-size:11px;">${planConfig.badge}</span>
+              <span class="badge" style="background:${statusBg}; color:${statusColor}; font-size:11px; font-weight:800;">${statusLabel}</span>
             </div>
             <p style="font-size:13px; color:var(--text-muted); margin:4px 0 0 0;">
-              আপনার বর্তমান মার্চেন্ট প্যাকেজ অনুযায়ী কানেক্টেড ওয়েবসাইট ও ট্রানজ্যাকশন লিমিট পর্যবেক্ষণ করুন।
+              ${subInfo.isExpired 
+                ? '<span style="color:#ef4444; font-weight:700;">⚠️ Subscription has expired. Your automation service is suspended—renew now to resume.</span>' 
+                : `Next billing & renewal date: <strong>${expiryFormatted}</strong> (${subInfo.daysLeft} days left)।`}
             </p>
           </div>
-          <button class="btn btn-secondary-action" style="font-size:12px;" onclick="window.payflowApp.showToast('Billing portal will open in new window', 'info')">
-            প্যাকেজ পরিবর্তন / আপগ্রেড
-          </button>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-primary-action" style="font-size:11px; padding:6px 12px; font-weight:700;" onclick="window.payflowApp.openRenewModal()">
+              💳 ${subInfo.isExpired ? 'Renew & Activate Now' : 'Renew / Extend Plan'}
+            </button>
+            <button class="btn btn-secondary-action" style="font-size:11px; padding:6px 10px; color:#ef4444; border-color:#fca5a5;" onclick="window.payflowApp.simulateSubscriptionDays(0)" title="Test suspended state after plan expiry">
+              ⏱️ Test: Expire (Off)
+            </button>
+            <button class="btn btn-secondary-action" style="font-size:11px; padding:6px 10px; color:#10b981; border-color:#86efac;" onclick="window.payflowApp.simulateSubscriptionDays(30)" title="Reset active state to 30 days">
+              ⏱️ Test: 30 Days (Active)
+            </button>
+          </div>
         </div>
 
         <div class="quota-grid">
           <!-- Quota 1: Websites -->
           <div class="quota-item">
             <div class="quota-header">
-              <span class="quota-title">🌐 কানেক্টেড ওয়েবসাইট কোটা</span>
+              <span class="quota-title">🌐 Connected Websites Quota</span>
               <span class="quota-counts">${s.quotas.websites.connected} / ${s.quotas.websites.allowed} Sites</span>
             </div>
             <div class="progress-track">
               <div class="progress-fill" style="width:${s.quotas.websites.percent}%;"></div>
             </div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">
-              আরও ${s.quotas.websites.allowed - s.quotas.websites.connected}টি ওয়েবসাইট কানেক্ট করতে পারবেন।
+              ${s.quotas.websites.allowed - s.quotas.websites.connected} website slots remaining.
             </div>
           </div>
 
           <!-- Quota 2: Devices -->
           <div class="quota-item">
             <div class="quota-header">
-              <span class="quota-title">📱 কানেক্টেড ডিভাইস কোটা</span>
+              <span class="quota-title">📱 Connected Forwarder Devices</span>
               <span class="quota-counts">${s.quotas.devices.connected} / ${s.quotas.devices.allowed} SIMs</span>
             </div>
             <div class="progress-track">
               <div class="progress-fill" style="width:${s.quotas.devices.percent}%;"></div>
             </div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">
-              আরও ${s.quotas.devices.allowed - s.quotas.devices.connected}টি অ্যান্ড্রয়েড ফরওয়ার্ডার যুক্ত করা সম্ভব।
+              ${s.quotas.devices.allowed - s.quotas.devices.connected} forwarder device slots remaining.
             </div>
           </div>
 
           <!-- Quota 3: Monthly Volume -->
           <div class="quota-item">
             <div class="quota-header">
-              <span class="quota-title">💰 মাসিক ভলিউম লিমিট</span>
+              <span class="quota-title">💰 Monthly Transaction Volume</span>
               <span class="quota-counts">৳ ${(s.quotas.monthly_volume_bdt.used).toLocaleString()} / ৳ ${(s.quotas.monthly_volume_bdt.allowed).toLocaleString()}</span>
             </div>
             <div class="progress-track">
               <div class="progress-fill" style="width:${s.quotas.monthly_volume_bdt.percent}%;"></div>
             </div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">
-              ব্যবহার হয়েছে ${s.quotas.monthly_volume_bdt.percent}% (সীমাহীন লেনদেনের জন্য Enterprise tier নিন)।
+              Utilized ${s.quotas.monthly_volume_bdt.percent}% (Upgrade to Enterprise for unlimited throughput).
             </div>
           </div>
         </div>
@@ -530,23 +550,23 @@ export const components = {
       <div class="table-card" style="margin-bottom:24px;">
         <div class="table-toolbar">
           <div>
-            <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin:0;">কানেক্টেড ওয়েবসাইটসমূহ</h4>
-            <span style="font-size:12px; color:var(--text-muted);">পেমেন্ট ও চেকআউটের জন্য অনুমোদিত ডোমেইন তালিকা</span>
+            <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin:0;">Connected Websites</h4>
+            <span style="font-size:12px; color:var(--text-muted);">Authorized domains configured for checkout and webhooks</span>
           </div>
           <button class="btn btn-primary-action" onclick="window.payflowApp.openConnectWebsiteModal()">
-            + নতুন ওয়েবসাইট যুক্ত করুন
+            + Connect Website
           </button>
         </div>
         <div class="table-responsive">
           <table class="data-table">
             <thead>
               <tr>
-                <th>ওয়েবসাইটের নাম</th>
-                <th>ডোমেইন URL</th>
-                <th>প্ল্যাটফর্ম</th>
-                <th>ওয়েবহুক কলব্যাক URL</th>
-                <th>স্ট্যাটাস</th>
-                <th>অ্যাকশন</th>
+                <th>Website Name</th>
+                <th>Domain URL</th>
+                <th>Platform</th>
+                <th>Webhook Callback URL</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -559,7 +579,7 @@ export const components = {
                   <td><span class="badge badge-completed">● ${w.status}</span></td>
                   <td>
                     <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.testSiteWebhook('${w.id}', '${w.webhook_url}')">
-                      টেস্ট পিং
+                      Test Ping
                     </button>
                   </td>
                 </tr>
@@ -572,7 +592,7 @@ export const components = {
       <!-- Webhook Configuration & Delivery Log -->
       <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:20px;">
         <div class="card-panel">
-          <h4 class="card-panel-title" style="margin-bottom:14px;">গ্লোবাল ওয়েবহুক সিক্রেট</h4>
+          <h4 class="card-panel-title" style="margin-bottom:14px;">Global Webhook Secret</h4>
           <div class="form-group">
             <label class="form-label">Primary Webhook URL</label>
             <input type="text" id="wh-url-input" class="form-control mono" value="https://merchant.example.com/api/webhook">
@@ -590,15 +610,15 @@ export const components = {
         </div>
 
         <div class="card-panel">
-          <h4 class="card-panel-title" style="margin-bottom:14px;">সাম্প্রতিক ডেলিভারি হিস্টোরি</h4>
+          <h4 class="card-panel-title" style="margin-bottom:14px;">Recent Delivery History</h4>
           <div class="table-responsive">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>ইভেন্ট</th>
-                  <th>HTTP স্ট্যাটাস</th>
-                  <th>রেসপন্স সময়</th>
-                  <th>সময়</th>
+                  <th>Event</th>
+                  <th>HTTP Status</th>
+                  <th>Response Time</th>
+                  <th>Time</th>
                 </tr>
               </thead>
               <tbody id="webhook-logs-tbody">
@@ -606,13 +626,13 @@ export const components = {
                   <td><span class="mono" style="font-size:12px;">payment.completed</span></td>
                   <td><span class="badge badge-completed">200 OK</span></td>
                   <td>112ms</td>
-                  <td>10 মিনিট পূর্বে</td>
+                  <td>10 mins ago</td>
                 </tr>
                 <tr>
                   <td><span class="mono" style="font-size:12px;">payment.completed</span></td>
                   <td><span class="badge badge-completed">200 OK</span></td>
                   <td>89ms</td>
-                  <td>32 মিনিট পূর্বে</td>
+                  <td>32 mins ago</td>
                 </tr>
               </tbody>
             </table>
@@ -630,12 +650,12 @@ export const components = {
           <div style="width:56px; height:56px; border-radius:16px; background:var(--primary-subtle); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           </div>
-          <h3 style="font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">কোনো পেমেন্ট চ্যানেল কনফিগার করা নেই</h3>
+          <h3 style="font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">No Payment Channels Configured</h3>
           <p style="font-size:13px; color:var(--text-muted); max-width:440px; margin:0 auto 20px;">
-            গ্রাহকদের জন্য bKash, Nagad, Rocket, ব্যাংক ট্রান্সফার বা Binance Pay চ্যানেল যোগ করুন।
+            Add bKash, Nagad, Rocket, Bank Transfer, or Binance Pay channels for your customers.
           </p>
           <button class="btn btn-primary-action" onclick="window.payflowApp.openAddPaymentMethodModal()">
-            + প্রথম চ্যানেল যুক্ত করুন
+            + Add First Channel
           </button>
         </div>
       `;
@@ -725,11 +745,11 @@ export const components = {
               <!-- Active Toggle Switch -->
               <button 
                 class="btn-icon-tool" 
-                title="${isActive ? 'বন্ধ করতে ক্লিক করুন' : 'চালু করতে ক্লিক করুন'}" 
+                title="${isActive ? 'Click to deactivate' : 'Click to activate'}" 
                 onclick="window.payflowApp.togglePaymentMethod('${m.id}', ${!isActive})"
                 style="padding:4px 9px; border-radius:20px; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:4px; background:${isActive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)'}; color:${isActive ? '#10b981' : '#ef4444'}; border:1px solid ${isActive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'};">
                 <span style="width:6px; height:6px; border-radius:50%; background:${isActive ? '#10b981' : '#ef4444'}; display:inline-block;"></span>
-                <span>${isActive ? 'সক্রিয়' : 'বন্ধ'}</span>
+                <span>${isActive ? 'Active' : 'Inactive'}</span>
               </button>
             </div>
 
@@ -740,7 +760,7 @@ export const components = {
                   ${m.account_number}
                 </span>
                 <button class="btn btn-secondary-action" style="padding:1px 6px; font-size:10.5px;" onclick="window.payflowApp.copyText('${m.account_number}')">
-                  কপি
+                  Copy
                 </button>
               </div>
               ${m.account_name ? `
@@ -759,7 +779,7 @@ export const components = {
             ${instFormatted ? `
               <details style="margin-bottom:8px; font-size:11.5px;">
                 <summary style="cursor:pointer; font-weight:600; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px; user-select:none;">
-                  <span>নির্দেশিকা</span>
+                  <span>Instructions</span>
                 </summary>
                 <div style="background:var(--bg-main, #ffffff); border:1px solid var(--border); border-radius:6px; padding:6px 10px; margin-top:4px; font-size:11px; color:var(--text-secondary); line-height:1.4;">
                   <ul style="padding-left:14px; margin:0;">
@@ -774,14 +794,14 @@ export const components = {
           <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:8px; margin-top:2px;">
             <div style="display:flex; gap:6px;">
               <button class="btn btn-secondary-action" style="padding:3px 8px; font-size:11px;" onclick="window.payflowApp.editPaymentMethod('${m.id}')">
-                এডিট
+                Edit
               </button>
               <a href="/checkout" target="_blank" class="btn btn-secondary-action" style="padding:3px 8px; font-size:11px; text-decoration:none;">
-                টেস্ট
+                Test
               </a>
             </div>
 
-            <button class="btn-icon-tool" style="color:var(--danger, #ef4444); padding:3px;" title="মুছুন" onclick="window.payflowApp.deletePaymentMethod('${m.id}', '${m.title.replace(/'/g, "\\'")}')">
+            <button class="btn-icon-tool" style="color:var(--danger, #ef4444); padding:3px;" title="Delete" onclick="window.payflowApp.deletePaymentMethod('${m.id}', '${m.title.replace(/'/g, "\\'")}')">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>

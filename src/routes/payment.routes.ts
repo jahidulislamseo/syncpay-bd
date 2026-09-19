@@ -285,7 +285,21 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     if (!invoice) {
       return reply.status(404).send({ success: false, error: 'Invoice not found' });
     }
-    return reply.send({ success: true, invoice });
+
+    // Enrich response with merchant name for checkout header branding
+    let merchant_name: string | null = null;
+    let merchant_logo_url: string | null = null;
+    if (invoice.merchant_id) {
+      try {
+        const { dbService } = await import('../db/database.js');
+        const merchant = dbService.getMerchantById(invoice.merchant_id);
+        if (merchant) {
+          merchant_name = merchant.name || null;
+        }
+      } catch (_) {}
+    }
+
+    return reply.send({ success: true, invoice: { ...invoice, merchant_name, merchant_logo_url } });
   });
 
   // ==========================================

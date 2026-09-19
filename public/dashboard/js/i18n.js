@@ -374,7 +374,7 @@ export const translations = {
 
 class I18nService {
   constructor() {
-    this.currentLang = localStorage.getItem('syncpay_lang') || localStorage.getItem('payflow_lang') || 'bn';
+    this.currentLang = localStorage.getItem('syncpay_lang') || localStorage.getItem('payflow_lang') || 'en';
   }
 
   get lang() {
