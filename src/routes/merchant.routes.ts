@@ -172,7 +172,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       merchant_id: FALLBACK_MERCHANT_ID,
       device_id: deviceId,
       device_token: token,
-      device_name: dev?.device_name || 'PayFlow Android Forwarder',
+      device_name: dev?.device_name || 'SyncPay Android Forwarder',
     };
 
     try {
@@ -266,7 +266,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       status: 'ACTIVE',
       created_at: new Date().toISOString().split('T')[0],
     };
-    return reply.status(201).send({ success: true, data: newSite, message: 'Website connected to PayFlow gateway' });
+    return reply.status(201).send({ success: true, data: newSite, message: 'Website connected to SyncPay BD gateway' });
   });
 
   // ==========================================

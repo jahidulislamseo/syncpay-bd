@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Documentation | PayFlow MFS</title>
-  <meta name="description" content="PayFlow MFS API — invoice তৈরি, payment verify এবং webhook সংক্রান্ত সম্পূর্ণ ডকুমেন্টেশন।">
+  <title>API Documentation | SyncPay BD</title>
+  <meta name="description" content="SyncPay BD API — invoice তৈরি, payment verify এবং webhook সংক্রান্ত সম্পূর্ণ ডকুমেন্টেশন।">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -68,7 +68,7 @@
 <body>
   <header>
     <div class="nav-wrap">
-      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>PayFlow MFS</span></a>
+      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>SyncPay BD</span></a>
       <div class="nav-right">
         <a href="/docs/api" style="color:var(--primary)">API Docs</a>
         <a href="/docs/trx-verification">Verification</a>
@@ -94,7 +94,7 @@
 
     <main class="content">
       <div class="page-chip">API Documentation</div>
-      <h1>PayFlow MFS API</h1>
+      <h1>SyncPay BD API</h1>
       <p class="lead">একটিমাত্র REST API দিয়ে আপনার যেকোনো platform-এ bKash, Nagad, Rocket ও Upay payment verification যোগ করুন। JSON-based, সহজ authentication, real-time response।</p>
 
       <div class="doc-links">
@@ -104,16 +104,16 @@
 
       <div class="base-url">
         <span class="label">BASE URL</span>
-        <span>https://api.payflow-mfs.com/v1</span>
+        <span>https://api.syncpaybd.xyz/v1</span>
       </div>
 
       <h2 id="overview">Overview</h2>
-      <p>PayFlow MFS API একটি RESTful HTTP API। সব request ও response JSON format-এ। HTTPS বাধ্যতামূলক।</p>
+      <p>SyncPay BD API একটি RESTful HTTP API। সব request ও response JSON format-এ। HTTPS বাধ্যতামূলক।</p>
       <ul>
         <li>Content-Type: <code>application/json</code></li>
         <li>সব response-এ <code>success: true/false</code> থাকে</li>
         <li>Rate limit: 100 req/minute per API key</li>
-        <li>Sandbox: <code>https://sandbox.payflow-mfs.com/v1</code></li>
+        <li>Sandbox: <code>https://sandbox.syncpaybd.xyz/v1</code></li>
       </ul>
       <div class="alert alert-info">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>

@@ -227,13 +227,13 @@ export class DatabaseService {
       `).run();
     }
 
-    // Seed official PayFlow sandbox merchant key
+    // Seed official SyncPay BD sandbox merchant key
     const checkPayflowMerchant = this.db.prepare('SELECT id FROM merchants WHERE api_key = ?');
     const existing = checkPayflowMerchant.get('sandbox_test_8f4c9a2e7b31') as { id: string } | undefined;
     if (!existing) {
       this.db.prepare(`
         INSERT INTO merchants (id, name, api_key, webhook_url)
-        VALUES ('m_payflow_sandbox', 'PayFlow Sandbox Merchant', 'sandbox_test_8f4c9a2e7b31', 'https://merchant.com/api/payflow/webhook')
+        VALUES ('m_payflow_sandbox', 'SyncPay BD Sandbox Merchant', 'sandbox_test_8f4c9a2e7b31', 'https://merchant.com/api/payflow/webhook')
       `).run();
     } else if (existing.id !== 'm_payflow_sandbox') {
       this.db.exec(`
@@ -241,7 +241,7 @@ export class DatabaseService {
         UPDATE devices SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
         UPDATE transactions SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
         UPDATE invoices SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
-        UPDATE merchants SET id = 'm_payflow_sandbox', name = 'PayFlow Sandbox Merchant', webhook_url = 'https://merchant.com/api/payflow/webhook' WHERE api_key = 'sandbox_test_8f4c9a2e7b31';
+        UPDATE merchants SET id = 'm_payflow_sandbox', name = 'SyncPay BD Sandbox Merchant', webhook_url = 'https://merchant.com/api/payflow/webhook' WHERE api_key = 'sandbox_test_8f4c9a2e7b31';
         PRAGMA foreign_keys = ON;
       `);
     }
@@ -265,7 +265,7 @@ export class DatabaseService {
     if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('00000000-0000-0000-0000-000000000999')) {
       this.db.prepare(`
         INSERT OR IGNORE INTO merchants (id, name, api_key, webhook_url)
-        VALUES ('00000000-0000-0000-0000-000000000999', 'PayFlow Sandbox (UUID)', 'sandbox_test_8f4c9a2e7b31_uuid', 'https://merchant.com/api/payflow/webhook')
+        VALUES ('00000000-0000-0000-0000-000000000999', 'SyncPay BD Sandbox (UUID)', 'sandbox_test_8f4c9a2e7b31_uuid', 'https://merchant.com/api/payflow/webhook')
       `).run();
     }
     if (!this.db.prepare('SELECT id FROM devices WHERE id = ? OR device_token = ?').get('00000000-0000-0000-0000-000000000001', 'token_phone_primary_uuid')) {
@@ -308,7 +308,7 @@ export class DatabaseService {
           title: 'Nagad',
           badge: 'MFS',
           account_number: '01712345678',
-          account_name: 'PayFlow Store',
+          account_name: 'SyncPay BD Store',
           bank_name: null,
           branch_name: null,
           routing_number: null,
@@ -344,7 +344,7 @@ export class DatabaseService {
           title: 'Upay',
           badge: 'MFS',
           account_number: '01812345678',
-          account_name: 'PayFlow Merchant',
+          account_name: 'SyncPay BD Merchant',
           bank_name: null,
           branch_name: null,
           routing_number: null,
@@ -362,7 +362,7 @@ export class DatabaseService {
           title: 'TAP',
           badge: 'MFS',
           account_number: '01798765432',
-          account_name: 'PayFlow Store',
+          account_name: 'SyncPay BD Store',
           bank_name: null,
           branch_name: null,
           routing_number: null,
@@ -398,7 +398,7 @@ export class DatabaseService {
           title: 'mCash',
           badge: 'MFS',
           account_number: '01898765432',
-          account_name: 'IBBL PayFlow',
+          account_name: 'IBBL SyncPay BD',
           bank_name: null,
           branch_name: null,
           routing_number: null,
@@ -524,13 +524,13 @@ export class DatabaseService {
           title: 'City Bank',
           badge: 'BANK',
           account_number: '1502938471001',
-          account_name: 'PayFlow Technologies Ltd',
+          account_name: 'SyncPay BD Technologies Ltd',
           bank_name: 'City Bank PLC',
           branch_name: 'Gulshan Avenue Branch, Dhaka',
           routing_number: '225271983',
           sender_label: 'Sender Bank / Account Name *',
           trx_label: 'Bank Transfer Ref / Slip No *',
-          instructions: '১. ব্যাংক অ্যাপ থেকে Fund Transfer (NPSB/BEFTN) করুন\n২. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue\n৩. অ্যাকাউন্ট: {ACCOUNT_NUMBER}, নাম: PayFlow Ltd\n৪. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৫. রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন',
+          instructions: '১. ব্যাংক অ্যাপ থেকে Fund Transfer (NPSB/BEFTN) করুন\n২. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue\n৩. অ্যাকাউন্ট: {ACCOUNT_NUMBER}, নাম: SyncPay BD Ltd\n৪. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৫. রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন',
           theme_color: '#005A9C',
           is_active: 1,
           sort_order: 14,
@@ -542,7 +542,7 @@ export class DatabaseService {
           title: 'Binance Pay',
           badge: 'CRYPTO',
           account_number: '829301948',
-          account_name: 'PayFlowGlobal',
+          account_name: 'SyncPay BDGlobal',
           bank_name: null,
           branch_name: null,
           routing_number: null,
@@ -868,7 +868,7 @@ export class DatabaseService {
     if (!checkAdmin.get('admin@payflow.com')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_root', 'PayFlow Super Admin', 'admin@payflow.com', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
+        VALUES ('admin_root', 'SyncPay BD Super Admin', 'admin@payflow.com', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
       `).run();
     }
     if (!checkAdmin.get('ops@payflow.com')) {

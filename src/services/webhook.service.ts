@@ -34,7 +34,7 @@ export class WebhookService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'PayFlow-Webhook-Engine/1.0',
+          'User-Agent': 'SyncPayBD-Webhook-Engine/1.0',
           'X-Payflow-Signature': signature,
           'X-Payflow-Invoice-Id': params.invoiceId,
         },

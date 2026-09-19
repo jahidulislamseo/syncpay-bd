@@ -1253,7 +1253,7 @@
       padding: 14px 18px;
       border-bottom: 1px solid #f1f5f9;
     }
-    .comp-col-payflow {
+    .comp-col-syncpay {
       background: #f0f9ff;
       color: #0369a1;
       font-weight: 700;
@@ -1918,7 +1918,7 @@
                 <input type="text" id="pf-cus-name" class="input-ctrl" value="Rahim Ahmed">
               </div>
 
-              <button class="btn-checkout" style="padding: 9px;" onclick="testPayflowCreateInvoice()">
+              <button class="btn-checkout" style="padding: 9px;" onclick="testSyncPayCreateInvoice()">
                 Test Create Invoice (POST)
               </button>
 
@@ -1941,7 +1941,7 @@
                 <input type="text" id="pf-verify-id" class="input-ctrl mono" placeholder="উদাঃ PF98X2K9L">
               </div>
 
-              <button class="btn-checkout" style="background:#10b981; padding: 9px;" onclick="testPayflowVerifyInvoice()">
+              <button class="btn-checkout" style="background:#10b981; padding: 9px;" onclick="testSyncPayVerifyInvoice()">
                 Test Verify Status (POST)
               </button>
 
@@ -2051,34 +2051,34 @@
           <thead>
             <tr>
               <th data-i18n="comp_th_feature">বৈশিষ্ট্য</th>
-              <th class="comp-col-payflow" data-i18n="comp_th_payflow">⚡ SyncPay BD</th>
+              <th class="comp-col-syncpay" data-i18n="comp_th_syncpay">⚡ SyncPay BD</th>
               <th data-i18n="comp_th_trad">🏦 Traditional Gateway</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><strong data-i18n="comp_row1_title">Transaction Fees</strong></td>
-              <td class="comp-col-payflow" data-i18n="comp_row1_pf">ফ্ল্যাট সাবস্ক্রিপশন (প্রতি অর্ডারে ০% ফি)</td>
+              <td class="comp-col-syncpay" data-i18n="comp_row1_pf">ফ্ল্যাট সাবস্ক্রিপশন (প্রতি অর্ডারে ০% ফি)</td>
               <td data-i18n="comp_row1_tr">প্রতি অর্ডারে ১.৫% – ৩.৫% ফি কাটা হয়</td>
             </tr>
             <tr>
               <td><strong data-i18n="comp_row2_title">অ্যাকাউন্ট রিকোয়ারমেন্ট</strong></td>
-              <td class="comp-col-payflow" data-i18n="comp_row2_pf">Personal, Agent বা Merchant নাম্বার সাপোর্টেড</td>
+              <td class="comp-col-syncpay" data-i18n="comp_row2_pf">Personal, Agent বা Merchant নাম্বার সাপোর্টেড</td>
               <td data-i18n="comp_row2_tr">বাধ্যতামূলক ট্রেড লাইসেন্স ও মার্চেন্ট অনুমোদন</td>
             </tr>
             <tr>
               <td><strong data-i18n="comp_row3_title">টাকা পাওয়ার সময়</strong></td>
-              <td class="comp-col-payflow" data-i18n="comp_row3_pf">তাৎক্ষণিক সরাসরি আপনার ব্যক্তিগত ওয়ালেটে</td>
+              <td class="comp-col-syncpay" data-i18n="comp_row3_pf">তাৎক্ষণিক সরাসরি আপনার ব্যক্তিগত ওয়ালেটে</td>
               <td data-i18n="comp_row3_tr">৩ থেকে ৭ দিন ব্যাংকে টাকা আটকে থাকে</td>
             </tr>
             <tr>
               <td><strong data-i18n="comp_row4_title">লেনদেনের লিমিট</strong></td>
-              <td class="comp-col-payflow" data-i18n="comp_row4_pf">আনলিমিটেড ট্রানজ্যাকশন ভেরিফিকেশন</td>
+              <td class="comp-col-syncpay" data-i18n="comp_row4_pf">আনলিমিটেড ট্রানজ্যাকশন ভেরিফিকেশন</td>
               <td data-i18n="comp_row4_tr">ভলিউম লিমিট ও মাসিক এক্সট্রা চার্জ</td>
             </tr>
             <tr>
               <td><strong data-i18n="comp_row5_title">ডাবল স্পেন্ড প্রটেকশন</strong></td>
-              <td class="comp-col-payflow" data-i18n="comp_row5_pf">একই TrxID পুনর্ব্যবহার সম্পূর্ণ অটোমেটিক ব্লক</td>
+              <td class="comp-col-syncpay" data-i18n="comp_row5_pf">একই TrxID পুনর্ব্যবহার সম্পূর্ণ অটোমেটিক ব্লক</td>
               <td data-i18n="comp_row5_tr">ম্যানুয়াল SMS চেকিংয়ে ভুয়া স্ক্রিনশটের ঝুঁকি</td>
             </tr>
           </tbody>
@@ -2408,7 +2408,7 @@
     let currentProvider = 'bKash';
     let currentBilling = 'monthly';
     const API_KEY = 'live_demo_sec_99410';
-    const PAYFLOW_SANDBOX_KEY = 'sandbox_test_8f4c9a2e7b31';
+    const SYNCPAY_SANDBOX_KEY = 'sandbox_test_8f4c9a2e7b31';
 
     // Pricing dataset
     const primaryPlans = [
@@ -2683,7 +2683,7 @@
     }
 
     // Developer API Tests
-    async function testPayflowCreateInvoice() {
+    async function testSyncPayCreateInvoice() {
       const amount = parseFloat(document.getElementById('pf-amount').value) || 1200;
       const cusName = document.getElementById('pf-cus-name').value.trim() || 'Rahim Ahmed';
       const resEl = document.getElementById('pf-create-response');
@@ -2698,7 +2698,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'payflow-api-key': PAYFLOW_SANDBOX_KEY
+            'syncpay-api-key': SYNCPAY_SANDBOX_KEY
           },
           body: JSON.stringify({
             cus_name: cusName,
@@ -2726,7 +2726,7 @@
       }
     }
 
-    async function testPayflowVerifyInvoice() {
+    async function testSyncPayVerifyInvoice() {
       const invoiceId = document.getElementById('pf-verify-id').value.trim();
       const resEl = document.getElementById('pf-verify-response');
 
@@ -2742,7 +2742,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'payflow-api-key': PAYFLOW_SANDBOX_KEY
+            'syncpay-api-key': SYNCPAY_SANDBOX_KEY
           },
           body: JSON.stringify({ invoice_id: invoiceId })
         });

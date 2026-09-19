@@ -1009,7 +1009,7 @@
           title: 'Pay with Nagad Payment',
           badge: 'BANGLA QR',
           account_number: '01712345678',
-          account_name: 'PayFlow Store',
+          account_name: 'SyncPay Store',
           theme_color: '#F7941D',
           sender_label: 'Your Nagad Number *',
           trx_label: 'Nagad TxnID *',
@@ -1033,14 +1033,14 @@
           title: 'City Bank PLC (BEFTN / NPSB)',
           badge: 'ONLINE BANK',
           account_number: '1502938471001',
-          account_name: 'PayFlow Technologies Ltd',
+          account_name: 'SyncPay BD Technologies Ltd',
           bank_name: 'City Bank PLC',
           branch_name: 'Gulshan Avenue Branch',
           routing_number: '225271983',
           theme_color: '#005A9C',
           sender_label: 'Sender Bank / Account Name *',
           trx_label: 'Bank Transfer Ref / Slip No *',
-          instructions: '১. আপনার ব্যাংক অ্যাপ (যেমন Citytouch, EBL SKYBANKING ইত্যাদি) লগইন করুন\n২. Fund Transfer -> Other Bank Transfer (NPSB / BEFTN) বেছে নিন\n৩. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue Branch দিন\n৪. অ্যাকাউন্ট নং: {ACCOUNT_NUMBER} এবং নাম: PayFlow Technologies Ltd লিখুন\n৫. পরিমাণ: ৳ {AMOUNT} এবং রেফারেন্সে {REF} দিন\n৬. ট্রান্সফার শেষে প্রাপ্ত রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন',
+          instructions: '১. আপনার ব্যাংক অ্যাপ (যেমন Citytouch, EBL SKYBANKING ইত্যাদি) লগইন করুন\n২. Fund Transfer -> Other Bank Transfer (NPSB / BEFTN) বেছে নিন\n৩. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue Branch দিন\n৪. অ্যাকাউন্ট নং: {ACCOUNT_NUMBER} এবং নাম: SyncPay BD Technologies Ltd লিখুন\n৫. পরিমাণ: ৳ {AMOUNT} এবং রেফারেন্সে {REF} দিন\n৬. ট্রান্সফার শেষে প্রাপ্ত রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন',
         },
         {
           id: 'pm_binance_default',
@@ -1048,7 +1048,7 @@
           title: 'Binance Pay (USDT Crypto)',
           badge: 'BINANCE PAY',
           account_number: '829301948',
-          account_name: 'PayFlowGlobal',
+          account_name: 'SyncPayGlobal',
           theme_color: '#F3BA2F',
           sender_label: 'Your Binance Pay ID / Nickname *',
           trx_label: 'Binance Order ID / Internal TxID *',
@@ -1185,9 +1185,9 @@
       // Update Merchant Notice Text
       const noticeBox = document.getElementById('merchant-notice-text');
       if (type === 'bank') {
-        noticeBox.innerHTML = `Bank: <strong>${activeMethod.bank_name || 'Bank'}</strong> • A/C: <strong>${activeMethod.account_name || 'PayFlow'}</strong>`;
+        noticeBox.innerHTML = `Bank: <strong>${activeMethod.bank_name || 'Bank'}</strong> • A/C: <strong>${activeMethod.account_name || 'SyncPay BD'}</strong>`;
       } else {
-        noticeBox.innerHTML = `A/C Name: <strong>${activeMethod.account_name || 'PayFlow'}</strong>`;
+        noticeBox.innerHTML = `A/C Name: <strong>${activeMethod.account_name || 'SyncPay BD'}</strong>`;
       }
 
       // Update QR Code on checkout card & Zoom modal (raw=1 directly returns PNG image)

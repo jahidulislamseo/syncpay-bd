@@ -1,4 +1,4 @@
-// PayFlow MFS — Production Dashboard Master Application Controller
+// SyncPay BD — Production Dashboard Master Application Controller
 import { i18n } from './i18n.js?v=1.0.5';
 import { api } from './api.js?v=1.0.5';
 import { components } from './components.js?v=1.0.5';
@@ -2303,7 +2303,7 @@ class PayFlowDashboardApp {
         document.getElementById('pm-routing-number').value = '225271983';
         document.getElementById('pm-sender-label').value = 'Sender Bank / Account Name *';
         document.getElementById('pm-trx-label').value = 'Bank Transfer Ref / Slip No *';
-        document.getElementById('pm-instructions').value = '১. ব্যাংক অ্যাপ থেকে Fund Transfer (NPSB/BEFTN) করুন\n২. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue\n৩. অ্যাকাউন্ট: {ACCOUNT_NUMBER}, নাম: PayFlow Ltd\n৪. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৫. রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন';
+        document.getElementById('pm-instructions').value = '১. ব্যাংক অ্যাপ থেকে Fund Transfer (NPSB/BEFTN) করুন\n২. ব্যাংক: City Bank PLC, ব্রাঞ্চ: Gulshan Avenue\n৩. অ্যাকাউন্ট: {ACCOUNT_NUMBER}, নাম: SyncPay Ltd\n৪. পরিমাণ ৳ {AMOUNT} ও রেফারেন্স {REF} দিন\n৫. রেফারেন্স নম্বর দিয়ে ভেরিফাই করুন';
       } else if (type === 'binance') {
         document.getElementById('pm-title').value = 'Binance Pay';
         document.getElementById('pm-badge').value = 'CRYPTO';
