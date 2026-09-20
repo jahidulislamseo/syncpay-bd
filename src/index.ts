@@ -45,7 +45,7 @@ await server.register(adminRoutes);
 
 // Health check
 server.get('/health', async () => {
-  return { status: 'OK', timestamp: new Date().toISOString(), system: 'SyncPay BD Gateway', domain: 'syncpaybd.xyz' };
+  return { status: 'OK', timestamp: new Date().toISOString(), system: 'SyncPay BD Gateway', domain: 'syncpaybd.site' };
 });
 
 // Serve Static Frontend only in standalone Node.js environment (Vercel CDN serves static assets directly)
@@ -55,9 +55,18 @@ if (!process.env.VERCEL) {
     prefix: '/',
   });
 
-  // Canonical Clean URL Hook: Redirect any *.html request to its clean URL (301 Permanent Redirect)
+  // Canonical Non-WWW & Clean URL Hook: Redirect any www.* or *.html request (301 Permanent Redirect)
   server.addHook('onRequest', async (req, reply) => {
-    const rawUrl = req.raw.url || '';
+    // 1. Enforce Non-WWW Canonical Domain (e.g. www.syncpaybd.site -> syncpaybd.site)
+    const host = req.headers.host;
+    if (host && /^www\./i.test(host)) {
+      const nonWwwHost = host.replace(/^www\./i, '');
+      const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
+      return reply.code(301).redirect(`${proto}://${nonWwwHost}${req.raw.url || req.url}`);
+    }
+
+    // 2. Enforce Extensionless Clean URLs (e.g. /dashboard.html -> /dashboard)
+    const rawUrl = req.raw.url || req.url || '';
     const [pathname, search] = rawUrl.split('?');
     if (pathname && pathname.endsWith('.html')) {
       let cleanPath = pathname.slice(0, -5);
@@ -112,7 +121,7 @@ if (!process.env.VERCEL) {
     console.log(`\n======================================================`);
     console.log(`🚀 SyncPay BD Engine running at: http://localhost:${PORT}`);
     console.log(`📊 Dashboard & Checkout UI:       http://localhost:${PORT}/`);
-    console.log(`🌐 Production Domain:             https://syncpaybd.xyz`);
+    console.log(`🌐 Production Domain:             https://syncpaybd.site`);
     console.log(`======================================================\n`);
   } catch (err) {
     server.log.error(err);

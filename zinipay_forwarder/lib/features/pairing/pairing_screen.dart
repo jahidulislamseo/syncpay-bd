@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/app_localizations.dart';
@@ -13,7 +14,7 @@ class PairingScreen extends ConsumerStatefulWidget {
 
 class _PairingScreenState extends ConsumerState<PairingScreen> {
   final _formKey = GlobalKey<FormState>();
-  bool _isManual = false;
+  bool _isManual = true;
   bool _isScanning = false;
 
   late final TextEditingController _merchantIdCtrl;
@@ -30,7 +31,9 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     _merchantIdCtrl = TextEditingController(text: vault.merchantId);
     _businessNameCtrl = TextEditingController(text: vault.merchantName);
     _tokenCtrl = TextEditingController(text: vault.deviceToken);
-    _backendUrlCtrl = TextEditingController(text: vault.backendUrl);
+    _backendUrlCtrl = TextEditingController(
+      text: vault.backendUrl.isNotEmpty ? vault.backendUrl : 'https://syncpaybd.site',
+    );
   }
 
   @override
@@ -42,19 +45,60 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     super.dispose();
   }
 
-  void _simulateQrScan() async {
-    setState(() => _isScanning = true);
-    await Future.delayed(const Duration(milliseconds: 1500));
-    if (!mounted) return;
-
-    _merchantIdCtrl.text = 'MER_001';
-    _businessNameCtrl.text = 'ABC Store BD';
-    _tokenCtrl.text = 'token_phone_primary';
-    _backendUrlCtrl.text = 'http://10.0.2.2:4000';
-
-    setState(() => _isScanning = false);
-
-    _submitPairing();
+  void _handleQrScan() async {
+    final textCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Pairing Token / QR Data'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'SyncPay BD ড্যাশবোর্ড থেকে প্রাপ্ত Pairing Token বা JSON ডেটা দিন:',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: textCtrl,
+              decoration: const InputDecoration(
+                hintText: 'e.g. token_xxxx বা JSON',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final val = textCtrl.text.trim();
+              Navigator.pop(ctx);
+              if (val.isEmpty) return;
+              try {
+                final json = jsonDecode(val);
+                if (json is Map) {
+                  if (json['merchant_id'] != null) _merchantIdCtrl.text = json['merchant_id'].toString();
+                  if (json['business_name'] != null) _businessNameCtrl.text = json['business_name'].toString();
+                  if (json['device_token'] != null) _tokenCtrl.text = json['device_token'].toString();
+                  if (json['backend_url'] != null) _backendUrlCtrl.text = json['backend_url'].toString();
+                  setState(() => _isManual = true);
+                  return;
+                }
+              } catch (_) {}
+              _tokenCtrl.text = val;
+              setState(() => _isManual = true);
+            },
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _submitPairing() async {
@@ -152,7 +196,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // QR Scanner Button
+                // QR Scanner / Token Importer Button
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6366F1),
@@ -160,15 +204,9 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  onPressed: _isScanning ? null : _simulateQrScan,
-                  icon: _isScanning
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.qr_code),
-                  label: Text(_isScanning ? 'Scanning QR...' : loc.tr('scan_qr_code')),
+                  onPressed: _handleQrScan,
+                  icon: const Icon(Icons.qr_code_scanner),
+                  label: Text(loc.tr('scan_qr_code')),
                 ),
                 const SizedBox(height: 16),
 

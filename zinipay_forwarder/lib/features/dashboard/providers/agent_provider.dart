@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_vault.dart';
 import '../../../services/offline_queue_service.dart';
+import '../../../services/soundbox_service.dart';
+import '../../../services/telemetry_service.dart';
+import '../../../services/telephony_channel_service.dart';
 import '../../sms/models/sms_transaction.dart';
 import '../../sms/services/mfs_sms_parser.dart';
 
@@ -15,6 +18,8 @@ class AgentState {
   String get serverUrl => backendUrl;
   final String deviceId;
   final String deviceToken;
+  final String deviceName;
+  final String androidVersion;
   final String merchantId;
   final String merchantName;
   final String language;
@@ -46,6 +51,8 @@ class AgentState {
     required this.backendUrl,
     required this.deviceId,
     required this.deviceToken,
+    this.deviceName = '',
+    this.androidVersion = '',
     required this.merchantId,
     required this.merchantName,
     required this.language,
@@ -89,6 +96,8 @@ class AgentState {
     String? backendUrl,
     String? deviceId,
     String? deviceToken,
+    String? deviceName,
+    String? androidVersion,
     String? merchantId,
     String? merchantName,
     String? language,
@@ -116,6 +125,8 @@ class AgentState {
       backendUrl:           backendUrl           ?? this.backendUrl,
       deviceId:             deviceId             ?? this.deviceId,
       deviceToken:          deviceToken          ?? this.deviceToken,
+      deviceName:           deviceName           ?? this.deviceName,
+      androidVersion:       androidVersion       ?? this.androidVersion,
       merchantId:           merchantId           ?? this.merchantId,
       merchantName:         merchantName         ?? this.merchantName,
       language:             language             ?? this.language,
@@ -150,19 +161,25 @@ final agentProvider = StateNotifierProvider<AgentNotifier, AgentState>((ref) {
 class AgentNotifier extends StateNotifier<AgentState> {
   final LocalVault _vault;
   final ApiClient _apiClient;
-  late final OfflineQueueService _queueService;
+  final OfflineQueueService _queueService;
+  final SoundboxService _soundboxService = SoundboxService();
+  final TelemetryService _telemetryService = TelemetryService();
+  final TelephonyChannelService _telephonyChannel = TelephonyChannelService();
   Timer? _heartbeatTimer;
 
   AgentNotifier(this._vault, {ApiClient? apiClient})
       : _apiClient = apiClient ?? ApiClient(),
+        _queueService = OfflineQueueService(vault: _vault, apiClient: apiClient ?? ApiClient()),
         super(AgentState(
           isOnline: true,
           isServiceRunning: true,
-          latencyMs: 115,
+          latencyMs: null,
           lastSyncedAt: DateTime.now(),
           backendUrl: _vault.backendUrl,
           deviceId: _vault.deviceId,
           deviceToken: _vault.deviceToken,
+          deviceName: _vault.deviceName,
+          androidVersion: _vault.androidVersion,
           merchantId: _vault.merchantId,
           merchantName: _vault.merchantName,
           language: _vault.language,
@@ -192,16 +209,33 @@ class AgentNotifier extends StateNotifier<AgentState> {
       transactionHistory: _queueService.getHistory(),
     );
 
-    // Initial ping
+    // Initial ping & genuine device info refresh
     pingBackend();
+    _refreshDeviceInfo();
 
     // Start periodic heartbeat (every 60s)
     _heartbeatTimer = Timer.periodic(const Duration(seconds: 60), (_) {
       pingBackend();
+      _refreshDeviceInfo();
     });
   }
 
-  /// Pings backend to check online status and latency
+  /// Refreshes genuine device hardware and OS identity from Android platform
+  Future<void> _refreshDeviceInfo() async {
+    try {
+      final t = await _telemetryService.sampleTelemetry();
+      if (t.deviceName.isNotEmpty || t.androidVersion.isNotEmpty) {
+        if (t.deviceName.isNotEmpty) await _vault.setDeviceName(t.deviceName);
+        if (t.androidVersion.isNotEmpty) await _vault.setAndroidVersion(t.androidVersion);
+        state = state.copyWith(
+          deviceName: t.deviceName.isNotEmpty ? t.deviceName : state.deviceName,
+          androidVersion: t.androidVersion.isNotEmpty ? t.androidVersion : state.androidVersion,
+        );
+      }
+    } catch (_) {}
+  }
+
+  /// Pings backend to check online status and latency with hardware telemetry
   Future<void> pingBackend() async {
     final latency = await _apiClient.measureLatency(
       backendUrl: state.backendUrl,
@@ -214,19 +248,42 @@ class AgentNotifier extends StateNotifier<AgentState> {
       latencyMs: latency,
       lastSyncedAt: online ? DateTime.now() : state.lastSyncedAt,
     );
+
+    // Transmit battery, thermal & SIM hardware metrics in background
+    if (online) {
+      final res = await _telemetryService.sendHeartbeatWithTelemetry();
+      if (res != null && res['commands'] is List) {
+        final cmds = res['commands'] as List;
+        for (final cmd in cmds) {
+          if (cmd is Map && cmd['action'] == 'RESYNC_SMS') {
+            final mins = (cmd['minutes'] as num?)?.toInt() ?? 60;
+            unawaited(resyncRecentSms(minutes: mins));
+          }
+        }
+      }
+    }
   }
 
-  /// Main handler for incoming SMS intercepted by telephony broadcast receiver or simulator
-  Future<bool> handleIncomingRawSms(String sender, String body) async {
-    await _vault.addLog('Incoming SMS Received', 'From: $sender');
+  /// Main handler for incoming SMS or push notifications intercepted by telephony receiver
+  Future<bool> handleIncomingRawSms(
+    String sender,
+    String body, {
+    int? simSlot,
+    String? carrier,
+    String? source = 'SMS',
+  }) async {
+    await _vault.addLog(
+      source == 'APP_NOTIFICATION' ? 'Push Notification Intercepted' : 'Incoming SMS Received',
+      'From: $sender${simSlot != null ? " (SIM ${simSlot + 1})" : ""}',
+    );
 
-    // Parse SMS
+    // Parse SMS / Notification body
     final parsed = MfsSmsParser.parse(sender, body);
 
     if (!parsed.success || parsed.amount == null || parsed.trxId == null) {
       state = state.copyWith(rejectedCount: state.rejectedCount + 1);
       await _vault.addLog(
-        'SMS Rejected',
+        'Format Rejected',
         'Non-financial or unrecognized format: ${parsed.error ?? "Failed regex"}',
       );
       return false;
@@ -244,11 +301,35 @@ class AgentNotifier extends StateNotifier<AgentState> {
 
     await _vault.addLog(
       'Parser Detected ${parsed.provider}',
-      'Extracted TrxID: ${parsed.trxId}, Amount: ৳${parsed.amount}',
+      'Extracted TrxID: ${parsed.trxId}, Amount: ৳${parsed.amount}${simSlot != null ? " [SIM ${simSlot + 1}]" : ""}',
     );
 
-    final transaction = parsed.toTransaction();
+    // Bengali Voice Soundbox Audio Announcement
+    unawaited(_soundboxService.announcePayment(
+      provider: parsed.provider,
+      amount: parsed.amount!,
+    ));
+
+    final transaction = parsed.toTransaction(
+      simSlot: simSlot,
+      carrier: carrier,
+      source: source,
+    );
     return _queueService.enqueue(transaction);
+  }
+
+  /// Missed SMS inbox resynchronization
+  Future<int> resyncRecentSms({int minutes = 60}) async {
+    final list = await _telephonyChannel.readRecentSms(minutes: minutes);
+    int ingestedCount = 0;
+    for (final item in list) {
+      final sender = item['sender']?.toString() ?? '';
+      final body = item['body']?.toString() ?? '';
+      final ok = await handleIncomingRawSms(sender, body, source: 'RESYNC');
+      if (ok) ingestedCount++;
+    }
+    await _vault.addLog('Inbox Resync Completed', 'Checked ${list.length} SMS, ingested $ingestedCount new payments');
+    return ingestedCount;
   }
 
   /// Triggers manual sync of offline queue

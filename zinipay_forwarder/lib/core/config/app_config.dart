@@ -6,7 +6,7 @@ class AppConfig {
   // Default server URLs
   static const String defaultEmulatorBackendUrl = 'http://10.0.2.2:4000';
   static const String defaultLocalhostBackendUrl = 'http://localhost:4000';
-  static const String defaultProductionBackendUrl = 'https://syncpaybd.xyz';
+  static const String defaultProductionBackendUrl = 'https://syncpaybd.site';
 
   // Backend Endpoints
   static const String ingestEndpoint = '/api/v1/device/sms/ingest';
@@ -21,4 +21,5 @@ class AppConfig {
   // Telephony Method & Event Channels
   static const String methodChannelName = 'com.zinipay.forwarder/telephony';
   static const String smsEventChannelName = 'com.zinipay.forwarder/sms_stream';
+  static const String notificationEventChannelName = 'com.zinipay.forwarder/notification_stream';
 }

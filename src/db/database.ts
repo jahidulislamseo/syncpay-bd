@@ -215,6 +215,37 @@ export class DatabaseService {
         this.db.exec(`ALTER TABLE invoices ADD COLUMN ${col.name} ${col.type};`);
       }
     }
+
+    // Devices hardware telemetry migrations
+    const devTableInfo = this.db.prepare('PRAGMA table_info(devices)').all() as Array<{ name: string }>;
+    const existingDevCols = new Set(devTableInfo.map((col) => col.name));
+    const devColsToAdd: Array<{ name: string; type: string }> = [
+      { name: 'battery_level', type: 'INTEGER' },
+      { name: 'battery_temp', type: 'REAL' },
+      { name: 'is_charging', type: 'INTEGER' },
+      { name: 'charger_type', type: 'TEXT' },
+      { name: 'free_ram_mb', type: 'INTEGER' },
+      { name: 'sim_slots', type: 'TEXT' },
+    ];
+    for (const col of devColsToAdd) {
+      if (!existingDevCols.has(col.name)) {
+        this.db.exec(`ALTER TABLE devices ADD COLUMN ${col.name} ${col.type};`);
+      }
+    }
+
+    // Transactions Dual-SIM and notification source migrations
+    const txTableInfo = this.db.prepare('PRAGMA table_info(transactions)').all() as Array<{ name: string }>;
+    const existingTxCols = new Set(txTableInfo.map((col) => col.name));
+    const txColsToAdd: Array<{ name: string; type: string }> = [
+      { name: 'sim_slot', type: 'INTEGER' },
+      { name: 'carrier', type: 'TEXT' },
+      { name: 'source', type: 'TEXT DEFAULT "SMS"' },
+    ];
+    for (const col of txColsToAdd) {
+      if (!existingTxCols.has(col.name)) {
+        this.db.exec(`ALTER TABLE transactions ADD COLUMN ${col.name} ${col.type};`);
+      }
+    }
   }
 
   private seedDemoData() {
@@ -598,8 +629,43 @@ export class DatabaseService {
     return stmt.get(tokenOrId, tokenOrId) as { id: string; merchant_id: string; device_name: string; sim_number: string } | undefined;
   }
 
-  public updateDeviceHeartbeat(tokenOrId: string) {
-    this.db.prepare("UPDATE devices SET last_seen = datetime('now'), status = 'ONLINE' WHERE device_token = ? OR id = ?").run(tokenOrId, tokenOrId);
+  public updateDeviceHeartbeat(
+    tokenOrId: string,
+    telemetry?: {
+      battery_level?: number;
+      battery_temp?: number;
+      battery_temperature?: number;
+      is_charging?: boolean;
+      charger_type?: string;
+      free_ram_mb?: number;
+      sim_slots?: any[];
+    }
+  ) {
+    if (telemetry) {
+      this.db.prepare(`
+        UPDATE devices 
+        SET last_seen = datetime('now'), 
+            status = 'ONLINE',
+            battery_level = COALESCE(?, battery_level),
+            battery_temp = COALESCE(?, battery_temp),
+            is_charging = COALESCE(?, is_charging),
+            charger_type = COALESCE(?, charger_type),
+            free_ram_mb = COALESCE(?, free_ram_mb),
+            sim_slots = COALESCE(?, sim_slots)
+        WHERE device_token = ? OR id = ?
+      `).run(
+        telemetry.battery_level ?? null,
+        telemetry.battery_temp ?? telemetry.battery_temperature ?? null,
+        telemetry.is_charging != null ? (telemetry.is_charging ? 1 : 0) : null,
+        telemetry.charger_type ?? null,
+        telemetry.free_ram_mb ?? null,
+        telemetry.sim_slots ? JSON.stringify(telemetry.sim_slots) : null,
+        tokenOrId,
+        tokenOrId
+      );
+    } else {
+      this.db.prepare("UPDATE devices SET last_seen = datetime('now'), status = 'ONLINE' WHERE device_token = ? OR id = ?").run(tokenOrId, tokenOrId);
+    }
   }
 
   public insertTransaction(params: {
@@ -610,11 +676,14 @@ export class DatabaseService {
     amount: number;
     sender?: string;
     rawSms: string;
+    simSlot?: number;
+    carrier?: string;
+    source?: string;
   }): { success: boolean; isDuplicate?: boolean; id?: number } {
     try {
       const stmt = this.db.prepare(`
-        INSERT INTO transactions (merchant_id, device_id, provider, trx_id, amount, sender, raw_sms)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO transactions (merchant_id, device_id, provider, trx_id, amount, sender, raw_sms, sim_slot, carrier, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       const result = stmt.run(
         params.merchantId,
@@ -623,7 +692,10 @@ export class DatabaseService {
         params.trxId.toUpperCase(),
         params.amount,
         params.sender || null,
-        params.rawSms
+        params.rawSms,
+        params.simSlot != null ? params.simSlot : null,
+        params.carrier || null,
+        params.source || 'SMS'
       );
       return { success: true, id: Number(result.lastInsertRowid) };
     } catch (err: any) {
@@ -865,22 +937,22 @@ export class DatabaseService {
   private seedAdminData() {
     // Seed default admin users
     const checkAdmin = this.db.prepare('SELECT id FROM admin_users WHERE email = ?');
-    if (!checkAdmin.get('admin@syncpaybd.xyz')) {
+    if (!checkAdmin.get('admin@syncpaybd.site')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_root', 'SyncPay BD Super Admin', 'admin@syncpaybd.xyz', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
+        VALUES ('admin_root', 'SyncPay BD Super Admin', 'admin@syncpaybd.site', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
       `).run();
     }
-    if (!checkAdmin.get('ops@syncpaybd.xyz')) {
+    if (!checkAdmin.get('ops@syncpaybd.site')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_ops', 'Tariqul Islam (Ops Lead)', 'ops@syncpaybd.xyz', 'Operations Admin', 'ACTIVE', 'hashed_ops_pwd')
+        VALUES ('admin_ops', 'Tariqul Islam (Ops Lead)', 'ops@syncpaybd.site', 'Operations Admin', 'ACTIVE', 'hashed_ops_pwd')
       `).run();
     }
-    if (!checkAdmin.get('security@syncpaybd.xyz')) {
+    if (!checkAdmin.get('security@syncpaybd.site')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_sec', 'Nusrat Jahan (SecOps)', 'security@syncpaybd.xyz', 'Security Admin', 'ACTIVE', 'hashed_sec_pwd')
+        VALUES ('admin_sec', 'Nusrat Jahan (SecOps)', 'security@syncpaybd.site', 'Security Admin', 'ACTIVE', 'hashed_sec_pwd')
       `).run();
     }
 
@@ -950,10 +1022,10 @@ export class DatabaseService {
     const auditCount = (this.db.prepare('SELECT COUNT(id) as c FROM audit_logs').get() as any)?.c || 0;
     if (auditCount === 0) {
       const logs = [
-        { email: 'admin@syncpaybd.xyz', action: 'ADMIN_LOGIN', res: 'Auth', id: 'admin_root', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Super Admin login from trusted dashboard IP' },
-        { email: 'ops@syncpaybd.xyz', action: 'DEVICE_STATUS_CHECK', res: 'Device', id: 'dev_phone_4', ip: '192.168.1.24', resu: 'SUCCESS', det: 'Dispatched health ping to Gadget Mart forwarder' },
-        { email: 'security@syncpaybd.xyz', action: 'API_KEY_INSPECTION', res: 'ApiKey', id: 'key_sec_99', ip: '10.0.0.15', resu: 'SUCCESS', det: 'Audited active keys for Chaldal Grocery Express' },
-        { email: 'admin@syncpaybd.xyz', action: 'SYSTEM_SETTINGS_UPDATE', res: 'Settings', id: 'global_conf', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Updated MFS webhook timeout to 6000ms' },
+        { email: 'admin@syncpaybd.site', action: 'ADMIN_LOGIN', res: 'Auth', id: 'admin_root', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Super Admin login from trusted dashboard IP' },
+        { email: 'ops@syncpaybd.site', action: 'DEVICE_STATUS_CHECK', res: 'Device', id: 'dev_phone_4', ip: '192.168.1.24', resu: 'SUCCESS', det: 'Dispatched health ping to Gadget Mart forwarder' },
+        { email: 'security@syncpaybd.site', action: 'API_KEY_INSPECTION', res: 'ApiKey', id: 'key_sec_99', ip: '10.0.0.15', resu: 'SUCCESS', det: 'Audited active keys for Chaldal Grocery Express' },
+        { email: 'admin@syncpaybd.site', action: 'SYSTEM_SETTINGS_UPDATE', res: 'Settings', id: 'global_conf', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Updated MFS webhook timeout to 6000ms' },
       ];
       for (const l of logs) {
         this.db.prepare(`
@@ -1071,7 +1143,7 @@ export class DatabaseService {
     return merchants.map((m) => ({
       ...m,
       status: 'ACTIVE',
-      email: `${m.id}@merchant.syncpaybd.xyz`,
+      email: `${m.id}@merchant.syncpaybd.site`,
     }));
   }
 
@@ -1083,7 +1155,7 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?)
     `).run(id, name, apiKey, webhookUrl || null);
 
-    this.insertAuditLog('admin@syncpaybd.xyz', 'MERCHANT_CREATE', 'Merchant', id, '127.0.0.1', 'SUCCESS', `Created merchant ${name}`);
+    this.insertAuditLog('admin@syncpaybd.site', 'MERCHANT_CREATE', 'Merchant', id, '127.0.0.1', 'SUCCESS', `Created merchant ${name}`);
     return this.getMerchantById(id);
   }
 
@@ -1107,7 +1179,7 @@ export class DatabaseService {
 
   public updateDeviceStatusAdmin(deviceId: string, status: 'ONLINE' | 'OFFLINE' | 'DISABLED') {
     this.db.prepare('UPDATE devices SET status = ? WHERE id = ?').run(status, deviceId);
-    this.insertAuditLog('admin@syncpaybd.xyz', 'DEVICE_STATUS_CHANGE', 'Device', deviceId, '127.0.0.1', 'SUCCESS', `Set status to ${status}`);
+    this.insertAuditLog('admin@syncpaybd.site', 'DEVICE_STATUS_CHANGE', 'Device', deviceId, '127.0.0.1', 'SUCCESS', `Set status to ${status}`);
     return { success: true, deviceId, status };
   }
 
@@ -1168,7 +1240,7 @@ export class DatabaseService {
 
   public revokeApiKeyAdmin(keyId: string) {
     this.db.prepare("UPDATE api_keys SET status = 'revoked' WHERE id = ?").run(keyId);
-    this.insertAuditLog('admin@syncpaybd.xyz', 'API_KEY_REVOKE', 'ApiKey', keyId, '127.0.0.1', 'SUCCESS', 'Admin revoked merchant API key');
+    this.insertAuditLog('admin@syncpaybd.site', 'API_KEY_REVOKE', 'ApiKey', keyId, '127.0.0.1', 'SUCCESS', 'Admin revoked merchant API key');
     return { success: true, keyId };
   }
 
@@ -1216,7 +1288,7 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?, 'ACTIVE', 'hashed_generated_pwd')
     `).run(id, params.name, params.email, params.role);
 
-    this.insertAuditLog('admin@syncpaybd.xyz', 'ADMIN_USER_CREATE', 'AdminUser', id, '127.0.0.1', 'SUCCESS', `Created admin ${params.name} with role ${params.role}`);
+    this.insertAuditLog('admin@syncpaybd.site', 'ADMIN_USER_CREATE', 'AdminUser', id, '127.0.0.1', 'SUCCESS', `Created admin ${params.name} with role ${params.role}`);
     return { id, name: params.name, email: params.email, role: params.role };
   }
 
@@ -1236,7 +1308,7 @@ export class DatabaseService {
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
     `).run(key, value);
 
-    this.insertAuditLog('admin@syncpaybd.xyz', 'SETTING_UPDATE', 'SystemSetting', key, '127.0.0.1', 'SUCCESS', `Updated ${key} to ${value}`);
+    this.insertAuditLog('admin@syncpaybd.site', 'SETTING_UPDATE', 'SystemSetting', key, '127.0.0.1', 'SUCCESS', `Updated ${key} to ${value}`);
     return { success: true, key, value };
   }
 

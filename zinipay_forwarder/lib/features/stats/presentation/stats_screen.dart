@@ -32,8 +32,8 @@ class StatsScreen extends ConsumerWidget {
                   Icon(Icons.bar_chart_outlined, size: 60, color: Colors.grey),
                   SizedBox(height: 12),
                   Text('এখনো কোনো ডেটা নেই', style: TextStyle(color: Colors.grey)),
-                  SizedBox(height: 4),
-                  Text('SMS Simulator দিয়ে test করুন', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  const SizedBox(height: 4),
+                  const Text('পেমেন্ট এসএমএস আসলে এখানে রিয়েল-টাইম পরিসংখ্যান প্রদর্শিত হবে', style: TextStyle(color: Colors.grey, fontSize: 12)),
                 ],
               ),
             )

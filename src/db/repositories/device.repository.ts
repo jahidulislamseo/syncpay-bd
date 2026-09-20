@@ -99,7 +99,7 @@ export class DeviceRepository {
     return { entity, rawToken: params.rawToken };
   }
 
-  public static async updateHeartbeat(deviceIdOrToken: string): Promise<void> {
+  public static async updateHeartbeat(deviceIdOrToken: string, telemetry?: any): Promise<void> {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
       const tokenHash = CryptoUtil.hashToken(deviceIdOrToken);
@@ -109,7 +109,7 @@ export class DeviceRepository {
         .or(`id.eq.${deviceIdOrToken},device_token_hash.eq.${tokenHash}`);
     }
 
-    dbService.updateDeviceHeartbeat(deviceIdOrToken);
+    dbService.updateDeviceHeartbeat(deviceIdOrToken, telemetry);
   }
 
   public static async listByMerchant(merchantId: string): Promise<DeviceEntity[]> {

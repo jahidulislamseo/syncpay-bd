@@ -4,13 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Merchant Dashboard | SyncPay BD</title>
-  <meta name="description" content="Production Merchant Dashboard for SyncPay BD Payment Gateway (syncpaybd.xyz). Real-time MFS telephony stream, transactions ledger, invoices, forwarder devices and API keys.">
+  <meta name="description" content="Production Merchant Dashboard for SyncPay BD Payment Gateway (syncpaybd.site). Real-time MFS telephony stream, transactions ledger, invoices, forwarder devices and API keys.">
   <link rel="icon" type="image/png" href="/images/syncpay-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/dashboard/css/style.css">
+  <link rel="canonical" href="https://syncpaybd.site/dashboard">
   <script>
+    if (window.location.hostname.startsWith('www.')) {
+      window.location.replace(window.location.href.replace('://www.', '://'));
+    }
     if (window.location.pathname.endsWith('.html')) {
       const clean = window.location.pathname.replace(/\.html$/, '') || '/';
       window.history.replaceState(null, '', (clean === '/index' ? '/' : clean) + window.location.search + window.location.hash);
@@ -762,7 +766,7 @@
           </div>
           <div class="detail-item" style="display:flex; justify-content:space-between; margin-bottom:6px;">
             <span class="detail-key">Merchant Email:</span>
-            <span class="mono">demo@syncpaybd.xyz</span>
+            <span class="mono">demo@syncpaybd.site</span>
           </div>
           <div class="detail-item" style="display:flex; justify-content:space-between;">
             <span class="detail-key">Live API Key:</span>

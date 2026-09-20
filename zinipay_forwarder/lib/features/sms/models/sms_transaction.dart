@@ -22,6 +22,9 @@ class SmsTransaction {
   final int retryCount;
   final String? lastError;
   final String fingerprint;
+  final int? simSlot;
+  final String? carrier;
+  final String? source;
 
   const SmsTransaction({
     required this.id,
@@ -36,6 +39,9 @@ class SmsTransaction {
     this.retryCount = 0,
     this.lastError,
     required this.fingerprint,
+    this.simSlot,
+    this.carrier,
+    this.source = 'SMS',
   });
 
   SmsTransaction copyWith({
@@ -51,6 +57,9 @@ class SmsTransaction {
     int? retryCount,
     String? lastError,
     String? fingerprint,
+    int? simSlot,
+    String? carrier,
+    String? source,
   }) {
     return SmsTransaction(
       id: id ?? this.id,
@@ -65,6 +74,9 @@ class SmsTransaction {
       retryCount: retryCount ?? this.retryCount,
       lastError: lastError ?? this.lastError,
       fingerprint: fingerprint ?? this.fingerprint,
+      simSlot: simSlot ?? this.simSlot,
+      carrier: carrier ?? this.carrier,
+      source: source ?? this.source,
     );
   }
 
@@ -82,6 +94,9 @@ class SmsTransaction {
       'retry_count': retryCount,
       'last_error': lastError,
       'fingerprint': fingerprint,
+      'sim_slot': simSlot,
+      'carrier': carrier,
+      'source': source,
     };
   }
 
@@ -102,6 +117,9 @@ class SmsTransaction {
       retryCount: json['retry_count'] as int? ?? 0,
       lastError: json['last_error'] as String?,
       fingerprint: json['fingerprint'] as String? ?? '',
+      simSlot: json['sim_slot'] as int?,
+      carrier: json['carrier'] as String?,
+      source: json['source'] as String? ?? 'SMS',
     );
   }
 }

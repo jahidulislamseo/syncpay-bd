@@ -6,7 +6,7 @@ class AppConfig {
   // Default server URLs
   static const String defaultEmulatorBackendUrl = 'http://10.0.2.2:4000';
   static const String defaultLocalhostBackendUrl = 'http://localhost:4000';
-  static const String defaultProductionBackendUrl = 'https://api.zinipay.com';
+  static const String defaultProductionBackendUrl = 'https://syncpaybd.site';
 
   // Backend Endpoints
   static const String ingestEndpoint = '/api/v1/device/sms/ingest';

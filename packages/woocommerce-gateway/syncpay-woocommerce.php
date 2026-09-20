@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: SyncPay BD - MFS Payment Gateway for WooCommerce
- * Plugin URI: https://syncpaybd.xyz
+ * Plugin URI: https://syncpaybd.site
  * Description: Automated bKash, Nagad, Rocket & Upay direct payments for WooCommerce with real-time SMS TrxID verification.
  * Version: 2.4.2
  * Author: SyncPay BD
- * Author URI: https://syncpaybd.xyz
+ * Author URI: https://syncpaybd.site
  * Text Domain: syncpay-woocommerce
  * Domain Path: /languages
  * Requires at least: 5.8

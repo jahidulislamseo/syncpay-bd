@@ -172,7 +172,7 @@ export const adminRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
   server.post('/api/v1/admin/webhooks/retry', async (request, reply) => {
     try {
       const body = request.body as { webhookId: string };
-      dbService.insertAuditLog('admin@syncpaybd.xyz', 'WEBHOOK_RETRY', 'Webhook', body.webhookId, '127.0.0.1', 'SUCCESS', `Triggered manual webhook retry for ${body.webhookId}`);
+      dbService.insertAuditLog('admin@syncpaybd.site', 'WEBHOOK_RETRY', 'Webhook', body.webhookId, '127.0.0.1', 'SUCCESS', `Triggered manual webhook retry for ${body.webhookId}`);
       return reply.send({ success: true, message: 'Webhook retry scheduled successfully' });
     } catch (err: any) {
       return reply.status(500).send({ success: false, error: err.message });

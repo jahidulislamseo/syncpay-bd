@@ -22,7 +22,7 @@ class ParsedMfsResult {
     this.error,
   });
 
-  SmsTransaction toTransaction() {
+  SmsTransaction toTransaction({int? simSlot, String? carrier, String? source = 'SMS'}) {
     final cleanTrx    = (trxId ?? '').toUpperCase();
     final cleanAmount = amount ?? 0.0;
     final fingerprint = SecurityUtils.generateFingerprint(provider, cleanTrx, cleanAmount);
@@ -36,6 +36,9 @@ class ParsedMfsResult {
       receivedAt: DateTime.now(),
       status:     SmsStatus.received,
       fingerprint: fingerprint,
+      simSlot:    simSlot,
+      carrier:    carrier,
+      source:     source,
     );
   }
 

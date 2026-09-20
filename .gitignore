@@ -47,6 +47,10 @@ flutter_agent/.dart_tool/
 flutter_agent/.flutter-plugins
 flutter_agent/.flutter-plugins-dependencies
 flutter_agent/pubspec.lock
+zinipay_forwarder/build/
+zinipay_forwarder/.dart_tool/
+zinipay_forwarder/.flutter-plugins
+zinipay_forwarder/.flutter-plugins-dependencies
 
 # Test coverage
 coverage/

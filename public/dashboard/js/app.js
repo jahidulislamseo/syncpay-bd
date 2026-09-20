@@ -1615,7 +1615,7 @@ class PayFlowDashboardApp {
     const session = auth.getSession() || {
       name: 'Demo Merchant',
       business: 'Demo Merchant Store',
-      email: 'demo@syncpaybd.xyz',
+      email: 'demo@syncpaybd.site',
       plan: 'growth',
       apiKey: 'live_sk_demo_99410abc',
     };
@@ -2511,7 +2511,7 @@ class PayFlowDashboardApp {
         <div id="auth-login-form">
           <div class="auth-field">
             <label>Email</label>
-            <input type="email" id="auth-email" class="form-control" placeholder="demo@syncpaybd.xyz" autocomplete="email">
+            <input type="email" id="auth-email" class="form-control" placeholder="demo@syncpaybd.site" autocomplete="email">
           </div>
           <div class="auth-field">
             <label>Password</label>
@@ -2697,7 +2697,7 @@ class PayFlowDashboardApp {
 
   fillDemo(plan) {
     const demos = {
-      growth: { email: 'demo@syncpaybd.xyz', pass: 'demo1234' },
+      growth: { email: 'demo@syncpaybd.site', pass: 'demo1234' },
       starter: { email: 'starter@test.com', pass: 'test1234' },
       enterprise: { email: 'enterprise@test.com', pass: 'ent1234' },
     };

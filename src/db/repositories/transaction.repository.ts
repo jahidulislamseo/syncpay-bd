@@ -27,6 +27,9 @@ export class TransactionRepository {
     senderNumber?: string;
     rawSms: string;
     status?: 'COMPLETED' | 'PENDING' | 'FAILED' | 'REFUNDED';
+    simSlot?: number;
+    carrier?: string;
+    source?: string;
   }): Promise<{ success: boolean; isDuplicate?: boolean; id?: string }> {
     const supabase = getSupabaseClient();
     const upperTrxId = params.trxId.toUpperCase();
@@ -72,6 +75,9 @@ export class TransactionRepository {
       amount: params.amount,
       sender: params.senderNumber,
       rawSms: params.rawSms,
+      simSlot: params.simSlot,
+      carrier: params.carrier,
+      source: params.source,
     });
 
     if (localResult.isDuplicate) {

@@ -5,7 +5,7 @@ setup(
     version="2.0.0",
     description="Official Python SDK for SyncPay BD Automated MFS Gateway",
     author="SyncPay BD",
-    author_email="support@syncpaybd.xyz",
+    author_email="support@syncpaybd.site",
     packages=find_packages(),
     python_requires=">=3.7",
     classifiers=[

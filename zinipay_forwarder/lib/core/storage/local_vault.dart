@@ -6,6 +6,8 @@ import '../security/security_utils.dart';
 class LocalVault {
   static const String _keyDeviceId = 'zp_device_id';
   static const String _keyDeviceToken = 'zp_device_token';
+  static const String _keyDeviceName = 'zp_device_name';
+  static const String _keyAndroidVersion = 'zp_android_version';
   static const String _keyMerchantId = 'zp_merchant_id';
   static const String _keyMerchantName = 'zp_merchant_name';
   static const String _keyBackendUrl = 'zp_backend_url';
@@ -41,19 +43,25 @@ class LocalVault {
 
   Future<void> setDeviceId(String id) => _prefs.setString(_keyDeviceId, id);
 
-  String get deviceToken => _prefs.getString(_keyDeviceToken) ?? 'token_phone_primary';
+  String get deviceName => _prefs.getString(_keyDeviceName) ?? '';
+  Future<void> setDeviceName(String name) => _prefs.setString(_keyDeviceName, name);
+
+  String get androidVersion => _prefs.getString(_keyAndroidVersion) ?? '';
+  Future<void> setAndroidVersion(String v) => _prefs.setString(_keyAndroidVersion, v);
+
+  String get deviceToken => _prefs.getString(_keyDeviceToken) ?? '';
   Future<void> setDeviceToken(String token) => _prefs.setString(_keyDeviceToken, token);
 
-  String get merchantId => _prefs.getString(_keyMerchantId) ?? 'MER_001';
+  String get merchantId => _prefs.getString(_keyMerchantId) ?? '';
   Future<void> setMerchantId(String id) => _prefs.setString(_keyMerchantId, id);
 
-  String get merchantName => _prefs.getString(_keyMerchantName) ?? 'ABC Store';
+  String get merchantName => _prefs.getString(_keyMerchantName) ?? '';
   Future<void> setMerchantName(String name) => _prefs.setString(_keyMerchantName, name);
 
-  String get backendUrl => _prefs.getString(_keyBackendUrl) ?? AppConfig.defaultEmulatorBackendUrl;
+  String get backendUrl => _prefs.getString(_keyBackendUrl) ?? AppConfig.defaultProductionBackendUrl;
   Future<void> setBackendUrl(String url) => _prefs.setString(_keyBackendUrl, url);
 
-  bool get isPaired => _prefs.getString(_keyDeviceToken) != null;
+  bool get isPaired => (_prefs.getString(_keyDeviceToken)?.isNotEmpty ?? false);
 
   // Localization & Theme
   String get language => _prefs.getString(_keyLanguage) ?? 'bn'; // Default Bangla

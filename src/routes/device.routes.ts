@@ -9,12 +9,29 @@ const ingestSchema = z.object({
   sms: z.string().min(1, 'sms body is required'),
   sender: z.string().optional(),
   received_at: z.string().optional(),
+  sim_slot: z.number().optional(),
+  carrier: z.string().optional(),
+  source: z.string().optional(),
 });
 
 const legacySyncSchema = z.object({
   device_token: z.string(),
   sender: z.string().optional(),
   raw_sms: z.string(),
+  sim_slot: z.number().optional(),
+  carrier: z.string().optional(),
+  source: z.string().optional(),
+});
+
+const heartbeatSchema = z.object({
+  device_token: z.string().optional(),
+  device_id: z.string().optional(),
+  battery_level: z.number().optional(),
+  battery_temp: z.number().optional(),
+  is_charging: z.boolean().optional(),
+  charger_type: z.string().optional(),
+  free_ram_mb: z.number().optional(),
+  sim_slots: z.any().optional(),
 });
 
 export async function deviceRoutes(fastify: FastifyInstance) {
@@ -33,7 +50,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const { device_id, sms, sender } = parseResult.data;
+    const { device_id, sms, sender, sim_slot, carrier, source } = parseResult.data;
 
     // STEP 1, 2 & 3: Device valid, active and belongs to active merchant?
     const auth = await DeviceService.authenticateDevice(device_id);
@@ -56,6 +73,9 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       sms,
       sender,
       webhookSecret: (auth.merchant as any).webhook_secret,
+      simSlot: sim_slot,
+      carrier,
+      source,
     });
 
     if (ingest.isDuplicate) {
@@ -112,6 +132,9 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       deviceId: auth.device.id,
       sms: raw_sms,
       sender,
+      simSlot: parseResult.data.sim_slot,
+      carrier: parseResult.data.carrier,
+      source: parseResult.data.source,
     });
 
     if (!ingest.success && !ingest.isDuplicate) {
@@ -128,10 +151,20 @@ export async function deviceRoutes(fastify: FastifyInstance) {
 
   /**
    * Device Heartbeat Endpoint
+   * Ingests hardware telemetry and dispatches remote commands
    */
   fastify.post('/api/v1/device/heartbeat', async (request: FastifyRequest, reply: FastifyReply) => {
-    const body = request.body as { device_token?: string; device_id?: string };
-    const token = body?.device_token || body?.device_id;
+    const parseResult = heartbeatSchema.safeParse(request.body);
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        success: false,
+        error: 'Invalid heartbeat payload structure',
+        errors: parseResult.error.errors,
+      });
+    }
+
+    const data = parseResult.data;
+    const token = data.device_token || data.device_id;
     if (!token) {
       return reply.status(400).send({ success: false, error: 'device_token or device_id required' });
     }
@@ -141,8 +174,22 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       return reply.status(401).send({ success: false, error: 'Device not found' });
     }
 
-    await DeviceService.recordHeartbeat(token);
-    return reply.send({ success: true, status: 'ONLINE', device_name: auth.device.device_name });
+    // Persist hardware telemetry
+    await DeviceService.recordHeartbeat(token, {
+      battery_level: data.battery_level,
+      battery_temp: data.battery_temp,
+      is_charging: data.is_charging,
+      charger_type: data.charger_type,
+      free_ram_mb: data.free_ram_mb,
+      sim_slots: data.sim_slots,
+    });
+
+    return reply.send({
+      success: true,
+      status: 'ONLINE',
+      device_name: auth.device.device_name,
+      commands: [], // Remote command array (e.g. RESYNC_SMS)
+    });
   });
 
   /**

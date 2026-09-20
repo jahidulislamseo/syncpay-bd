@@ -136,4 +136,52 @@ describe('Android Device Ingestion & HMAC Webhook Suite', () => {
     const isWrongSecretValid = CryptoUtil.verifyWebhookSignature(payload, signature, 'wrong_secret');
     assert.strictEqual(isWrongSecretValid, false);
   });
+
+  test('POST /api/v1/device/sms/ingest accepts Dual-SIM slot & App Notification source', async () => {
+    const trxId = 'NOTIF' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const sms = `Received Amount: Tk 350.00 from 01911223344. TxnID: ${trxId}. Balance: Tk 5,350.00`;
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/device/sms/ingest',
+      payload: {
+        device_id: DEVICE_TOKEN,
+        sms,
+        sender: '16167',
+        sim_slot: 1,
+        carrier: 'Banglalink',
+        source: 'APP_NOTIFICATION',
+      },
+    });
+
+    assert.strictEqual(res.statusCode, 201);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, true);
+    assert.strictEqual(body.transaction.trx_id, trxId);
+  });
+
+  test('POST /api/v1/device/heartbeat persists hardware telemetry and returns commands', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/device/heartbeat',
+      payload: {
+        device_token: DEVICE_TOKEN,
+        battery_level: 88,
+        battery_temp: 33.2,
+        is_charging: true,
+        charger_type: 'AC',
+        free_ram_mb: 1750,
+        sim_slots: [
+          { slot: 0, carrier: 'Grameenphone', state: 'READY' },
+          { slot: 1, carrier: 'Banglalink', state: 'READY' },
+        ],
+      },
+    });
+
+    assert.strictEqual(res.statusCode, 200);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, true);
+    assert.strictEqual(body.status, 'ONLINE');
+    assert.ok(Array.isArray(body.commands));
+  });
 });

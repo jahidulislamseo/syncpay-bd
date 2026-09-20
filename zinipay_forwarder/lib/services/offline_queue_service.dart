@@ -74,6 +74,32 @@ class OfflineQueueService {
     return true;
   }
 
+  /// Convenience method to enqueue raw SMS or app notification with metadata
+  Future<bool> enqueueSms({
+    required String rawSms,
+    required String sender,
+    int? simSlot,
+    String? carrier,
+    String? source,
+  }) async {
+    final cleanTrx = 'RAW_${DateTime.now().millisecondsSinceEpoch}';
+    final trx = SmsTransaction(
+      id: 'sms_${DateTime.now().millisecondsSinceEpoch}',
+      provider: sender,
+      trxId: cleanTrx,
+      amount: 0.0,
+      sender: sender,
+      rawSms: rawSms,
+      receivedAt: DateTime.now(),
+      status: SmsStatus.received,
+      fingerprint: '${sender}_${DateTime.now().millisecondsSinceEpoch}',
+      simSlot: simSlot,
+      carrier: carrier,
+      source: source ?? 'SMS',
+    );
+    return enqueue(trx);
+  }
+
   /// Attempts to upload all pending transactions in queue
   Future<void> processQueue() async {
     if (_isSyncing) return;
@@ -99,6 +125,9 @@ class OfflineQueueService {
           sms: item.rawSms,
           sender: item.sender,
           receivedAt: item.receivedAt,
+          simSlot: item.simSlot,
+          carrier: item.carrier,
+          source: item.source,
         );
 
         if (res.success) {

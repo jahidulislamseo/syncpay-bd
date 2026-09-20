@@ -99,7 +99,7 @@ const PLANS = {
 const DEMO_ACCOUNTS = [
   {
     id: 'm_demo_101',
-    email: 'demo@syncpaybd.xyz',
+    email: 'demo@syncpaybd.site',
     password: 'demo1234',
     name: 'Demo Merchant',
     business: 'Demo Store BD',

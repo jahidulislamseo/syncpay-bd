@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../services/biometric_service.dart';
 import '../../../services/csv_export_service.dart';
+import '../../../services/soundbox_service.dart';
+import '../../../services/telemetry_service.dart';
+import '../../../services/telephony_channel_service.dart';
 import '../../../services/update_service.dart';
 import '../../dashboard/providers/agent_provider.dart';
 
@@ -16,17 +19,36 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _biometricAvailable = false;
   bool _biometricEnabled   = false;
+  bool _soundboxEnabled    = true;
+  bool _notifListenerEnabled = false;
+  DeviceTelemetry? _telemetry;
+
+  final SoundboxService _soundbox = SoundboxService();
+  final TelephonyChannelService _telephony = TelephonyChannelService();
+  final TelemetryService _telemetryService = TelemetryService();
 
   @override
   void initState() {
     super.initState();
-    _loadBiometric();
+    _loadState();
   }
 
-  Future<void> _loadBiometric() async {
+  Future<void> _loadState() async {
     final available = await BiometricService.isAvailable();
     final enabled   = await BiometricService.isEnabled();
-    if (mounted) setState(() { _biometricAvailable = available; _biometricEnabled = enabled; });
+    final soundbox  = await _soundbox.isEnabled();
+    final notifOk   = await _telephony.isNotificationListenerEnabled();
+    final telemetry = await _telemetryService.sampleTelemetry();
+
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricEnabled   = enabled;
+        _soundboxEnabled    = soundbox;
+        _notifListenerEnabled = notifOk;
+        _telemetry          = telemetry;
+      });
+    }
   }
 
   Future<void> _toggleBiometric(bool val) async {
@@ -200,6 +222,119 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 icon: const Icon(Icons.battery_charging_full),
                 label: Text(loc.tr('battery_settings_btn')),
               ),
+            ]),
+          )),
+          const SizedBox(height: 16),
+
+          // ── Bangla Voice Soundbox ─────────────────────────────────────────
+          const _SectionHeader(title: 'বাংলা ভয়েস সাউন্ডবক্স (SOUNDBOX TTS)'),
+          Card(child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('পেমেন্ট ভয়েস প্রম্পট (Voice Announcements)', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: const Text('বিকাশ, নগদ বা রকেটে পেমেন্ট এলে বাংলায় ভয়েস ঘোষণা করবে', style: TextStyle(fontSize: 12)),
+                value: _soundboxEnabled,
+                activeColor: const Color(0xFF6366F1),
+                onChanged: (val) async {
+                  await _soundbox.setEnabled(val);
+                  setState(() => _soundboxEnabled = val);
+                },
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFF6366F1))),
+                onPressed: () async {
+                  await _soundbox.testAnnouncement();
+                },
+                icon: const Icon(Icons.volume_up_rounded, size: 18),
+                label: const Text('টেস্ট সাউন্ডবক্স ভয়েস (Test Soundbox Voice)'),
+              ),
+            ]),
+          )),
+          const SizedBox(height: 16),
+
+          // ── Notification Interceptor (bKash/Nagad App Push) ───────────────
+          const _SectionHeader(title: 'অ্যাপ পুশ নোটিফিকেশন রিডার (INSTANT INTERCEPTOR)'),
+          Card(child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(
+                children: [
+                  Icon(
+                    _notifListenerEnabled ? Icons.check_circle : Icons.warning_amber_rounded,
+                    color: _notifListenerEnabled ? Colors.green : Colors.orange,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _notifListenerEnabled ? 'নোটিফিকেশন সার্ভিস সক্রিয় (ACTIVE)' : 'নোটিফিকেশন অনুমতি প্রয়োজন (INACTIVE)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: _notifListenerEnabled ? Colors.green : Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'এসএমএস দেরিতে আসলে সরাসরি বিকাশ ও নগদ অ্যাপের পুশ নোটিফিকেশন থেকে ১-২ সেকেন্ডে পেমেন্ট শনাক্ত করবে।',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: _notifListenerEnabled ? Colors.grey : const Color(0xFF6366F1)),
+                ),
+                onPressed: () async {
+                  await _telephony.openNotificationListenerSettings();
+                },
+                icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                label: Text(_notifListenerEnabled ? 'অনুমতি সেটিংস পরীক্ষা করুন' : 'নোটিফিকেশন অ্যাক্সেস দিন (Grant Access)'),
+              ),
+            ]),
+          )),
+          const SizedBox(height: 16),
+
+          // ── Device Health & Hardware Telemetry ────────────────────────────
+          const _SectionHeader(title: 'ডিভাইস হার্ডওয়্যার স্বাস্থ্য (HARDWARE TELEMETRY)'),
+          Card(child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text('ব্যাটারি লেভেল', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text('${_telemetry?.batteryLevel ?? 100}% (${_telemetry?.isCharging == true ? "Charging ${_telemetry?.chargerType}" : "Battery"})',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                ]),
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                  const Text('তাপমাত্রা', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text('${_telemetry?.batteryTemperature.toStringAsFixed(1) ?? "26.0"} °C',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: (_telemetry?.batteryTemperature ?? 26) > 42 ? Colors.red : Colors.green,
+                      )),
+                ]),
+              ]),
+              const SizedBox(height: 12),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text('ফ্রি র‍্যাম (RAM)', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text('${_telemetry?.freeRamMb ?? 512} MB / ${_telemetry?.totalRamMb ?? 2048} MB',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                ]),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final t = await _telemetryService.sampleTelemetry();
+                    setState(() => _telemetry = t);
+                  },
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: const Text('রিফ্রেশ'),
+                ),
+              ]),
             ]),
           )),
           const SizedBox(height: 16),

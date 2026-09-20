@@ -95,8 +95,14 @@ class ConnectionScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    _InfoRow(label: loc.tr('business_name'), value: agentState.merchantName),
-                    _InfoRow(label: loc.tr('merchant_id'), value: agentState.merchantId),
+                    _InfoRow(
+                      label: loc.tr('business_name'),
+                      value: agentState.merchantName.isNotEmpty ? agentState.merchantName : 'Not paired',
+                    ),
+                    _InfoRow(
+                      label: loc.tr('merchant_id'),
+                      value: agentState.merchantId.isNotEmpty ? agentState.merchantId : 'Unassigned',
+                    ),
                     _InfoRow(label: loc.tr('backend_url'), value: agentState.backendUrl),
                   ],
                 ),
@@ -104,7 +110,7 @@ class ConnectionScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // Device Information Card
+            // Device Information Card (Genuine Phone Hardware & OS Identity)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -117,9 +123,19 @@ class ConnectionScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     _InfoRow(label: loc.tr('device_id'), value: agentState.deviceId),
-                    _InfoRow(label: loc.tr('device_name'), value: 'Samsung Galaxy A54 5G'),
-                    _InfoRow(label: loc.tr('android_version'), value: 'Android 14 (API 34)'),
-                    _InfoRow(label: loc.tr('app_version'), value: '1.0.0 (Build 101)'),
+                    _InfoRow(
+                      label: loc.tr('device_name'),
+                      value: agentState.deviceName.isNotEmpty
+                          ? agentState.deviceName
+                          : 'Hardware Telephony Agent',
+                    ),
+                    _InfoRow(
+                      label: loc.tr('android_version'),
+                      value: agentState.androidVersion.isNotEmpty
+                          ? agentState.androidVersion
+                          : 'Android OS',
+                    ),
+                    const _InfoRow(label: 'App Version', value: '1.1.0 (Build 2)'),
                     _InfoRow(label: loc.tr('mfs_providers'), value: 'bKash, Nagad, Rocket, Upay'),
                     _InfoRow(
                       label: loc.tr('last_synced'),

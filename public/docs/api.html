@@ -7,6 +7,12 @@
   <meta name="description" content="SyncPay BD API — Complete documentation for invoice creation, payment verification, and webhooks.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="canonical" href="https://syncpaybd.site/docs/api">
+  <script>
+    if (window.location.hostname.startsWith('www.')) {
+      window.location.replace(window.location.href.replace('://www.', '://'));
+    }
+  </script>
   <style>
     :root{--bg:#f8fafc;--bg-card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#64748b;--primary:#0284c7;--primary-h:#0369a1;--primary-s:#f0f9ff;--primary-b:#bae6fd;--success:#10b981;--danger:#ef4444;--radius:16px;--radius-sm:8px;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -104,7 +110,7 @@
 
       <div class="base-url">
         <span class="label">BASE URL</span>
-        <span>https://api.syncpaybd.xyz/v1</span>
+        <span>https://api.syncpaybd.site/v1</span>
       </div>
 
       <h2 id="overview">Overview</h2>
@@ -113,7 +119,7 @@
         <li>Content-Type: <code>application/json</code></li>
         <li>All responses include <code>success: true/false</code></li>
         <li>Rate limit: 100 req/minute per API key</li>
-        <li>Sandbox: <code>https://sandbox.syncpaybd.xyz/v1</code></li>
+        <li>Sandbox: <code>https://sandbox.syncpaybd.site/v1</code></li>
       </ul>
       <div class="alert alert-info">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>

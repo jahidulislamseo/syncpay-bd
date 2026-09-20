@@ -35,15 +35,45 @@ class _SyncPayForwarderAppState extends ConsumerState<SyncPayForwarderApp> {
   @override
   void initState() {
     super.initState();
-    // Listen for platform SMS events emitted by Android SmsListenerReceiver
-    _telephonyChannel.startListening((sender, body) {
-      ref.read(agentProvider.notifier).handleIncomingRawSms(sender, body);
+    // 1. Listen for platform SMS events emitted by Android SmsListenerReceiver (Dual-SIM aware)
+    _telephonyChannel.startListening((data) {
+      final sender = data['sender']?.toString() ?? '';
+      final body = data['body']?.toString() ?? '';
+      final simSlot = data['sim_slot'] as int?;
+      final carrier = data['carrier']?.toString();
+      if (body.isNotEmpty) {
+        ref.read(agentProvider.notifier).handleIncomingRawSms(
+          sender,
+          body,
+          simSlot: simSlot,
+          carrier: carrier,
+          source: 'SMS',
+        );
+      }
+    });
+
+    // 2. Listen for real-time bKash/Nagad push notifications
+    _telephonyChannel.startListeningNotifications((data) {
+      final provider = data['provider']?.toString() ?? 'MFS';
+      final title = data['title']?.toString() ?? '';
+      final body = data['body']?.toString() ?? '';
+      final fullText = title.isNotEmpty ? '$title: $body' : body;
+      if (fullText.isNotEmpty) {
+        ref.read(agentProvider.notifier).handleIncomingRawSms(
+          provider,
+          fullText,
+          simSlot: 0,
+          carrier: 'AppNotification',
+          source: 'APP_NOTIFICATION',
+        );
+      }
     });
   }
 
   @override
   void dispose() {
     _telephonyChannel.stopListening();
+    _telephonyChannel.stopListeningNotifications();
     super.dispose();
   }
 

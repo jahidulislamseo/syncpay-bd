@@ -25,8 +25,8 @@ export class DeviceService {
     return { authenticated: true, device, merchant };
   }
 
-  public static async recordHeartbeat(tokenOrId: string): Promise<void> {
-    await DeviceRepository.updateHeartbeat(tokenOrId);
+  public static async recordHeartbeat(tokenOrId: string, telemetry?: any): Promise<void> {
+    await DeviceRepository.updateHeartbeat(tokenOrId, telemetry);
   }
 
   public static async registerDevice(params: {

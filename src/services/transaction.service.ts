@@ -9,6 +9,9 @@ export interface IngestSmsParams {
   sms: string;
   sender?: string;
   webhookSecret?: string;
+  simSlot?: number;
+  carrier?: string;
+  source?: string;
 }
 
 export interface IngestResult {
@@ -51,6 +54,9 @@ export class TransactionService {
       amount: parsed.amount,
       senderNumber: parsed.sender,
       rawSms: params.sms,
+      simSlot: params.simSlot,
+      carrier: params.carrier,
+      source: params.source,
     });
 
     if (insertResult.isDuplicate) {

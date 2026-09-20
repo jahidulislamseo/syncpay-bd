@@ -40,6 +40,9 @@ class ApiClient {
     required String sms,
     String? sender,
     DateTime? receivedAt,
+    int? simSlot,
+    String? carrier,
+    String? source,
   }) async {
     final cleanUrl = backendUrl.replaceAll(RegExp(r'/+$'), '');
     final uri = Uri.parse('$cleanUrl${AppConfig.ingestEndpoint}');
@@ -48,6 +51,9 @@ class ApiClient {
       'device_id': deviceToken.isNotEmpty ? deviceToken : deviceId,
       'sms': sms,
       if (sender != null && sender.isNotEmpty) 'sender': sender,
+      if (simSlot != null) 'sim_slot': simSlot,
+      if (carrier != null && carrier.isNotEmpty) 'carrier': carrier,
+      if (source != null && source.isNotEmpty) 'source': source,
       'received_at': (receivedAt ?? DateTime.now()).toIso8601String(),
     };
 
