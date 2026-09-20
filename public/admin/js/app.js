@@ -166,8 +166,14 @@ class AdminApp {
         case 'invoices':
           await this.renderInvoicesView(container);
           break;
+        case 'unmatched-sms':
+          await this.renderUnmatchedSmsView(container);
+          break;
         case 'merchants':
           await this.renderMerchantsView(container);
+          break;
+        case 'payouts':
+          await this.renderPayoutsView(container);
           break;
         case 'devices':
           await this.renderDevicesView(container);
@@ -195,6 +201,12 @@ class AdminApp {
           break;
         case 'suspicious':
           await this.renderSuspiciousView(container);
+          break;
+        case 'blacklist':
+          await this.renderBlacklistView(container);
+          break;
+        case 'simulator':
+          await this.renderSimulatorView(container);
           break;
         case 'system-health':
           await this.renderSystemHealthView(container);
@@ -326,6 +338,9 @@ class AdminApp {
           <p>Global multi-merchant transactions, automated TrxID reconciliations and SMS logs.</p>
         </div>
         <div class="header-actions">
+          <button class="btn-secondary" onclick="window.openManualVerifyModal()" style="display:inline-flex;align-items:center;gap:0.35rem;">
+            ✓ Manual Verify Override
+          </button>
           <button class="btn-primary" onclick="window.exportTransactionsCsv()">Export CSV</button>
         </div>
       </div>
@@ -534,13 +549,174 @@ class AdminApp {
     `;
   }
 
-  async renderProvidersView(container) {
-    const res = await adminApi.getMfsProviders();
+  async renderUnmatchedSmsView(container) {
+    const res = await adminApi.getUnmatchedSms();
     container.innerHTML = `
       <div class="page-header">
         <div class="page-title-wrap">
-          <h1>MFS Providers Deep Performance</h1>
-          <p>Throughput, latency, and success rates for bKash, Nagad, Rocket, and Upay gateways.</p>
+          <h1>📬 Unmatched Incoming SMS Pool</h1>
+          <p>Inbound payments received via SMS forwarders that did not match an active pending invoice. Assign them manually to resolve customer checkouts.</p>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>TrxID</th>
+                <th>Amount</th>
+                <th>Sender</th>
+                <th>Status</th>
+                <th>Received At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${components.renderUnmatchedSmsTable(res.data || [])}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  async renderPayoutsView(container) {
+    const res = await adminApi.getPayouts();
+    container.innerHTML = `
+      <div class="page-header">
+        <div class="page-title-wrap">
+          <h1>💸 Merchant Settlements & Payout Requests</h1>
+          <p>Manage merchant ledger withdrawal requests, review bank/MFS accounts, and authorize settlements.</p>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Payout ID</th>
+                <th>Merchant</th>
+                <th>Gross Amount</th>
+                <th>Platform Fee (1.5%)</th>
+                <th>Net Disbursement</th>
+                <th>Disbursement Account</th>
+                <th>Status</th>
+                <th>Actions / TrxID</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${components.renderPayoutsTable(res.data || [])}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  async renderBlacklistView(container) {
+    const res = await adminApi.getBlacklist();
+    container.innerHTML = `
+      <div class="page-header">
+        <div class="page-title-wrap">
+          <h1>🚫 Security Blacklist & Fraud Guard</h1>
+          <p>Enforced blocklist of abusive IP addresses, fraudulent phone numbers, and intercepted fake TrxIDs.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary" onclick="window.openAddBlacklistModal()" style="background:var(--danger);border-color:var(--danger);">+ Block IP / Number</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Entity Type</th>
+                <th>Blocked Target</th>
+                <th>Detection Reason</th>
+                <th>Enforced By</th>
+                <th>Created At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${components.renderBlacklistTable(res.data || [])}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  async renderSimulatorView(container) {
+    container.innerHTML = `
+      <div class="page-header">
+        <div class="page-title-wrap">
+          <h1>⚡ Developer & Payment Simulator</h1>
+          <p>Simulate inbound MFS payment SMS events and verify real-time invoice reconciliation and webhook delivery without physical devices.</p>
+        </div>
+      </div>
+
+      <div class="dashboard-panel" style="max-width:700px;">
+        <h3 class="panel-title" style="margin-bottom:1.25rem;">Dispatch Simulated Payment Event</h3>
+        
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">MFS Payment Channel *</label>
+          <select id="simProvider" class="table-search-input" style="width:100%;">
+            <option value="bKash">bKash (Shortcode: bKash / 16247)</option>
+            <option value="Nagad">Nagad (Shortcode: 16167)</option>
+            <option value="Rocket">DBBL Rocket (Shortcode: 16216)</option>
+            <option value="Upay">Upay (Shortcode: Upay)</option>
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <label style="font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">Simulated Amount (BDT) *</label>
+            <input type="number" id="simAmount" class="table-search-input" style="width:100%;" value="2450" placeholder="e.g. 2450">
+          </div>
+          <div>
+            <label style="font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">Customer Phone (Sender) *</label>
+            <input type="text" id="simSender" class="table-search-input" style="width:100%;" value="01712349988" placeholder="e.g. 01712349988">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+          <div>
+            <label style="font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">Mock TrxID (Leave empty for auto-gen)</label>
+            <input type="text" id="simTrxId" class="table-search-input" style="width:100%;font-family:var(--font-mono);" placeholder="Auto-generated if blank">
+          </div>
+          <div>
+            <label style="font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">Target Order ID / Ref (Optional)</label>
+            <input type="text" id="simOrderId" class="table-search-input" style="width:100%;" placeholder="e.g. inv_demo_88">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;">
+          <button class="btn-primary" onclick="window.submitSimulatorSms()" style="background:linear-gradient(135deg,#4f46e5,#06b6d4);border:none;padding:0.6rem 1.25rem;font-weight:700;">
+            ⚡ Inject Inbound SMS & Test Match
+          </button>
+        </div>
+
+        <div id="simResult" style="margin-top:1.5rem;display:none;padding:1rem;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border-color);">
+        </div>
+      </div>
+    `;
+  }
+
+  async renderProvidersView(container) {
+    const [res, rulesRes] = await Promise.all([
+      adminApi.getMfsProviders(),
+      adminApi.getProviderRules(),
+    ]);
+    container.innerHTML = `
+      <div class="page-header">
+        <div class="page-title-wrap">
+          <h1>MFS Providers & Dynamic Regex Configuration</h1>
+          <p>Throughput, latency, live parser regex capture groups, and daily limits for bKash, Nagad, Rocket, and Upay.</p>
         </div>
       </div>
 
@@ -554,8 +730,14 @@ class AdminApp {
             <p><strong>Primary bKash Node:</strong> Forwarder SIM 01712345678 (Fastest SMS response time ~1.2s)</p>
             <p style="margin-top:0.75rem;"><strong>Primary Nagad Node:</strong> Forwarder SIM 01899123456 (Multi-SIM failover active)</p>
             <p style="margin-top:0.75rem;"><strong>Rocket Auto-Reconcile:</strong> Active regex engine v2.4 (Supports 16216 shortcode)</p>
+            <p style="margin-top:0.75rem;"><strong>No-Deploy Configuration:</strong> Modify regex capture groups below for instant parser reconfiguration without app redeployment.</p>
           </div>
         </div>
+      </div>
+
+      <div style="margin-top:1.5rem;">
+        <h2 style="font-size:1.15rem;font-weight:700;margin-bottom:1rem;">No-Deploy Regex & Threshold Controls</h2>
+        ${components.renderProviderRulesEditor(rulesRes.data || [])}
       </div>
     `;
   }
@@ -785,6 +967,18 @@ class AdminApp {
           </select>
         </div>
 
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid var(--border-color);">
+          <div>
+            <strong style="font-size:0.95rem;">Database Storage Optimization</strong>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">
+              Truncate SQLite Write-Ahead Log (WAL) and run VACUUM to reclaim disk space.
+            </p>
+          </div>
+          <button class="btn-secondary" onclick="window.triggerVacuum()" style="display:inline-flex;align-items:center;gap:0.35rem;">
+            ⚙ Run Checkpoint & VACUUM
+          </button>
+        </div>
+
         <div style="margin-top:1.5rem;">
           <button class="btn-primary" onclick="window.app.showToast('Settings successfully persisted in gateway SQLite configuration', 'success')">
             Save Configuration
@@ -1005,6 +1199,224 @@ class AdminApp {
       const container = document.getElementById('serverLogContainer');
       if (container) {
         container.innerHTML = components.renderServerLogsTerminal(res.data);
+      }
+    };
+
+    // Unmatched SMS Handlers
+    window.openAssignModal = (smsId, trxId, amount) => {
+      const modal = document.getElementById('assignSmsModal');
+      const idInput = document.getElementById('assignSmsId');
+      const summary = document.getElementById('assignSmsSummary');
+      if (idInput) idInput.value = smsId;
+      if (summary) summary.textContent = `TrxID ${trxId} (${components.formatCurrency(amount)})`;
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeAssignModal = () => {
+      const modal = document.getElementById('assignSmsModal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.submitAssignSms = async () => {
+      const smsId = document.getElementById('assignSmsId')?.value;
+      const invoiceId = document.getElementById('assignInvoiceId')?.value.trim();
+      if (!smsId || !invoiceId) {
+        this.showToast('Please enter target Invoice ID', 'error');
+        return;
+      }
+      try {
+        await adminApi.assignUnmatchedSms(smsId, invoiceId);
+        this.showToast(`Assigned to invoice ${invoiceId} and marked PAID`, 'success');
+        window.closeAssignModal();
+        this.renderCurrentView();
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    // Manual Verification Handlers
+    window.openManualVerifyModal = () => {
+      const modal = document.getElementById('manualVerifyModal');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeManualVerifyModal = () => {
+      const modal = document.getElementById('manualVerifyModal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.submitManualVerify = async () => {
+      const invoiceId = document.getElementById('verifyInvoiceId')?.value.trim();
+      const trxId = document.getElementById('verifyTrxId')?.value.trim();
+      const amount = Number(document.getElementById('verifyAmount')?.value) || 0;
+      if (!invoiceId || !trxId) {
+        this.showToast('Invoice ID and TrxID are required', 'error');
+        return;
+      }
+      try {
+        await adminApi.manualVerifyPayment(invoiceId, trxId, amount);
+        this.showToast(`Invoice ${invoiceId} marked as PAID with TrxID ${trxId}`, 'success');
+        window.closeManualVerifyModal();
+        this.renderCurrentView();
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    // Payouts Handlers
+    window.promptApprovePayout = (id) => {
+      const modal = document.getElementById('approvePayoutModal');
+      const inputId = document.getElementById('payoutApproveId');
+      if (inputId) inputId.value = id;
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeApprovePayoutModal = () => {
+      const modal = document.getElementById('approvePayoutModal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.submitApprovePayout = async () => {
+      const id = document.getElementById('payoutApproveId')?.value;
+      const trxId = document.getElementById('payoutTrxId')?.value.trim();
+      if (!id || !trxId) {
+        this.showToast('Disbursement TrxID is required', 'error');
+        return;
+      }
+      try {
+        await adminApi.approvePayout(id, trxId);
+        this.showToast(`Payout ${id} approved with reference ${trxId}`, 'success');
+        window.closeApprovePayoutModal();
+        this.renderCurrentView();
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    window.promptRejectPayout = async (id) => {
+      const reason = prompt('Enter rejection reason:');
+      if (!reason) return;
+      try {
+        await adminApi.rejectPayout(id, reason);
+        this.showToast(`Payout ${id} rejected`, 'info');
+        this.renderCurrentView();
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    // Blacklist Handlers
+    window.openAddBlacklistModal = () => {
+      const modal = document.getElementById('addBlacklistModal');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeAddBlacklistModal = () => {
+      const modal = document.getElementById('addBlacklistModal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.submitNewBlacklist = async () => {
+      const type = document.getElementById('blacklistType')?.value;
+      const value = document.getElementById('blacklistValue')?.value.trim();
+      const reason = document.getElementById('blacklistReason')?.value.trim();
+      if (!value || !reason) {
+        this.showToast('Value and reason are required', 'error');
+        return;
+      }
+      try {
+        await adminApi.addBlacklist(type, value, reason, 'Super Admin');
+        this.showToast(`Added ${value} to blacklist`, 'success');
+        window.closeAddBlacklistModal();
+        this.renderCurrentView();
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    window.removeBlacklist = async (id) => {
+      if (!confirm('Remove this entity from blacklist?')) return;
+      try {
+        await adminApi.removeBlacklist(id);
+        this.showToast('Entity removed from blacklist', 'info');
+        this.renderCurrentView();
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    // Provider Dynamic Regex Handler
+    window.saveProviderRule = async (provider) => {
+      const regexInput = document.getElementById(`rule_regex_${provider}`);
+      const limitInput = document.getElementById(`rule_limit_${provider}`);
+      const feeInput = document.getElementById(`rule_fee_${provider}`);
+      const enInput = document.getElementById(`rule_en_${provider}`);
+      try {
+        await adminApi.updateProviderRule({
+          provider,
+          regex_pattern: regexInput?.value.trim(),
+          daily_limit: Number(limitInput?.value) || 0,
+          fee_percentage: Number(feeInput?.value) || 0,
+          is_enabled: enInput?.checked ? 1 : 0,
+        });
+        this.showToast(`Configuration updated for ${provider.toUpperCase()}`, 'success');
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    // Simulator Handler
+    window.submitSimulatorSms = async () => {
+      const provider = document.getElementById('simProvider')?.value;
+      const amount = Number(document.getElementById('simAmount')?.value) || 0;
+      const sender = document.getElementById('simSender')?.value.trim();
+      const trxId = document.getElementById('simTrxId')?.value.trim() || undefined;
+      const orderId = document.getElementById('simOrderId')?.value.trim() || undefined;
+      const resultBox = document.getElementById('simResult');
+
+      if (!amount || !sender) {
+        this.showToast('Amount and sender phone are required', 'error');
+        return;
+      }
+
+      try {
+        const res = await adminApi.triggerMockSms({ provider, amount, sender, trxId, orderId });
+        this.showToast('Simulated SMS processed by Gateway Ingest Engine', 'success');
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          if (res.data?.matched) {
+            resultBox.innerHTML = `
+              <div style="color:var(--success);font-weight:700;margin-bottom:0.35rem;">✓ INVOICE AUTO-MATCHED & PAID!</div>
+              <div style="font-size:0.85rem;line-height:1.6;">
+                <strong>Invoice ID:</strong> ${res.data.invoiceId}<br>
+                <strong>TrxID:</strong> ${res.data.trxId}<br>
+                <strong>Channel:</strong> ${res.data.provider} (Tk ${res.data.amount})<br>
+                <em>Webhook dispatch to merchant automatically queued.</em>
+              </div>
+            `;
+          } else {
+            resultBox.innerHTML = `
+              <div style="color:var(--brand);font-weight:700;margin-bottom:0.35rem;">📬 SAVED IN UNMATCHED SMS POOL</div>
+              <div style="font-size:0.85rem;line-height:1.6;">
+                <strong>SMS Pool ID:</strong> ${res.data.unmatchedSmsId}<br>
+                <strong>TrxID:</strong> ${res.data.trxId}<br>
+                <em>No pending invoice matched this amount. Visible under <a href="#unmatched-sms" style="color:var(--brand);text-decoration:underline;">Unmatched SMS</a>.</em>
+              </div>
+            `;
+          }
+        }
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    // Vacuum Handler
+    window.triggerVacuum = async () => {
+      try {
+        const res = await adminApi.triggerVacuum();
+        this.showToast(res.message || 'SQLite VACUUM & WAL checkpoint completed', 'success');
+      } catch (err) {
+        this.showToast(err.message, 'error');
       }
     };
   }

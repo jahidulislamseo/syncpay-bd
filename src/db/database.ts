@@ -189,6 +189,59 @@ export class DatabaseService {
         updated_at TEXT DEFAULT (datetime('now')),
         FOREIGN KEY (merchant_id) REFERENCES merchants(id)
       );
+
+      CREATE TABLE IF NOT EXISTS payout_requests (
+        id TEXT PRIMARY KEY,
+        merchant_id TEXT NOT NULL,
+        merchant_name TEXT,
+        amount REAL NOT NULL,
+        fee REAL DEFAULT 0,
+        net_amount REAL NOT NULL,
+        payment_method TEXT NOT NULL,
+        account_number TEXT NOT NULL,
+        account_name TEXT,
+        bank_name TEXT,
+        branch_name TEXT,
+        status TEXT NOT NULL DEFAULT 'PENDING',
+        trx_id TEXT,
+        rejection_reason TEXT,
+        requested_at TEXT DEFAULT (datetime('now')),
+        processed_at TEXT,
+        FOREIGN KEY (merchant_id) REFERENCES merchants(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS security_blacklist (
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        value TEXT NOT NULL UNIQUE,
+        reason TEXT NOT NULL,
+        added_by TEXT DEFAULT 'Super Admin',
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS unmatched_sms (
+        id TEXT PRIMARY KEY,
+        device_id TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        sender TEXT,
+        amount REAL NOT NULL,
+        trx_id TEXT NOT NULL,
+        raw_sms TEXT NOT NULL,
+        status TEXT DEFAULT 'UNMATCHED',
+        assigned_invoice_id TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS provider_rules (
+        provider TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        regex_pattern TEXT NOT NULL,
+        daily_limit REAL DEFAULT 50000,
+        current_daily_total REAL DEFAULT 0,
+        fee_percentage REAL DEFAULT 1.5,
+        is_enabled INTEGER DEFAULT 1,
+        updated_at TEXT DEFAULT (datetime('now'))
+      );
     `);
 
     // Safe column migrations for existing SQLite databases
@@ -1056,6 +1109,66 @@ export class DatabaseService {
     this.db.prepare("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('gateway_env', 'production')").run();
     this.db.prepare("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('auto_refund_enabled', 'false')").run();
     this.db.prepare("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('webhook_retry_limit', '5')").run();
+
+    // Seed provider rules
+    const provCount = (this.db.prepare('SELECT COUNT(provider) as c FROM provider_rules').get() as any)?.c || 0;
+    if (provCount === 0) {
+      const defaultRules = [
+        { p: 'bkash', name: 'bKash Merchant/Personal', regex: 'received\\s+(?:Tk|BDT)\\s*([0-9,.]+).*from\\s+([0-9+]+).*TrxID\\s+([A-Za-z0-9]+)', limit: 100000, fee: 1.5, en: 1 },
+        { p: 'nagad', name: 'Nagad Business/Personal', regex: 'received.*(?:Tk|BDT)\\s*([0-9,.]+).*from\\s+([0-9+]+).*TrxID[:\\s]+([A-Za-z0-9]+)', limit: 80000, fee: 1.4, en: 1 },
+        { p: 'rocket', name: 'DBBL Rocket (16216)', regex: '(?:Tk|BDT)\\s*([0-9,.]+)\\s+received.*from\\s+([0-9+]+).*TxnId[:\\s]+([A-Za-z0-9]+)', limit: 50000, fee: 1.8, en: 1 },
+        { p: 'upay', name: 'UCB Upay Wallet', regex: 'Upay.*(?:Tk|BDT)\\s*([0-9,.]+).*received.*from\\s+([0-9+]+).*TxnId[:\\s]+([A-Za-z0-9]+)', limit: 30000, fee: 1.2, en: 1 },
+      ];
+      for (const r of defaultRules) {
+        this.db.prepare(`
+          INSERT INTO provider_rules (provider, name, regex_pattern, daily_limit, fee_percentage, is_enabled)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(r.p, r.name, r.regex, r.limit, r.fee, r.en);
+      }
+    }
+
+    // Seed sample payout requests
+    const payoutCount = (this.db.prepare('SELECT COUNT(id) as c FROM payout_requests').get() as any)?.c || 0;
+    if (payoutCount === 0) {
+      this.db.prepare(`
+        INSERT INTO payout_requests (id, merchant_id, merchant_name, amount, fee, net_amount, payment_method, account_number, account_name, bank_name, status, requested_at)
+        VALUES ('po_chaldal_01', 'm_chaldal_bd', 'Chaldal Grocery Express', 25000, 375, 24625, 'BANK_TRANSFER', '1081200049281', 'Chaldal BD Pvt Ltd', 'Eastern Bank PLC', 'PENDING', datetime('now', '-2 hours'))
+      `).run();
+      this.db.prepare(`
+        INSERT INTO payout_requests (id, merchant_id, merchant_name, amount, fee, net_amount, payment_method, account_number, account_name, bank_name, status, requested_at)
+        VALUES ('po_daraz_02', 'm_daraz_hub', 'Daraz BD Retail Partner', 50000, 750, 49250, 'MFS_BKASH', '01911998877', 'Daraz Retail Disburse', 'bKash Corporate', 'PENDING', datetime('now', '-5 hours'))
+      `).run();
+      this.db.prepare(`
+        INSERT INTO payout_requests (id, merchant_id, merchant_name, amount, fee, net_amount, payment_method, account_number, account_name, bank_name, status, trx_id, requested_at, processed_at)
+        VALUES ('po_gadget_03', 'm_gadget_mart', 'Gadget Mart BD', 15000, 225, 14775, 'MFS_NAGAD', '01899123456', 'Gadget Mart Store', 'Nagad Commercial', 'APPROVED', 'TXN_DISB_88192', datetime('now', '-1 day'), datetime('now', '-18 hours'))
+      `).run();
+    }
+
+    // Seed sample blacklist
+    const blCount = (this.db.prepare('SELECT COUNT(id) as c FROM security_blacklist').get() as any)?.c || 0;
+    if (blCount === 0) {
+      this.db.prepare(`
+        INSERT INTO security_blacklist (id, type, value, reason, added_by)
+        VALUES ('bl_1', 'IP', '103.205.18.9', 'Repeated brute force of fake TrxIDs within 1 minute window', 'Automated Fraud Guard')
+      `).run();
+      this.db.prepare(`
+        INSERT INTO security_blacklist (id, type, value, reason, added_by)
+        VALUES ('bl_2', 'PHONE', '01399887766', 'Known fraudulent reversal scammer report from multiple merchants', 'Super Admin')
+      `).run();
+    }
+
+    // Seed sample unmatched SMS
+    const unmatchedCount = (this.db.prepare('SELECT COUNT(id) as c FROM unmatched_sms').get() as any)?.c || 0;
+    if (unmatchedCount === 0) {
+      this.db.prepare(`
+        INSERT INTO unmatched_sms (id, device_id, provider, sender, amount, trx_id, raw_sms, status, created_at)
+        VALUES ('sms_unm_1', 'dev_phone_2', 'bKash', '01755112233', 1500, 'BKH8812903', 'You have received Tk 1,500.00 from 01755112233. Ref customer_cart_99. Fee Tk 0.00. Balance Tk 42,910.00. TrxID BKH8812903 at 20/09/2026 11:42', 'UNMATCHED', datetime('now', '-25 minutes'))
+      `).run();
+      this.db.prepare(`
+        INSERT INTO unmatched_sms (id, device_id, provider, sender, amount, trx_id, raw_sms, status, created_at)
+        VALUES ('sms_unm_2', 'dev_phone_3', 'Nagad', '01822445566', 3200, 'NGD5591023', 'Money received: Tk 3,200.00 from 01822445566. TrxID: NGD5591023. Ref: inv99. Counter: 01.', 'UNMATCHED', datetime('now', '-1 hour'))
+      `).run();
+    }
   }
 
   // ==========================================
@@ -1448,6 +1561,202 @@ export class DatabaseService {
       WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
     `).run(id, merchantId, fallbackId);
     return { success: true, id };
+  }
+
+  // ==========================================
+  // EXTENDED ADMIN CONTROLS & MODULES
+  // ==========================================
+
+  public getUnmatchedSms(limit: number = 50) {
+    return this.db.prepare(`
+      SELECT * FROM unmatched_sms 
+      ORDER BY created_at DESC 
+      LIMIT ?
+    `).all(limit);
+  }
+
+  public assignUnmatchedSms(smsId: string, invoiceId: string) {
+    const sms = this.db.prepare('SELECT * FROM unmatched_sms WHERE id = ?').get(smsId) as any;
+    if (!sms) throw new Error('Unmatched SMS not found');
+
+    const inv = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
+    if (!inv) throw new Error('Target invoice not found');
+
+    // Update invoice to PAID
+    this.db.prepare(`
+      UPDATE invoices 
+      SET status = 'PAID', trx_id = ?, payment_method = ? 
+      WHERE id = ?
+    `).run(sms.trx_id, sms.provider, invoiceId);
+
+    // Update unmatched SMS status
+    this.db.prepare(`
+      UPDATE unmatched_sms 
+      SET status = 'ASSIGNED', assigned_invoice_id = ? 
+      WHERE id = ?
+    `).run(invoiceId, smsId);
+
+    // Insert verified transaction record
+    this.db.prepare(`
+      INSERT OR IGNORE INTO transactions (merchant_id, device_id, provider, trx_id, amount, sender, raw_sms, is_verified, verified_at, order_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1, datetime('now'), ?)
+    `).run(inv.merchant_id, sms.device_id, sms.provider, sms.trx_id, sms.amount, sms.sender, sms.raw_sms, inv.order_id);
+
+    this.insertAuditLog('admin@syncpaybd.site', 'ASSIGN_UNMATCHED_SMS', 'Invoice', invoiceId, '127.0.0.1', 'SUCCESS', `Assigned SMS ${smsId} (TrxID: ${sms.trx_id}) to invoice ${invoiceId}`);
+    return { success: true, invoiceId, trxId: sms.trx_id };
+  }
+
+  public manualVerifyPayment(invoiceId: string, trxId: string, amount: number) {
+    const inv = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
+    if (!inv) throw new Error('Invoice not found');
+
+    this.db.prepare(`
+      UPDATE invoices 
+      SET status = 'PAID', trx_id = ? 
+      WHERE id = ?
+    `).run(trxId, invoiceId);
+
+    this.db.prepare(`
+      INSERT OR IGNORE INTO transactions (merchant_id, device_id, provider, trx_id, amount, sender, raw_sms, is_verified, verified_at, order_id)
+      VALUES (?, 'admin_manual_override', ?, ?, ?, 'MANUAL_VERIFIED', 'Manually verified via Super Admin console', 1, datetime('now'), ?)
+    `).run(inv.merchant_id, inv.provider, trxId, amount || inv.expected_amount, inv.order_id);
+
+    this.insertAuditLog('admin@syncpaybd.site', 'MANUAL_PAYMENT_VERIFICATION', 'Invoice', invoiceId, '127.0.0.1', 'SUCCESS', `Manually confirmed invoice ${invoiceId} with TrxID ${trxId} for Tk ${amount || inv.expected_amount}`);
+    return { success: true, invoiceId, trxId, status: 'PAID' };
+  }
+
+  public getPayoutRequests(limit: number = 50) {
+    return this.db.prepare(`
+      SELECT * FROM payout_requests 
+      ORDER BY requested_at DESC 
+      LIMIT ?
+    `).all(limit);
+  }
+
+  public createPayoutRequest(data: { merchant_id: string; amount: number; payment_method: string; account_number: string; account_name?: string; bank_name?: string; branch_name?: string }) {
+    const id = `po_${Date.now()}`;
+    const fee = Number((data.amount * 0.015).toFixed(2));
+    const net = Number((data.amount - fee).toFixed(2));
+    const merchant = this.db.prepare('SELECT name FROM merchants WHERE id = ?').get(data.merchant_id) as any;
+
+    this.db.prepare(`
+      INSERT INTO payout_requests (id, merchant_id, merchant_name, amount, fee, net_amount, payment_method, account_number, account_name, bank_name, branch_name, status, requested_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', datetime('now'))
+    `).run(id, data.merchant_id, merchant?.name || 'Enterprise Merchant', data.amount, fee, net, data.payment_method, data.account_number, data.account_name || '', data.bank_name || '', data.branch_name || '');
+
+    return { id, ...data, fee, net_amount: net, status: 'PENDING' };
+  }
+
+  public approvePayout(id: string, trxId: string) {
+    this.db.prepare(`
+      UPDATE payout_requests 
+      SET status = 'APPROVED', trx_id = ?, processed_at = datetime('now') 
+      WHERE id = ?
+    `).run(trxId, id);
+
+    this.insertAuditLog('admin@syncpaybd.site', 'PAYOUT_APPROVAL', 'Payout', id, '127.0.0.1', 'SUCCESS', `Approved payout ${id} with disbursement TrxID ${trxId}`);
+    return { success: true, id, status: 'APPROVED', trxId };
+  }
+
+  public rejectPayout(id: string, reason: string) {
+    this.db.prepare(`
+      UPDATE payout_requests 
+      SET status = 'REJECTED', rejection_reason = ?, processed_at = datetime('now') 
+      WHERE id = ?
+    `).run(reason, id);
+
+    this.insertAuditLog('admin@syncpaybd.site', 'PAYOUT_REJECTION', 'Payout', id, '127.0.0.1', 'SUCCESS', `Rejected payout ${id}. Reason: ${reason}`);
+    return { success: true, id, status: 'REJECTED', reason };
+  }
+
+  public getSecurityBlacklist() {
+    return this.db.prepare('SELECT * FROM security_blacklist ORDER BY created_at DESC').all();
+  }
+
+  public addSecurityBlacklist(type: string, value: string, reason: string, addedBy: string = 'Super Admin') {
+    const id = `bl_${Date.now()}`;
+    this.db.prepare(`
+      INSERT INTO security_blacklist (id, type, value, reason, added_by)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(id, type, value, reason, addedBy);
+
+    this.insertAuditLog('admin@syncpaybd.site', 'SECURITY_BLACKLIST_ADD', 'Blacklist', id, '127.0.0.1', 'SUCCESS', `Added ${type}: ${value} to blacklist. Reason: ${reason}`);
+    return { id, type, value, reason, added_by: addedBy };
+  }
+
+  public removeSecurityBlacklist(id: string) {
+    this.db.prepare('DELETE FROM security_blacklist WHERE id = ?').run(id);
+    this.insertAuditLog('admin@syncpaybd.site', 'SECURITY_BLACKLIST_REMOVE', 'Blacklist', id, '127.0.0.1', 'SUCCESS', `Removed blacklist item ${id}`);
+    return { success: true, id };
+  }
+
+  public getProviderRules() {
+    return this.db.prepare('SELECT * FROM provider_rules ORDER BY provider ASC').all();
+  }
+
+  public updateProviderRule(provider: string, data: { regex_pattern?: string; daily_limit?: number; fee_percentage?: number; is_enabled?: number }) {
+    const existing = this.db.prepare('SELECT * FROM provider_rules WHERE provider = ?').get(provider) as any;
+    if (!existing) throw new Error(`Provider rule for ${provider} not found`);
+
+    const regex = data.regex_pattern !== undefined ? data.regex_pattern : existing.regex_pattern;
+    const limit = data.daily_limit !== undefined ? data.daily_limit : existing.daily_limit;
+    const fee = data.fee_percentage !== undefined ? data.fee_percentage : existing.fee_percentage;
+    const enabled = data.is_enabled !== undefined ? data.is_enabled : existing.is_enabled;
+
+    this.db.prepare(`
+      UPDATE provider_rules 
+      SET regex_pattern = ?, daily_limit = ?, fee_percentage = ?, is_enabled = ?, updated_at = datetime('now')
+      WHERE provider = ?
+    `).run(regex, limit, fee, enabled, provider);
+
+    this.insertAuditLog('admin@syncpaybd.site', 'PROVIDER_RULE_UPDATE', 'ProviderRule', provider, '127.0.0.1', 'SUCCESS', `Updated rule for ${provider} (enabled=${enabled}, limit=${limit})`);
+    return { provider, regex_pattern: regex, daily_limit: limit, fee_percentage: fee, is_enabled: enabled };
+  }
+
+  public insertMockSms(provider: string, sender: string, amount: number, trxId: string, orderId?: string) {
+    const id = `sms_mock_${Date.now()}`;
+    const rawSms = `[SIMULATED] You have received Tk ${amount.toFixed(2)} from ${sender}. TrxID ${trxId}. Ref: ${orderId || 'inv_test'}`;
+
+    // Look for a matching pending invoice with this orderId or expected amount
+    let matchedInvoice: any = null;
+    if (orderId) {
+      matchedInvoice = this.db.prepare("SELECT * FROM invoices WHERE order_id = ? AND status = 'PENDING'").get(orderId);
+    }
+    if (!matchedInvoice) {
+      matchedInvoice = this.db.prepare("SELECT * FROM invoices WHERE expected_amount = ? AND status = 'PENDING' LIMIT 1").get(amount);
+    }
+
+    if (matchedInvoice) {
+      // Auto-match
+      this.db.prepare(`
+        UPDATE invoices 
+        SET status = 'PAID', trx_id = ?, payment_method = ? 
+        WHERE id = ?
+      `).run(trxId, provider, matchedInvoice.id);
+
+      this.db.prepare(`
+        INSERT INTO transactions (merchant_id, device_id, provider, trx_id, amount, sender, raw_sms, is_verified, verified_at, order_id)
+        VALUES (?, 'sim_device_gateway', ?, ?, ?, ?, ?, 1, datetime('now'), ?)
+      `).run(matchedInvoice.merchant_id, provider, trxId, amount, sender, rawSms, matchedInvoice.order_id);
+
+      this.insertAuditLog('simulator@syncpaybd.site', 'SIMULATOR_MATCH', 'Invoice', matchedInvoice.id, '127.0.0.1', 'SUCCESS', `Simulated SMS matched invoice ${matchedInvoice.id}`);
+      return { matched: true, invoiceId: matchedInvoice.id, trxId, provider, amount };
+    } else {
+      // Store in unmatched SMS
+      this.db.prepare(`
+        INSERT INTO unmatched_sms (id, device_id, provider, sender, amount, trx_id, raw_sms, status)
+        VALUES (?, 'sim_device_gateway', ?, ?, ?, ?, ?, 'UNMATCHED')
+      `).run(id, provider, sender, amount, trxId, rawSms);
+
+      this.insertAuditLog('simulator@syncpaybd.site', 'SIMULATOR_UNMATCHED', 'UnmatchedSms', id, '127.0.0.1', 'SUCCESS', `Simulated SMS stored in Unmatched Pool (TrxID: ${trxId})`);
+      return { matched: false, unmatchedSmsId: id, trxId, provider, amount };
+    }
+  }
+
+  public vacuumDatabase() {
+    this.db.exec('PRAGMA wal_checkpoint(TRUNCATE);');
+    this.db.exec('VACUUM;');
+    return { success: true, message: 'SQLite WAL truncated & database vacuum completed successfully' };
   }
 }
 

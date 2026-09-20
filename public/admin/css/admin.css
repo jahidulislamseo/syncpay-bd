@@ -307,6 +307,7 @@ button, input, select, textarea {
 /* ==========================================================================
    Main Content Area & Topbar
    ========================================================================== */
+.admin-main,
 .main-wrapper {
   flex: 1;
   margin-left: 270px;
@@ -314,6 +315,8 @@ button, input, select, textarea {
   flex-direction: column;
   min-width: 0;
   min-height: 100vh;
+  position: relative;
+  background-color: var(--bg-body);
 }
 
 .admin-topbar {
@@ -347,12 +350,15 @@ button, input, select, textarea {
   cursor: pointer;
 }
 
-.global-search-bar {
+.global-search-bar,
+.global-search-wrap {
   position: relative;
   width: 100%;
 }
 
-.global-search-bar input {
+.global-search-bar input,
+.global-search-wrap input,
+.search-input {
   width: 100%;
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);
@@ -363,7 +369,9 @@ button, input, select, textarea {
   transition: var(--transition);
 }
 
-.global-search-bar input:focus {
+.global-search-bar input:focus,
+.global-search-wrap input:focus,
+.search-input:focus {
   outline: none;
   border-color: var(--brand);
   box-shadow: 0 0 0 3px var(--brand-glow);
@@ -1241,6 +1249,7 @@ button, input, select, textarea {
   .admin-sidebar.open {
     transform: translateX(0);
   }
+  .admin-main,
   .main-wrapper {
     margin-left: 0;
   }

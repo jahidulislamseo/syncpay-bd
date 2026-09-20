@@ -140,6 +140,97 @@ class AdminApiClient {
       body: JSON.stringify({ key, value }),
     });
   }
+
+  // Unmatched SMS Pool
+  async getUnmatchedSms() {
+    return this.request('/api/v1/admin/unmatched-sms');
+  }
+
+  async assignUnmatchedSms(id, invoiceId) {
+    return this.request(`/api/v1/admin/unmatched-sms/${id}/assign`, {
+      method: 'POST',
+      body: JSON.stringify({ invoiceId }),
+    });
+  }
+
+  // Manual Payment Verification Override
+  async manualVerifyPayment(invoiceId, trxId, amount) {
+    return this.request('/api/v1/admin/transactions/manual-verify', {
+      method: 'POST',
+      body: JSON.stringify({ invoiceId, trxId, amount }),
+    });
+  }
+
+  // Payouts & Settlements
+  async getPayouts() {
+    return this.request('/api/v1/admin/payouts');
+  }
+
+  async createPayout(data) {
+    return this.request('/api/v1/admin/payouts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async approvePayout(id, trxId) {
+    return this.request(`/api/v1/admin/payouts/${id}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ trxId }),
+    });
+  }
+
+  async rejectPayout(id, reason) {
+    return this.request(`/api/v1/admin/payouts/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  // Security Blacklist
+  async getBlacklist() {
+    return this.request('/api/v1/admin/security/blacklist');
+  }
+
+  async addBlacklist(type, value, reason, addedBy) {
+    return this.request('/api/v1/admin/security/blacklist', {
+      method: 'POST',
+      body: JSON.stringify({ type, value, reason, addedBy }),
+    });
+  }
+
+  async removeBlacklist(id) {
+    return this.request(`/api/v1/admin/security/blacklist/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Provider Rules & Dynamic Regex
+  async getProviderRules() {
+    return this.request('/api/v1/admin/providers/config');
+  }
+
+  async updateProviderRule(data) {
+    return this.request('/api/v1/admin/providers/config', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Interactive Payment / SMS Simulator
+  async triggerMockSms(data) {
+    return this.request('/api/v1/admin/simulator/mock-sms', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // System Vacuum & Checkpoint
+  async triggerVacuum() {
+    return this.request('/api/v1/admin/system/vacuum', {
+      method: 'POST',
+    });
+  }
 }
 
 export const adminApi = new AdminApiClient();

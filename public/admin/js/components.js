@@ -537,4 +537,140 @@ export const components = {
       `;
     }).join('');
   },
+
+  // Unmatched SMS Pool Table
+  renderUnmatchedSmsTable(smsList = []) {
+    if (!smsList.length) {
+      return `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">No unmatched SMS records found. All incoming payments are successfully resolved.</td></tr>`;
+    }
+    return smsList.map((s) => {
+      const isAssigned = s.status === 'ASSIGNED';
+      return `
+        <tr>
+          <td><span class="badge badge-${(s.provider || 'bkash').toLowerCase()}">${s.provider}</span></td>
+          <td><strong style="font-family:var(--font-mono);">${s.trx_id}</strong></td>
+          <td style="font-weight:700;color:var(--text-primary);">${this.formatCurrency(s.amount)}</td>
+          <td>${this.maskPhoneNumber(s.sender)}</td>
+          <td><span class="badge ${isAssigned ? 'badge-completed' : 'badge-pending'}">${s.status}</span></td>
+          <td style="font-size:0.75rem;color:var(--text-muted);">${new Date(s.created_at).toLocaleString()}</td>
+          <td>
+            ${isAssigned ? `<span style="font-size:0.75rem;color:var(--success);">Assigned (${s.assigned_invoice_id})</span>` : `
+              <button class="btn-sm btn-primary" onclick="window.openAssignModal('${s.id}', '${s.trx_id}', ${s.amount})" style="padding:0.25rem 0.6rem;font-size:0.75rem;">
+                Assign to Invoice
+              </button>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  // Payouts & Settlements Table
+  renderPayoutsTable(payouts = []) {
+    if (!payouts.length) {
+      return `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No withdrawal or settlement requests registered.</td></tr>`;
+    }
+    return payouts.map((p) => {
+      const isPending = p.status === 'PENDING';
+      const isApproved = p.status === 'APPROVED';
+      return `
+        <tr>
+          <td><span style="font-family:var(--font-mono);font-size:0.78rem;">${p.id}</span></td>
+          <td><strong>${p.merchant_name || p.merchant_id}</strong></td>
+          <td style="font-weight:700;">${this.formatCurrency(p.amount)}</td>
+          <td style="color:var(--text-muted);font-size:0.8rem;">${this.formatCurrency(p.fee)}</td>
+          <td style="font-weight:700;color:var(--success);">${this.formatCurrency(p.net_amount)}</td>
+          <td>
+            <div style="font-size:0.8rem;"><strong>${p.payment_method}</strong></div>
+            <div style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">${p.account_number}</div>
+          </td>
+          <td>
+            <span class="badge ${isApproved ? 'badge-completed' : isPending ? 'badge-pending' : 'badge-failed'}">
+              ${p.status}
+            </span>
+          </td>
+          <td>
+            ${isPending ? `
+              <div style="display:flex;gap:0.4rem;">
+                <button class="btn-sm btn-primary" onclick="window.promptApprovePayout('${p.id}')" style="padding:0.25rem 0.5rem;font-size:0.72rem;background:var(--success);border-color:var(--success);">Approve</button>
+                <button class="btn-sm btn-danger" onclick="window.promptRejectPayout('${p.id}')" style="padding:0.25rem 0.5rem;font-size:0.72rem;">Reject</button>
+              </div>
+            ` : `<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">${p.trx_id || p.rejection_reason || 'Resolved'}</span>`}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  // Security Blacklist Table
+  renderBlacklistTable(list = []) {
+    if (!list.length) {
+      return `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Blacklist is empty. No blocked IPs or MSISDNs.</td></tr>`;
+    }
+    return list.map((b) => {
+      return `
+        <tr>
+          <td><span class="badge ${b.type === 'IP' ? 'badge-info' : 'badge-failed'}">${b.type}</span></td>
+          <td><strong style="font-family:var(--font-mono);">${b.value}</strong></td>
+          <td><span style="color:var(--text-secondary);font-size:0.82rem;">${b.reason}</span></td>
+          <td><span style="font-size:0.75rem;color:var(--text-muted);">${b.added_by || 'Admin'}</span></td>
+          <td><span style="font-size:0.75rem;color:var(--text-muted);">${new Date(b.created_at).toLocaleString()}</span></td>
+          <td>
+            <button class="btn-sm btn-danger" onclick="window.removeBlacklist('${b.id}')" style="padding:0.2rem 0.5rem;font-size:0.72rem;">
+              Remove
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  // Dynamic Provider Rules & Regex Editor Cards
+  renderProviderRulesEditor(rules = []) {
+    if (!rules.length) return `<div class="dashboard-panel"><p style="color:var(--text-muted);">No provider rules configured.</p></div>`;
+
+    return rules.map((r) => {
+      const isEnabled = r.is_enabled === 1;
+      return `
+        <div class="dashboard-panel" style="margin-bottom:1.25rem;border-left:4px solid var(--${r.provider === 'bkash' ? 'brand' : 'primary'});">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <div>
+              <h3 style="font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
+                <span class="badge badge-${r.provider}">${r.provider.toUpperCase()}</span>
+                ${r.name}
+              </h3>
+              <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem;">Live parser capture groups for transaction reconciliation.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <label style="font-size:0.8rem;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:0.35rem;">
+                <input type="checkbox" id="rule_en_${r.provider}" ${isEnabled ? 'checked' : ''} style="cursor:pointer;">
+                Channel Active
+              </label>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">Regular Expression (Amount, Sender, TrxID)</label>
+              <input type="text" id="rule_regex_${r.provider}" class="table-search-input" style="width:100%;font-family:var(--font-mono);font-size:0.8rem;" value="${r.regex_pattern}">
+            </div>
+            <div>
+              <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">Daily SIM Limit (BDT)</label>
+              <input type="number" id="rule_limit_${r.provider}" class="table-search-input" style="width:100%;" value="${r.daily_limit}">
+            </div>
+            <div>
+              <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.35rem;">Platform Fee (%)</label>
+              <input type="number" step="0.1" id="rule_fee_${r.provider}" class="table-search-input" style="width:100%;" value="${r.fee_percentage}">
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn-sm btn-primary" onclick="window.saveProviderRule('${r.provider}')">
+              Save Rule Configuration
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
 };

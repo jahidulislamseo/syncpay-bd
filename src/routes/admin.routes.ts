@@ -299,4 +299,171 @@ export const adminRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
       return reply.status(500).send({ success: false, error: err.message });
     }
   });
+
+  // Unmatched SMS Pool
+  server.get('/api/v1/admin/unmatched-sms', async (_request, reply) => {
+    try {
+      const data = dbService.getUnmatchedSms();
+      return reply.send({ success: true, data });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.post('/api/v1/admin/unmatched-sms/:id/assign', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = request.body as { invoiceId: string };
+      if (!body.invoiceId) {
+        return reply.status(400).send({ success: false, error: 'invoiceId is required' });
+      }
+      const result = dbService.assignUnmatchedSms(id, body.invoiceId);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  // Manual Transaction Verification Override
+  server.post('/api/v1/admin/transactions/manual-verify', async (request, reply) => {
+    try {
+      const body = request.body as { invoiceId: string; trxId: string; amount?: number };
+      if (!body.invoiceId || !body.trxId) {
+        return reply.status(400).send({ success: false, error: 'invoiceId and trxId are required' });
+      }
+      const result = dbService.manualVerifyPayment(body.invoiceId, body.trxId, body.amount || 0);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  // Payouts & Settlements
+  server.get('/api/v1/admin/payouts', async (_request, reply) => {
+    try {
+      const data = dbService.getPayoutRequests();
+      return reply.send({ success: true, data });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.post('/api/v1/admin/payouts', async (request, reply) => {
+    try {
+      const body = request.body as any;
+      if (!body.merchant_id || !body.amount || !body.payment_method || !body.account_number) {
+        return reply.status(400).send({ success: false, error: 'Missing required payout fields' });
+      }
+      const result = dbService.createPayoutRequest(body);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.post('/api/v1/admin/payouts/:id/approve', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = request.body as { trxId: string };
+      if (!body.trxId) {
+        return reply.status(400).send({ success: false, error: 'trxId is required' });
+      }
+      const result = dbService.approvePayout(id, body.trxId);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.post('/api/v1/admin/payouts/:id/reject', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = request.body as { reason: string };
+      const result = dbService.rejectPayout(id, body.reason || 'Verification failed');
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  // Security Blacklist
+  server.get('/api/v1/admin/security/blacklist', async (_request, reply) => {
+    try {
+      const data = dbService.getSecurityBlacklist();
+      return reply.send({ success: true, data });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.post('/api/v1/admin/security/blacklist', async (request, reply) => {
+    try {
+      const body = request.body as { type: string; value: string; reason: string; addedBy?: string };
+      if (!body.type || !body.value || !body.reason) {
+        return reply.status(400).send({ success: false, error: 'type, value, and reason are required' });
+      }
+      const result = dbService.addSecurityBlacklist(body.type, body.value, body.reason, body.addedBy);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.delete('/api/v1/admin/security/blacklist/:id', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const result = dbService.removeSecurityBlacklist(id);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  // MFS Provider Config & Dynamic Regex
+  server.get('/api/v1/admin/providers/config', async (_request, reply) => {
+    try {
+      const data = dbService.getProviderRules();
+      return reply.send({ success: true, data });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.post('/api/v1/admin/providers/config', async (request, reply) => {
+    try {
+      const body = request.body as { provider: string; regex_pattern?: string; daily_limit?: number; fee_percentage?: number; is_enabled?: number };
+      if (!body.provider) {
+        return reply.status(400).send({ success: false, error: 'provider is required' });
+      }
+      const result = dbService.updateProviderRule(body.provider, body);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  // Interactive Developer / Admin Payment & SMS Simulator
+  server.post('/api/v1/admin/simulator/mock-sms', async (request, reply) => {
+    try {
+      const body = request.body as { provider: string; sender: string; amount: number; trxId?: string; orderId?: string };
+      if (!body.provider || !body.amount || !body.sender) {
+        return reply.status(400).send({ success: false, error: 'provider, sender, and amount are required' });
+      }
+      const trxId = body.trxId || `SIM_${Date.now().toString(36).toUpperCase()}`;
+      const result = dbService.insertMockSms(body.provider, body.sender, Number(body.amount), trxId, body.orderId);
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  // Database Vacuum & Maintenance
+  server.post('/api/v1/admin/system/vacuum', async (_request, reply) => {
+    try {
+      const result = dbService.vacuumDatabase();
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
 };
