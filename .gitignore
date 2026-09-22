@@ -39,6 +39,7 @@ android-agent/build/
 android-agent/.gradle/
 android-agent/local.properties
 *.apk
+!public/downloads/syncpay-forwarder.apk
 *.aab
 
 # Flutter build

@@ -4,6 +4,8 @@ import fastifyStatic from '@fastify/static';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import rateLimit from '@fastify/rate-limit';
+
 import { deviceRoutes } from './routes/device.routes.js';
 import { paymentRoutes } from './routes/payment.routes.js';
 import { merchantRoutes } from './routes/merchant.routes.js';
@@ -20,6 +22,18 @@ const server = Fastify({
 await server.register(cors, {
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+});
+
+// Rate limiting to prevent brute-force attacks and DDoS
+await server.register(rateLimit, {
+  max: 120,
+  timeWindow: '1 minute',
+  allowList: ['127.0.0.1', 'localhost'],
+  errorResponseBuilder: (_req, context) => ({
+    statusCode: 429,
+    error: 'Too Many Requests',
+    message: `Rate limit exceeded. Try again in ${Math.ceil(context.ttl / 1000)} seconds.`,
+  }),
 });
 
 // Allow empty json body gracefully without FST_ERR_CTP_EMPTY_JSON_BODY

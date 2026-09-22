@@ -4,9 +4,20 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import { CryptoUtil } from '../src/utils/crypto.js';
 
+import fs from 'node:fs';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_PATH = path.resolve(__dirname, '../payflow.db');
+
+if (typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile();
+  } catch {}
+}
+
+const syncpayDb = path.resolve(__dirname, '../syncpay.db');
+const payflowDb = path.resolve(__dirname, '../payflow.db');
+const DB_PATH = process.env.DB_PATH || (fs.existsSync(syncpayDb) ? syncpayDb : payflowDb);
 
 // Deterministic UUID mapper for legacy non-UUID IDs
 function mapToUuid(id: string): string {

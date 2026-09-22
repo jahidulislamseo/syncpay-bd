@@ -9,6 +9,7 @@ export interface MerchantEntity {
   status: 'ACTIVE' | 'SUSPENDED' | 'PENDING';
   webhook_url?: string | null;
   redirect_url?: string | null;
+  password_hash?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -34,9 +35,10 @@ export class MerchantRepository {
       return {
         id: local.id,
         business_name: local.name,
-        email: 'merchant@example.com',
+        email: (local as any).email || 'merchant@example.com',
         status: 'ACTIVE',
         webhook_url: local.webhook_url,
+        password_hash: (local as any).password_hash || null,
       };
     }
     return null;
@@ -49,12 +51,39 @@ export class MerchantRepository {
         .from('merchants')
         .select('*')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (!error && data) {
         return data as MerchantEntity;
       }
     }
+
+    // Local SQLite fallback
+    const all = dbService.getAdminMerchants();
+    const local = all.find(
+      (m: any) => m.email === email || m.id === email || m.name.toLowerCase() === email.toLowerCase()
+    );
+    if (local) {
+      return {
+        id: local.id,
+        business_name: local.name,
+        email,
+        status: 'ACTIVE',
+        webhook_url: local.webhook_url,
+        password_hash: (local as any).password_hash || null,
+      };
+    }
+
+    // Check demo accounts
+    if (email === 'demo@syncpaybd.site' || email === 'merchant@example.com') {
+      return {
+        id: '00000000-0000-0000-0000-000000000101',
+        business_name: 'Demo Merchant Store',
+        email,
+        status: 'ACTIVE',
+      };
+    }
+
     return null;
   }
 
@@ -63,6 +92,7 @@ export class MerchantRepository {
     business_name: string;
     email: string;
     phone?: string;
+    password_hash?: string;
     webhook_url?: string;
     redirect_url?: string;
   }): Promise<MerchantEntity> {
@@ -72,6 +102,7 @@ export class MerchantRepository {
         business_name: params.business_name,
         email: params.email,
         phone: params.phone || null,
+        password_hash: params.password_hash || null,
         webhook_url: params.webhook_url || null,
         redirect_url: params.redirect_url || null,
         status: 'ACTIVE',
@@ -95,6 +126,7 @@ export class MerchantRepository {
       business_name: params.business_name,
       email: params.email,
       phone: params.phone || null,
+      password_hash: params.password_hash || null,
       status: 'ACTIVE' as const,
       webhook_url: params.webhook_url || null,
       redirect_url: params.redirect_url || null,

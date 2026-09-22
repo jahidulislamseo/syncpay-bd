@@ -167,7 +167,8 @@ export class TransactionRepository {
     }
 
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trx.id);
+    if (supabase && isSupabaseConfigured() && isUuid) {
       const { data, error } = await supabase
         .from('transactions')
         .update({
@@ -177,11 +178,9 @@ export class TransactionRepository {
         .select()
         .single();
 
-      if (error || !data) {
-        return { success: false, reason: 'Transaction lock failed. May have been concurrently claimed.' };
+      if (!error && data) {
+        return { success: true, transaction: data as TransactionEntity };
       }
-
-      return { success: true, transaction: data as TransactionEntity };
     }
 
     // Local SQLite fallback

@@ -22,11 +22,14 @@ export class DeviceRepository {
     const supabase = getSupabaseClient();
 
     if (supabase && isSupabaseConfigured()) {
-      const { data, error } = await supabase
-        .from('devices')
-        .select('*')
-        .or(`device_token_hash.eq.${tokenHash},id.eq.${token}`)
-        .single();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token);
+      let query = supabase.from('devices').select('*');
+      if (isUuid) {
+        query = query.or(`device_token_hash.eq.${tokenHash},id.eq.${token}`);
+      } else {
+        query = query.eq('device_token_hash', tokenHash);
+      }
+      const { data, error } = await query.maybeSingle();
 
       if (!error && data) {
         return data as DeviceEntity;

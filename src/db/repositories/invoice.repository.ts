@@ -41,6 +41,7 @@ export class InvoiceRepository {
         amount: params.amount,
         redirect_url: params.redirectUrl || null,
         webhook_url: params.webhookUrl || null,
+        customer_email: params.customerEmail || null,
         status: 'PENDING',
         expires_at: expiresAt,
       };
@@ -91,11 +92,14 @@ export class InvoiceRepository {
   public static async findByInvoiceId(invoiceId: string): Promise<InvoiceEntity | null> {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .or(`invoice_id.eq.${invoiceId},id.eq.${invoiceId}`)
-        .single();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(invoiceId);
+      let query = supabase.from('invoices').select('*');
+      if (isUuid) {
+        query = query.or(`invoice_id.eq.${invoiceId},id.eq.${invoiceId}`);
+      } else {
+        query = query.eq('invoice_id', invoiceId);
+      }
+      const { data, error } = await query.maybeSingle();
 
       if (!error && data) {
         return data as InvoiceEntity;
@@ -166,13 +170,21 @@ export class InvoiceRepository {
   ): Promise<void> {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
-      await supabase
-        .from('invoices')
-        .update({
-          status,
-          updated_at: new Date().toISOString(),
-        })
-        .or(`invoice_id.eq.${invoiceId},id.eq.${invoiceId}`);
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(invoiceId);
+      const updateData: any = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
+      if (trxId) updateData.trx_id = trxId;
+      if (paymentMethod) updateData.payment_method = paymentMethod;
+
+      let query = supabase.from('invoices').update(updateData);
+      if (isUuid) {
+        query = query.or(`invoice_id.eq.${invoiceId},id.eq.${invoiceId}`);
+      } else {
+        query = query.eq('invoice_id', invoiceId);
+      }
+      await query;
     }
 
     dbService.updateInvoiceStatus(invoiceId, status === 'FAILED' ? 'EXPIRED' : status, trxId, paymentMethod);

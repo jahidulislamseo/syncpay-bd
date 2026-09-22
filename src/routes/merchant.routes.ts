@@ -4,6 +4,8 @@ import { MerchantService } from '../services/merchant.service.js';
 import { DeviceService } from '../services/device.service.js';
 import { TransactionService } from '../services/transaction.service.js';
 import { dbService } from '../db/database.js';
+import { CryptoUtil } from '../utils/crypto.js';
+import { MerchantRepository } from '../db/repositories/merchant.repository.js';
 
 export async function merchantRoutes(fastify: FastifyInstance) {
   const DEMO_MERCHANT_ID = '00000000-0000-0000-0000-000000000101';
@@ -341,31 +343,65 @@ export async function merchantRoutes(fastify: FastifyInstance) {
 
   // Merchant Auth: Register
   fastify.post('/api/v1/merchant/auth/register', async (request: FastifyRequest, reply: FastifyReply) => {
-    const body = request.body as { name?: string; email?: string; business_name?: string; password?: string };
-    if (!body.name || !body.email) {
-      return reply.status(400).send({ success: false, error: 'Merchant name and email are required' });
+    const body = request.body as { name?: string; email?: string; business_name?: string; password?: string; phone?: string };
+    if (!body.name || !body.email || !body.password) {
+      return reply.status(400).send({ success: false, error: 'Name, email, and password are required' });
     }
-    const id = 'm_' + Math.random().toString(36).substring(2, 9);
-    const apiKey = 'pf_live_' + Math.random().toString(36).substring(2, 18);
+    if (body.password.length < 6) {
+      return reply.status(400).send({ success: false, error: 'Password must be at least 6 characters' });
+    }
+
+    const email = body.email.trim().toLowerCase();
+    const existing = await MerchantRepository.findByEmail(email);
+    if (existing) {
+      return reply.status(409).send({ success: false, error: 'A merchant account with this email already exists' });
+    }
+
+    const passwordHash = CryptoUtil.hashPassword(body.password);
+    const id = '00000000-0000-4' + Math.random().toString(16).substring(2, 5) + '-a' + Math.random().toString(16).substring(2, 5) + '-' + Math.random().toString(16).substring(2, 14);
+    const apiKey = 'live_sk_' + Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14);
     const businessName = body.business_name || body.name + ' Store';
 
     try {
+      await MerchantRepository.create({
+        id,
+        business_name: businessName,
+        email,
+        phone: body.phone,
+        password_hash: passwordHash,
+      });
+
+      const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
+      await ApiKeyRepository.create({
+        merchantId: id,
+        name: 'Default Live Key',
+        rawKey: apiKey,
+      });
+    } catch {
       dbService.insertMerchant({
         id,
         name: businessName,
         api_key: apiKey,
         webhook_url: '',
       });
-    } catch (e) {}
+    }
+
+    const token = CryptoUtil.signJwt({
+      id,
+      email,
+      name: businessName,
+      role: 'merchant',
+    });
 
     return reply.status(201).send({
       success: true,
       merchant: {
         id,
         name: businessName,
-        email: body.email,
+        email,
         api_key: apiKey,
       },
+      token,
       message: 'Merchant account registered successfully',
     });
   });
@@ -373,15 +409,73 @@ export async function merchantRoutes(fastify: FastifyInstance) {
   // Merchant Auth: Login
   fastify.post('/api/v1/merchant/auth/login', async (request: FastifyRequest, reply: FastifyReply) => {
     const body = request.body as { email?: string; password?: string };
+    if (!body.email || !body.password) {
+      return reply.status(400).send({ success: false, error: 'Email and password are required' });
+    }
+
+    const email = body.email.trim().toLowerCase();
+    const merchant = await MerchantRepository.findByEmail(email);
+
+    if (!merchant) {
+      return reply.status(401).send({ success: false, error: 'Invalid email or password' });
+    }
+
+    if (merchant.password_hash) {
+      const valid = CryptoUtil.verifyPassword(body.password, merchant.password_hash);
+      if (!valid) {
+        return reply.status(401).send({ success: false, error: 'Invalid email or password' });
+      }
+    } else {
+      if (email.includes('demo') && body.password !== 'demo1234' && body.password !== 'test1234') {
+        return reply.status(401).send({ success: false, error: 'Invalid credentials for demo account' });
+      }
+    }
+
+    let apiKey = 'live_demo_sec_99410';
+    try {
+      const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
+      const keys = await ApiKeyRepository.listByMerchant(merchant.id);
+      if (keys && keys.length > 0) {
+        apiKey = keys[0].key_prefix + '...';
+      }
+    } catch {}
+
+    const token = CryptoUtil.signJwt({
+      id: merchant.id,
+      email: merchant.email,
+      name: merchant.business_name,
+      role: 'merchant',
+    });
+
     return reply.send({
       success: true,
       merchant: {
-        id: FALLBACK_MERCHANT_ID,
-        name: 'Demo Merchant Store',
-        email: body?.email || 'merchant@demo.com',
-        api_key: 'live_demo_sec_99410',
+        id: merchant.id,
+        name: merchant.business_name,
+        email: merchant.email,
+        api_key: apiKey,
       },
-      token: 'jwt_mock_token_merchant',
+      token,
+      message: 'Authentication successful',
+    });
+  });
+
+  // Merchant Auth: Current User (Session verification)
+  fastify.get('/api/v1/merchant/auth/me', async (request: FastifyRequest, reply: FastifyReply) => {
+    const authHeader = request.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return reply.status(401).send({ success: false, error: 'Authorization token required' });
+    }
+    const token = authHeader.substring(7);
+    const { valid, payload } = CryptoUtil.verifyJwt(token);
+    if (!valid || !payload) {
+      return reply.status(401).send({ success: false, error: 'Invalid or expired session token' });
+    }
+    const merchant = await MerchantRepository.findById(payload.id);
+    return reply.send({
+      success: true,
+      user: payload,
+      merchant: merchant || null,
     });
   });
 }
