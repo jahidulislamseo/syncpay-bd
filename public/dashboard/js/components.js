@@ -301,7 +301,7 @@ export const components = {
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0;">SyncPay Android Forwarder APK</h3>
-              <span class="badge badge-completed" style="font-size: 10px;">v1.0.0 STABLE</span>
+              <span class="badge badge-completed" style="font-size: 10px;">v1.1.0 STABLE</span>
             </div>
             <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0 0;">
               Install on your SIM-enabled Android phone. bKash, Nagad, and Rocket SMS are automatically captured and verified.
