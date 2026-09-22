@@ -884,26 +884,7 @@ export class DatabaseService {
         VALUES ('dev_phone_4', 'm_gadget_mart', 'token_gadget_pri', 'Samsung Galaxy M34 (Rocket+Upay)', '01655778899', 'OFFLINE')
       `).run();
         }
-        // Seed sample transactions if under 5 rows
-        const txCount = this.db.prepare('SELECT COUNT(id) as c FROM transactions').get()?.c || 0;
-        if (txCount < 5) {
-            const sampleTxs = [
-                { m: 'm_demo_101', d: 'dev_phone_1', p: 'bKash', trx: 'BKH9941829', amt: 2450, s: '01712349988', v: 1, sms: 'You have received Tk 2,450.00 from 01712349988. TrxID BKH9941829.' },
-                { m: 'm_chaldal_bd', d: 'dev_phone_2', p: 'Nagad', trx: 'NGD7710294', amt: 1850, s: '01899223344', v: 1, sms: 'Money received: Tk 1,850.00 from 01899223344. TrxID: NGD7710294.' },
-                { m: 'm_daraz_hub', d: 'dev_phone_3', p: 'bKash', trx: 'BKH3329012', amt: 5200, s: '01911998877', v: 1, sms: 'You have received Tk 5,200.00 from 01911998877. TrxID BKH3329012.' },
-                { m: 'm_gadget_mart', d: 'dev_phone_4', p: 'Rocket', trx: 'RKT4410293', amt: 3200, s: '01655001122', v: 1, sms: 'Tk 3,200.00 received from 01655001122. TxnId: RKT4410293.' },
-                { m: 'm_payflow_sandbox', d: 'dev_phone_1', p: 'Upay', trx: 'UPY1102948', amt: 950, s: '01511223344', v: 0, sms: 'Upay Tk 950 received. TxnId UPY1102948.' },
-            ];
-            for (const tx of sampleTxs) {
-                try {
-                    this.db.prepare(`
-            INSERT OR IGNORE INTO transactions (merchant_id, device_id, provider, trx_id, amount, sender, raw_sms, is_verified, verified_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-          `).run(tx.m, tx.d, tx.p, tx.trx, tx.amt, tx.s, tx.sms, tx.v);
-                }
-                catch { }
-            }
-        }
+        // Zero demo transactions by default
         // Seed sample audit logs
         const auditCount = this.db.prepare('SELECT COUNT(id) as c FROM audit_logs').get()?.c || 0;
         if (auditCount === 0) {
@@ -956,22 +937,7 @@ export class DatabaseService {
         `).run(r.p, r.name, r.regex, r.limit, r.fee, r.en);
             }
         }
-        // Seed sample payout requests
-        const payoutCount = this.db.prepare('SELECT COUNT(id) as c FROM payout_requests').get()?.c || 0;
-        if (payoutCount === 0) {
-            this.db.prepare(`
-        INSERT INTO payout_requests (id, merchant_id, merchant_name, amount, fee, net_amount, payment_method, account_number, account_name, bank_name, status, requested_at)
-        VALUES ('po_chaldal_01', 'm_chaldal_bd', 'Chaldal Grocery Express', 25000, 375, 24625, 'BANK_TRANSFER', '1081200049281', 'Chaldal BD Pvt Ltd', 'Eastern Bank PLC', 'PENDING', datetime('now', '-2 hours'))
-      `).run();
-            this.db.prepare(`
-        INSERT INTO payout_requests (id, merchant_id, merchant_name, amount, fee, net_amount, payment_method, account_number, account_name, bank_name, status, requested_at)
-        VALUES ('po_daraz_02', 'm_daraz_hub', 'Daraz BD Retail Partner', 50000, 750, 49250, 'MFS_BKASH', '01911998877', 'Daraz Retail Disburse', 'bKash Corporate', 'PENDING', datetime('now', '-5 hours'))
-      `).run();
-            this.db.prepare(`
-        INSERT INTO payout_requests (id, merchant_id, merchant_name, amount, fee, net_amount, payment_method, account_number, account_name, bank_name, status, trx_id, requested_at, processed_at)
-        VALUES ('po_gadget_03', 'm_gadget_mart', 'Gadget Mart BD', 15000, 225, 14775, 'MFS_NAGAD', '01899123456', 'Gadget Mart Store', 'Nagad Commercial', 'APPROVED', 'TXN_DISB_88192', datetime('now', '-1 day'), datetime('now', '-18 hours'))
-      `).run();
-        }
+        // No demo payout requests by default
         // Seed sample blacklist
         const blCount = this.db.prepare('SELECT COUNT(id) as c FROM security_blacklist').get()?.c || 0;
         if (blCount === 0) {

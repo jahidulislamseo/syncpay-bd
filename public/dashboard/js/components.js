@@ -345,7 +345,7 @@ export const components = {
                 </div>
                 <div class="detail-item">
                   <span class="detail-key">Processed SMS</span>
-                  <span class="detail-val" style="color:var(--primary); font-weight:700;">${d.sms_count || 1284}</span>
+                  <span class="detail-val" style="color:var(--primary); font-weight:700;">${d.sms_count ?? 0}</span>
                 </div>
               </div>
             </div>
