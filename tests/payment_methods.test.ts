@@ -75,4 +75,30 @@ describe('Approved MFS Channels & Dynamic Checkout Suite', () => {
       );
     }
   });
+
+  it('should support saving and retrieving custom qr_code_url on payment channels', () => {
+    const testQrData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const method = db.upsertPaymentMethod({
+      merchant_id: merchantId,
+      provider_type: 'bkash',
+      title: 'bKash Personal QR Test',
+      account_number: '01580397069',
+      qr_code_url: testQrData,
+    }) as any;
+
+    assert.ok(method, 'Payment method should be created');
+    assert.equal(method.qr_code_url, testQrData, 'qr_code_url must match uploaded test QR data');
+
+    // Update with clear/remove QR
+    const updated = db.upsertPaymentMethod({
+      id: method.id,
+      merchant_id: merchantId,
+      provider_type: 'bkash',
+      title: 'bKash Personal QR Test',
+      account_number: '01580397069',
+      qr_code_url: '',
+    }) as any;
+
+    assert.equal(updated.qr_code_url, null, 'qr_code_url should be null when cleared');
+  });
 });

@@ -738,7 +738,10 @@ export const components = {
                 </div>
                 <div>
                   <div style="font-weight:700; font-size:14.5px; color:var(--text-primary); line-height:1.2;">${cleanTitle}</div>
-                  <span style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">${badgeText}</span>
+                  <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                    <span style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;">${badgeText}</span>
+                    ${m.qr_code_url ? `<span style="font-size:9.5px; font-weight:700; color:#2563eb; background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2); padding:1px 5px; border-radius:4px; display:inline-flex; align-items:center; gap:3px;"><span>📷</span> Custom QR</span>` : ''}
+                  </div>
                 </div>
               </div>
 

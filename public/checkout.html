@@ -1543,15 +1543,25 @@
         noticeBox.innerHTML = `A/C Name: <strong>${activeMethod.account_name || 'SyncPay BD'}</strong>`;
       }
 
-      // Update QR Code on checkout card & Zoom modal (raw=1 directly returns PNG image)
+      // Update QR Code on checkout card & Zoom modal (custom QR image or fallback dynamic QR)
       const qrData = activeMethod.account_number;
-      const qrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=240&raw=1`;
-      document.getElementById('qr-img').src = qrUrl;
+      const defaultQrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=240&raw=1`;
+      const defaultZoomQrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=360&raw=1`;
+      const customQr = (activeMethod.qr_code_url || activeMethod.qr_image || '').trim();
+      const finalQrUrl = customQr || defaultQrUrl;
+      const finalZoomQrUrl = customQr || defaultZoomQrUrl;
+
+      const qrImgEl = document.getElementById('qr-img');
+      qrImgEl.src = finalQrUrl;
+      qrImgEl.onerror = () => { qrImgEl.src = defaultQrUrl; };
+
       document.getElementById('qr-phone-caption').innerText = activeMethod.account_number;
       document.getElementById('qr-brand-name').innerText = shortName;
 
-      const zoomQrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=360&raw=1`;
-      document.getElementById('zoom-qr-image').src = zoomQrUrl;
+      const zoomImgEl = document.getElementById('zoom-qr-image');
+      zoomImgEl.src = finalZoomQrUrl;
+      zoomImgEl.onerror = () => { zoomImgEl.src = defaultZoomQrUrl; };
+
       document.getElementById('zoom-brand-text').innerText = shortName;
       document.getElementById('zoom-phone-number').innerText = activeMethod.account_number;
 

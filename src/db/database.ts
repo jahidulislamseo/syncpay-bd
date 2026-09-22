@@ -195,6 +195,7 @@ export class DatabaseService {
         theme_color TEXT DEFAULT '#E2136E',
         is_active INTEGER DEFAULT 1,
         sort_order INTEGER DEFAULT 0,
+        qr_code_url TEXT,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now')),
         FOREIGN KEY (merchant_id) REFERENCES merchants(id)
@@ -324,6 +325,20 @@ export class DatabaseService {
       if (!existingMCols.has(col.name)) {
         try {
           this.db.exec(`ALTER TABLE merchants ADD COLUMN ${col.name} ${col.type};`);
+        } catch {}
+      }
+    }
+
+    // Payment methods column migrations
+    const pmTableInfo = this.db.prepare('PRAGMA table_info(payment_methods)').all() as Array<{ name: string }>;
+    const existingPmCols = new Set(pmTableInfo.map((col) => col.name));
+    const pmColsToAdd: Array<{ name: string; type: string }> = [
+      { name: 'qr_code_url', type: 'TEXT' },
+    ];
+    for (const col of pmColsToAdd) {
+      if (!existingPmCols.has(col.name)) {
+        try {
+          this.db.exec(`ALTER TABLE payment_methods ADD COLUMN ${col.name} ${col.type};`);
         } catch {}
       }
     }
@@ -1579,11 +1594,16 @@ export class DatabaseService {
     theme_color?: string;
     is_active?: number;
     sort_order?: number;
+    qr_code_url?: string | null;
   }) {
     const id = params.id || ('pm_' + Math.random().toString(36).substring(2, 9));
     const now = new Date().toISOString();
 
-    const existing = this.db.prepare('SELECT id FROM payment_methods WHERE id = ?').get(id);
+    const existing = this.db.prepare('SELECT id, qr_code_url FROM payment_methods WHERE id = ?').get(id) as any;
+    const finalQrCodeUrl = params.qr_code_url !== undefined
+      ? (params.qr_code_url ? params.qr_code_url.trim() : null)
+      : (existing?.qr_code_url || null);
+
     if (existing) {
       this.db.prepare(`
         UPDATE payment_methods SET
@@ -1601,6 +1621,7 @@ export class DatabaseService {
           theme_color = ?,
           is_active = coalesce(?, is_active),
           sort_order = coalesce(?, sort_order),
+          qr_code_url = ?,
           updated_at = ?
         WHERE id = ?
       `).run(
@@ -1618,6 +1639,7 @@ export class DatabaseService {
         params.theme_color || '#E2136E',
         params.is_active !== undefined ? params.is_active : 1,
         params.sort_order !== undefined ? params.sort_order : 0,
+        finalQrCodeUrl,
         now,
         id
       );
@@ -1627,8 +1649,8 @@ export class DatabaseService {
         INSERT INTO payment_methods (
           id, merchant_id, provider_type, title, badge, account_number, account_name,
           bank_name, branch_name, routing_number, sender_label, trx_label,
-          instructions, theme_color, is_active, sort_order, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          instructions, theme_color, is_active, sort_order, qr_code_url, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         id,
         params.merchant_id,
@@ -1646,6 +1668,7 @@ export class DatabaseService {
         params.theme_color || '#E2136E',
         params.is_active !== undefined ? params.is_active : 1,
         params.sort_order !== undefined ? params.sort_order : 0,
+        finalQrCodeUrl,
         now,
         now
       );

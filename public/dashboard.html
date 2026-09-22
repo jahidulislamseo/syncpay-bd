@@ -921,6 +921,46 @@
           </div>
         </div>
 
+        <!-- Custom QR Code Image Upload -->
+        <div class="form-group" style="background:var(--bg-subtle, #f8fafc); border:1px solid var(--border); border-radius:10px; padding:12px; margin-top:8px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <label class="form-label" style="margin-bottom:0; font-weight:700; font-size:12px; display:flex; align-items:center; gap:6px;">
+              <span>Custom QR Code Image</span>
+              <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Optional — replaces auto-generated QR)</span>
+            </label>
+            <button type="button" id="pm-remove-qr-btn" class="btn btn-secondary-action" style="padding:1px 8px; font-size:11px; display:none; color:var(--danger, #ef4444);" onclick="window.payflowApp.clearQrUpload()">
+              ✕ Remove QR
+            </button>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:12px;">
+            <!-- Thumbnail Preview -->
+            <div id="pm-qr-preview-box" style="width:68px; height:68px; border-radius:8px; border:1.5px dashed var(--border); background:#ffffff; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; position:relative; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <img id="pm-qr-preview-img" src="" alt="QR Preview" style="width:100%; height:100%; object-fit:contain; display:none;">
+              <div id="pm-qr-placeholder" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:4px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--text-muted);"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span style="font-size:9.5px; color:var(--text-muted); margin-top:2px;">No QR</span>
+              </div>
+            </div>
+
+            <!-- Upload Action -->
+            <div style="flex:1;">
+              <input type="file" id="pm-qr-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="window.payflowApp.handleQrFileUpload(event)">
+              <input type="hidden" id="pm-qr-url">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                <button type="button" class="btn btn-secondary-action" style="font-size:12px; padding:5px 12px; display:inline-flex; align-items:center; gap:5px;" onclick="document.getElementById('pm-qr-file-input').click()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload QR Image
+                </button>
+                <span style="font-size:11px; color:var(--text-muted);">PNG, JPG, WebP (Max 5MB)</span>
+              </div>
+              <div id="pm-qr-status-text" style="font-size:11px; color:var(--text-muted);">
+                If no custom image is uploaded, system will automatically generate a dynamic QR code from the phone number.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group">
             <label class="form-label">Sender Number Label</label>

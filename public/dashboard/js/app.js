@@ -2677,6 +2677,10 @@ class PayFlowDashboardApp {
     document.getElementById('pm-branch-name').value = '';
     document.getElementById('pm-routing-number').value = '';
     document.getElementById('pm-is-active').value = '1';
+    document.getElementById('pm-qr-url').value = '';
+    const fileInput = document.getElementById('pm-qr-file-input');
+    if (fileInput) fileInput.value = '';
+    this.updateQrPreview('');
 
     this.onPaymentTypeChange(true);
     const modal = document.getElementById('modal-payment-method');
@@ -2855,6 +2859,13 @@ class PayFlowDashboardApp {
     document.getElementById('pm-sender-label').value = m.sender_label || 'Sender Number / Account';
     document.getElementById('pm-trx-label').value = m.trx_label || 'Transaction ID *';
 
+    // Populate QR code preview & URL
+    const qrUrl = m.qr_code_url || '';
+    document.getElementById('pm-qr-url').value = qrUrl;
+    const fileInput = document.getElementById('pm-qr-file-input');
+    if (fileInput) fileInput.value = '';
+    this.updateQrPreview(qrUrl);
+
     this.onPaymentTypeChange(false);
     const modal = document.getElementById('modal-payment-method');
     if (modal) modal.classList.add('active');
@@ -2869,6 +2880,103 @@ class PayFlowDashboardApp {
     area.value = val.substring(0, start) + varStr + val.substring(end);
     area.focus();
     area.selectionStart = area.selectionEnd = start + varStr.length;
+  }
+
+  handleQrFileUpload(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.showToast('Please select an image file (PNG, JPG, WebP)', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.showToast('Image size cannot exceed 5MB', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const rawData = e.target.result;
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 600;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const optimizedData = canvas.toDataURL('image/png');
+          document.getElementById('pm-qr-url').value = optimizedData;
+          this.updateQrPreview(optimizedData);
+          this.showToast('QR Code uploaded successfully', 'success');
+        } catch (err) {
+          document.getElementById('pm-qr-url').value = rawData;
+          this.updateQrPreview(rawData);
+          this.showToast('QR Code loaded', 'success');
+        }
+      };
+      img.onerror = () => {
+        document.getElementById('pm-qr-url').value = rawData;
+        this.updateQrPreview(rawData);
+      };
+      img.src = rawData;
+    };
+    reader.onerror = () => {
+      this.showToast('Failed to load image file', 'error');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  updateQrPreview(url) {
+    const previewImg = document.getElementById('pm-qr-preview-img');
+    const placeholder = document.getElementById('pm-qr-placeholder');
+    const removeBtn = document.getElementById('pm-remove-qr-btn');
+    const statusText = document.getElementById('pm-qr-status-text');
+
+    if (url && url.trim()) {
+      if (previewImg) {
+        previewImg.src = url.trim();
+        previewImg.style.display = 'block';
+      }
+      if (placeholder) placeholder.style.display = 'none';
+      if (removeBtn) removeBtn.style.display = 'inline-block';
+      if (statusText) {
+        statusText.innerHTML = '<span style="color:#10b981; font-weight:600;">✓ Custom QR active.</span> Will be displayed on customer checkout.';
+      }
+    } else {
+      if (previewImg) {
+        previewImg.src = '';
+        previewImg.style.display = 'none';
+      }
+      if (placeholder) placeholder.style.display = 'flex';
+      if (removeBtn) removeBtn.style.display = 'none';
+      if (statusText) {
+        statusText.innerText = 'If no custom image is uploaded, system will automatically generate a dynamic QR code from the phone number.';
+      }
+    }
+  }
+
+  clearQrUpload() {
+    const urlInput = document.getElementById('pm-qr-url');
+    if (urlInput) urlInput.value = '';
+    const fileInput = document.getElementById('pm-qr-file-input');
+    if (fileInput) fileInput.value = '';
+    this.updateQrPreview('');
+    this.showToast('Custom QR removed (Reverted to dynamic QR)', 'info');
   }
 
   async savePaymentMethod() {
@@ -2886,6 +2994,7 @@ class PayFlowDashboardApp {
     const instructions = document.getElementById('pm-instructions').value.trim();
     const senderLabel = document.getElementById('pm-sender-label').value.trim();
     const trxLabel = document.getElementById('pm-trx-label').value.trim();
+    const qrCodeUrl = (document.getElementById('pm-qr-url')?.value || '').trim();
 
     if (!title || !accountNumber) {
       this.showToast('Title and Account Number are required', 'error');
@@ -2908,6 +3017,7 @@ class PayFlowDashboardApp {
         instructions,
         sender_label: senderLabel,
         trx_label: trxLabel,
+        qr_code_url: qrCodeUrl || null,
       });
 
       if (res.success) {

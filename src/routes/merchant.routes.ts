@@ -358,6 +358,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
         theme_color: body.theme_color,
         is_active: body.is_active !== undefined ? (body.is_active ? 1 : 0) : 1,
         sort_order: body.sort_order !== undefined ? Number(body.sort_order) : 0,
+        qr_code_url: body.qr_code_url !== undefined ? body.qr_code_url : undefined,
       });
 
       return reply.send({
