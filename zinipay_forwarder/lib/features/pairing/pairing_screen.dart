@@ -70,12 +70,28 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       final json = jsonDecode(raw);
       if (json is Map) {
         if (json['merchant_id'] != null) _merchantIdCtrl.text = json['merchant_id'].toString();
-        // Support both 'business_name' and 'device_name' from QR payload
         final name = json['business_name'] ?? json['device_name'];
-        if (name != null) _businessNameCtrl.text = name.toString();
+        _businessNameCtrl.text = (name != null && name.toString().isNotEmpty)
+            ? name.toString()
+            : 'TECNO KM5 (Forwarder)';
         if (json['device_token'] != null) _tokenCtrl.text = json['device_token'].toString();
         if (json['backend_url'] != null) _backendUrlCtrl.text = json['backend_url'].toString();
+
         setState(() => _isManual = true);
+
+        // Auto-connect immediately if required credentials exist
+        if (_tokenCtrl.text.isNotEmpty && _merchantIdCtrl.text.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚡ QR স্ক্যান সফল! অটোমেটিক কানেক্ট হচ্ছে...'),
+              backgroundColor: Color(0xFF10B981),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          _submitPairing();
+          return;
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ QR স্ক্যান সফল! তথ্য পূরণ হয়েছে।'),

@@ -1907,6 +1907,9 @@ class PayFlowDashboardApp {
         if (sUrl) sUrl.innerText = res.payload.backend_url;
         if (dToken) dToken.innerText = res.payload.device_token;
         if (mId) mId.innerText = res.payload.merchant_id;
+
+        // Auto-poll to detect when device scans and connects
+        this.startPairingPolling(primaryDeviceId);
       }
     } catch (e) {
       if (qrSlot) {
@@ -1941,12 +1944,81 @@ class PayFlowDashboardApp {
             if (sUrl) sUrl.innerText = qrRes.payload.backend_url;
             if (dToken) dToken.innerText = qrRes.payload.device_token;
             if (mId) mId.innerText = qrRes.payload.merchant_id;
+
+            this.startPairingPolling(res.data.id);
           }
         }
       }
     } catch (e) {
       this.showToast(e.message, 'error');
     }
+  }
+
+  stopPairingPolling() {
+    if (this.pairingPollTimer) {
+      clearInterval(this.pairingPollTimer);
+      this.pairingPollTimer = null;
+    }
+  }
+
+  startPairingPolling(deviceId) {
+    this.stopPairingPolling();
+    const modalStartTime = Date.now();
+
+    this.pairingPollTimer = setInterval(async () => {
+      try {
+        const devices = await api.getDevices();
+        if (Array.isArray(devices) && devices.length > 0) {
+          const matched = devices.find(d => {
+            const matchesId = !deviceId || d.id === deviceId || d.device_token === deviceId;
+            if (!matchesId) return false;
+            if (d.status === 'ONLINE') {
+              if (d.last_seen || d.last_seen_at) {
+                const ts = new Date(d.last_seen || d.last_seen_at).getTime();
+                if (!isNaN(ts) && (ts >= modalStartTime - 5000 || Date.now() - ts < 25000)) {
+                  return true;
+                }
+              }
+              return true;
+            }
+            return false;
+          });
+
+          if (matched) {
+            this.stopPairingPolling();
+            this.onDevicePairSuccess(matched);
+          }
+        }
+      } catch (_) {}
+    }, 1500);
+  }
+
+  onDevicePairSuccess(device) {
+    const slots = [
+      document.getElementById('device-qr-image-slot'),
+      document.getElementById('add-device-qr-image-slot'),
+    ].filter(Boolean);
+
+    slots.forEach(slot => {
+      slot.innerHTML = `
+        <div style="padding: 24px; text-align: center; animation: fadeIn 0.3s ease-in-out;">
+          <div style="width: 68px; height: 68px; border-radius: 50%; background: #10b981; color: white; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 14px auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3 style="font-size: 17px; font-weight: 800; color: #10b981; margin: 0 0 6px 0;">🎉 Device Connected!</h3>
+          <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">${device.device_name || 'ফোন'} সফলভাবে কানেক্ট হয়েছে।</p>
+          <div style="margin-top: 12px; font-size: 12px; font-weight: 700; color: var(--primary);">ড্যাশবোর্ড পেজ ওপেন হচ্ছে...</div>
+        </div>
+      `;
+    });
+
+    this.showToast(`🎉 ${device.device_name || 'Device'} কানেক্ট হয়েছে! ড্যাশবোর্ড রিলোড হচ্ছে...`, 'success');
+
+    setTimeout(() => {
+      this.closeAllModals();
+      window.location.hash = '#devices';
+      window.location.reload();
+    }, 1800);
   }
 
   async showDeviceQrModal(deviceId, deviceName) {
@@ -1974,6 +2046,9 @@ class PayFlowDashboardApp {
         if (sUrl) sUrl.innerText = res.payload.backend_url;
         if (dToken) dToken.innerText = res.payload.device_token;
         if (mId) mId.innerText = res.payload.merchant_id;
+
+        // Auto-poll to detect when device scans and connects
+        this.startPairingPolling(deviceId);
       }
     } catch (e) {
       if (qrSlot) {
@@ -2077,6 +2152,7 @@ class PayFlowDashboardApp {
   }
 
   closeAllModals() {
+    this.stopPairingPolling();
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
   }
 
