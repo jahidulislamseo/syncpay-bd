@@ -29,7 +29,6 @@ class UpdateInfo {
       versionCode: json['version_code'] ?? 1,
       downloadUrl: json['download_url'] ?? '',
       forceUpdate: json['force_update'] ?? false,
-      fileSizeBytes: json['file_size_bytes'] ?? 16038881,
       fileSizeFormatted: json['file_size_formatted'] ?? '15 MB',
       changelog: json['changelog_bn'] ?? json['changelog'] ?? 'নতুন আপডেট ও পারফরম্যান্স উন্নতি।',
     );
