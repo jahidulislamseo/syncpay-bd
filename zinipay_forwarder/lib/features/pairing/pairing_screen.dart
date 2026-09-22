@@ -32,8 +32,14 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     _merchantIdCtrl = TextEditingController(text: vault.merchantId);
     _businessNameCtrl = TextEditingController(text: vault.merchantName);
     _tokenCtrl = TextEditingController(text: vault.deviceToken);
+
+    // If stored URL is a local/emulator address, override with production URL
+    final storedUrl = vault.backendUrl;
+    final isLocalUrl = storedUrl.contains('10.0.2.2') ||
+        storedUrl.contains('localhost') ||
+        storedUrl.contains('127.0.0.1');
     _backendUrlCtrl = TextEditingController(
-      text: vault.backendUrl.isNotEmpty ? vault.backendUrl : 'https://syncpaybd.site',
+      text: isLocalUrl ? 'https://syncpaybd.site' : storedUrl,
     );
   }
 
