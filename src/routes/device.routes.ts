@@ -206,8 +206,8 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       min_supported_version: '1.0.0',
       force_update: false,
       download_url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-forwarder.apk',
-      file_size_bytes: 18874368,
-      file_size_formatted: '18 MB',
+      file_size_bytes: 16038881,
+      file_size_formatted: '15 MB',
       release_date: '2026-09-19',
       changelog: '• Real-time bKash, Nagad, Rocket, Upay SMS verification\n• New In-App 1-Click Auto Update & Downloader\n• Enhanced background sync service stability\n• Battery optimization and disconnect prevention',
       changelog_bn: '• বিকাশ, নগদ, রকেট ও উপায় এসএমএস অটো ভেরিফিকেশন\n• অ্যাপের ভেতরেই ১-ক্লিক অটো আপডেট ও ইনস্টলেশন\n• ব্যাকগ্রাউন্ড সার্ভিস ও ব্যাটারি অপটিমাইজেশন উন্নত করা হয়েছে\n• নিরবচ্ছিন্ন কানেকশন ও বাগ ফিক্স'

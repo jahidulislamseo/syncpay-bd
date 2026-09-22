@@ -1386,7 +1386,7 @@ class PayFlowDashboardApp {
               <div style="background:var(--bg-subtle); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between;">
                   <span style="color:var(--text-muted);">App Size:</span>
-                  <span>78 MB (Production Build)</span>
+                  <span>15 MB (Optimized Build)</span>
                 </div>
               </div>
             </div>
