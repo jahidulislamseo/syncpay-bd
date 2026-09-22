@@ -21,6 +21,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Dual-SIM Detection -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- Camera for QR Code scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:label="SyncPay Agent"

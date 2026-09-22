@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/app_localizations.dart';
 import '../dashboard/providers/agent_provider.dart';
 import '../permissions/permission_screen.dart';
+import 'qr_scanner_screen.dart';
 
 class PairingScreen extends ConsumerStatefulWidget {
   const PairingScreen({super.key});
@@ -45,58 +46,47 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     super.dispose();
   }
 
+  /// Opens real camera QR scanner. On success, parses the scanned JSON/token
+  /// and auto-fills all pairing fields.
   void _handleQrScan() async {
-    final textCtrl = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Pairing Token / QR Data'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'SyncPay BD ড্যাশবোর্ড থেকে প্রাপ্ত Pairing Token বা JSON ডেটা দিন:',
-              style: TextStyle(fontSize: 13),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: textCtrl,
-              decoration: const InputDecoration(
-                hintText: 'e.g. token_xxxx বা JSON',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+    final String? scanned = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const QrScannerScreen()),
+    );
+
+    if (scanned == null || scanned.isEmpty) return;
+
+    _applyScannedData(scanned);
+  }
+
+  void _applyScannedData(String raw) {
+    try {
+      final json = jsonDecode(raw);
+      if (json is Map) {
+        if (json['merchant_id'] != null) _merchantIdCtrl.text = json['merchant_id'].toString();
+        // Support both 'business_name' and 'device_name' from QR payload
+        final name = json['business_name'] ?? json['device_name'];
+        if (name != null) _businessNameCtrl.text = name.toString();
+        if (json['device_token'] != null) _tokenCtrl.text = json['device_token'].toString();
+        if (json['backend_url'] != null) _backendUrlCtrl.text = json['backend_url'].toString();
+        setState(() => _isManual = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ QR স্ক্যান সফল! তথ্য পূরণ হয়েছে।'),
+            backgroundColor: Color(0xFF10B981),
+            duration: Duration(seconds: 2),
           ),
-          ElevatedButton(
-            onPressed: () {
-              final val = textCtrl.text.trim();
-              Navigator.pop(ctx);
-              if (val.isEmpty) return;
-              try {
-                final json = jsonDecode(val);
-                if (json is Map) {
-                  if (json['merchant_id'] != null) _merchantIdCtrl.text = json['merchant_id'].toString();
-                  if (json['business_name'] != null) _businessNameCtrl.text = json['business_name'].toString();
-                  if (json['device_token'] != null) _tokenCtrl.text = json['device_token'].toString();
-                  if (json['backend_url'] != null) _backendUrlCtrl.text = json['backend_url'].toString();
-                  setState(() => _isManual = true);
-                  return;
-                }
-              } catch (_) {}
-              _tokenCtrl.text = val;
-              setState(() => _isManual = true);
-            },
-            child: const Text('Apply'),
-          ),
-        ],
+        );
+        return;
+      }
+    } catch (_) {}
+    // Plain token (not JSON)
+    _tokenCtrl.text = raw.trim();
+    setState(() => _isManual = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✅ Token স্ক্যান হয়েছে! বাকি তথ্য পূরণ করুন।'),
+        backgroundColor: Color(0xFF6366F1),
+        duration: Duration(seconds: 2),
       ),
     );
   }

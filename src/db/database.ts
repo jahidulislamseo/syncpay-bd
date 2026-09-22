@@ -41,11 +41,21 @@ export interface InvoiceRecord {
 }
 
 export class DatabaseService {
-  private db: DatabaseSync;
+  private db!: DatabaseSync;
 
   constructor(dbPath: string = DB_PATH) {
-    this.db = new DatabaseSync(dbPath);
-    this.initSchema();
+    try {
+      this.db = new DatabaseSync(dbPath);
+      this.initSchema();
+    } catch (err) {
+      console.warn(`[DatabaseService] Could not open SQLite at ${dbPath}, falling back to in-memory:`, err);
+      try {
+        this.db = new DatabaseSync(':memory:');
+        this.initSchema();
+      } catch (memErr) {
+        console.error('[DatabaseService] Fatal: Failed to initialize in-memory SQLite:', memErr);
+      }
+    }
   }
 
   private initSchema() {

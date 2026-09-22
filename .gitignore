@@ -10,7 +10,6 @@ yarn-error.log*
 *.db-wal
 
 # Build output
-dist/
 build/
 
 # Environment & secrets
