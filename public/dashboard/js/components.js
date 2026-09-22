@@ -309,7 +309,7 @@ export const components = {
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-          <a href="/downloads/syncpay-forwarder.apk" download="syncpay-forwarder.apk" class="btn btn-primary-action" style="background: #10b981; border-color: #059669; padding: 10px 20px; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); display: inline-flex; align-items: center; gap: 8px;">
+          <a href="https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-forwarder.apk" target="_blank" rel="noopener noreferrer" download="syncpay-forwarder.apk" class="btn btn-primary-action" style="background: #10b981; border-color: #059669; padding: 10px 20px; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); display: inline-flex; align-items: center; gap: 8px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>⚡ 1-Click APK Download (15 MB)</span>
           </a>

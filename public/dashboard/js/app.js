@@ -1412,7 +1412,7 @@ class PayFlowDashboardApp {
       php: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-php-sdk.zip', name: 'syncpay-php-sdk.zip' },
       nodejs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-node-sdk.zip', name: 'syncpay-node-sdk.zip' },
       python: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-python-sdk.zip', name: 'syncpay-python-sdk.zip' },
-      apk: { url: '/downloads/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
+      apk: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
     };
 
     const target = fileMap[pluginName];
