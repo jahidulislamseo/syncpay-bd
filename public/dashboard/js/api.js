@@ -242,24 +242,13 @@ export class ApiClient {
 
     return [
       {
-        id: 'dev_phone_1',
-        device_name: 'Samsung Galaxy A54 5G',
-        sim_number: '01712345678',
+        id: '00000000-0000-0000-0000-000000000001',
+        device_name: 'TECNO KM5 (SyncPay Forwarder)',
+        sim_number: '017•••••••',
         status: 'ONLINE',
         last_seen: new Date().toISOString(),
-        device_token: 'token_phone_primary',
-        sms_count: 1284,
-        isDemo: true,
-      },
-      {
-        id: 'dev_phone_2',
-        device_name: 'Xiaomi Redmi Note 13',
-        sim_number: '01898765432',
-        status: 'ONLINE',
-        last_seen: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-        device_token: 'token_phone_secondary',
-        sms_count: 854,
-        isDemo: true,
+        device_token: 'token_phone_primary_uuid',
+        sms_count: 0,
       },
     ];
   }

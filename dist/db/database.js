@@ -301,7 +301,7 @@ export class DatabaseService {
         if (!checkDevice.get('dev_phone_1', 'token_phone_primary')) {
             this.db.prepare(`
         INSERT OR IGNORE INTO devices (id, merchant_id, device_token, device_name, sim_number)
-        VALUES ('dev_phone_1', 'm_demo_101', 'token_phone_primary', 'Samsung Galaxy A54 (bKash+Nagad)', '01712345678')
+        VALUES ('dev_phone_1', 'm_demo_101', 'token_phone_primary', 'TECNO KM5 (SyncPay Forwarder)', '017•••••••')
       `).run();
         }
         // Seed UUID merchant & device aliases for Supabase schema tests
@@ -320,7 +320,7 @@ export class DatabaseService {
         if (!this.db.prepare('SELECT id FROM devices WHERE id = ? OR device_token = ?').get('00000000-0000-0000-0000-000000000001', 'token_phone_primary_uuid')) {
             this.db.prepare(`
         INSERT OR IGNORE INTO devices (id, merchant_id, device_token, device_name, sim_number)
-        VALUES ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'token_phone_primary_uuid', 'Samsung Galaxy A54 UUID', '01712345678')
+        VALUES ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'token_phone_primary_uuid', 'TECNO KM5 (SyncPay Forwarder)', '017•••••••')
       `).run();
         }
         // Seed default Payment Methods for Demo Merchants

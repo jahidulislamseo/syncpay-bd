@@ -193,10 +193,10 @@ export async function merchantRoutes(fastify: FastifyInstance) {
 
     const pairingPayload = {
       backend_url: serverUrl,
-      merchant_id: FALLBACK_MERCHANT_ID,
+      merchant_id: dev?.merchant_id || DEMO_MERCHANT_ID,
       device_id: deviceId,
       device_token: token,
-      device_name: dev?.device_name || 'SyncPay Android Forwarder',
+      device_name: dev?.device_name || 'TECNO KM5 (SyncPay Forwarder)',
     };
 
     try {
