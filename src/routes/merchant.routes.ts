@@ -375,7 +375,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       await ApiKeyRepository.create({
         merchantId: id,
         name: 'Default Live Key',
-        rawKey: apiKey,
+        rawApiKey: apiKey,
       });
     } catch {
       dbService.insertMerchant({
