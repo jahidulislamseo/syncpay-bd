@@ -283,20 +283,49 @@ export const components = {
 
     return merchants
       .map((m) => {
+        const isFree = (m.plan || 'FREE') === 'FREE';
+        const planBadge = isFree
+          ? `<span class="badge" style="background:#ecfdf5;color:#059669;font-weight:700;border:1px solid #a7f3d0;">FREE</span>`
+          : `<span class="badge" style="background:#eff6ff;color:#2563eb;font-weight:700;border:1px solid #bfdbfe;">${m.plan || 'PRO'}</span>`;
+
+        let statusBadge = `<span class="badge badge-active">ACTIVE</span>`;
+        if (m.status === 'PAYMENT_REQUIRED') {
+          statusBadge = `<span class="badge" style="background:#fffbeb;color:#b45309;font-weight:700;border:1px solid #fde68a;">PAYMENT REQ</span>`;
+        } else if (m.status === 'SUSPENDED') {
+          statusBadge = `<span class="badge badge-offline" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">SUSPENDED</span>`;
+        } else if (m.status === 'PENDING') {
+          statusBadge = `<span class="badge" style="background:#fefce8;color:#a16207;border:1px solid #fef08a;">PENDING</span>`;
+        }
+
+        const isSuspended = m.status === 'SUSPENDED';
+
         return `
         <tr>
           <td>
-            <strong>${m.name}</strong>
-            <div style="font-size:0.72rem;color:var(--text-muted);">${m.id}</div>
+            <strong style="color:var(--text-primary);">${m.name}</strong>
+            <div class="mono" style="font-size:0.72rem;color:var(--text-muted);">${m.id}</div>
           </td>
-          <td>${m.email}</td>
-          <td><span class="badge badge-neutral">${m.device_count || 1} Devices</span></td>
-          <td><strong>${Number(m.transaction_count || 0).toLocaleString()}</strong></td>
+          <td>
+            <div>${m.email || 'N/A'}</div>
+            <div class="mono" style="font-size:0.75rem;color:var(--text-muted);">${m.phone || ''}</div>
+          </td>
+          <td>${planBadge}</td>
+          <td>${statusBadge}</td>
+          <td><span class="badge badge-neutral">${m.device_count || 0} Devices</span></td>
           <td style="color:var(--success);font-weight:700;">${this.formatCurrency(m.total_volume || 0)}</td>
-          <td><span class="badge badge-active">ACTIVE</span></td>
           <td>${new Date(m.created_at).toLocaleDateString()}</td>
           <td>
-            <button class="btn-secondary btn-sm" onclick="window.inspectMerchant('${m.id}')">Manage</button>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+              <button class="btn-sm" style="background:#10b981;color:#fff;border:none;border-radius:6px;padding:4px 8px;font-weight:700;cursor:pointer;font-size:11px;" title="Approve with Free Plan" onclick="window.setMerchantPlan('${m.id}', 'FREE', 'ACTIVE', 'FREE')">
+                Free
+              </button>
+              <button class="btn-sm" style="background:#f59e0b;color:#fff;border:none;border-radius:6px;padding:4px 8px;font-weight:700;cursor:pointer;font-size:11px;" title="Require Payment" onclick="window.promptRequirePayment('${m.id}', '${m.name}')">
+                Req Pay
+              </button>
+              <button class="btn-sm" style="background:${isSuspended ? '#3b82f6' : '#ef4444'};color:#fff;border:none;border-radius:6px;padding:4px 8px;font-weight:700;cursor:pointer;font-size:11px;" onclick="window.toggleMerchantStatus('${m.id}', '${isSuspended ? 'ACTIVE' : 'SUSPENDED'}')">
+                ${isSuspended ? 'Activate' : 'Suspend'}
+              </button>
+            </div>
           </td>
         </tr>
       `;

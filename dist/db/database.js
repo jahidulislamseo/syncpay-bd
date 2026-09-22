@@ -262,9 +262,24 @@ export class DatabaseService {
             { name: 'carrier', type: 'TEXT' },
             { name: 'source', type: 'TEXT DEFAULT "SMS"' },
         ];
-        for (const col of txColsToAdd) {
-            if (!existingTxCols.has(col.name)) {
-                this.db.exec(`ALTER TABLE transactions ADD COLUMN ${col.name} ${col.type};`);
+        // Merchants table column migrations
+        const mTableInfo = this.db.prepare('PRAGMA table_info(merchants)').all();
+        const existingMCols = new Set(mTableInfo.map((col) => col.name));
+        const mColsToAdd = [
+            { name: 'email', type: 'TEXT' },
+            { name: 'phone', type: 'TEXT' },
+            { name: 'status', type: 'TEXT DEFAULT "ACTIVE"' },
+            { name: 'plan', type: 'TEXT DEFAULT "FREE"' },
+            { name: 'payment_status', type: 'TEXT DEFAULT "FREE"' },
+            { name: 'payment_note', type: 'TEXT' },
+            { name: 'password_hash', type: 'TEXT' },
+        ];
+        for (const col of mColsToAdd) {
+            if (!existingMCols.has(col.name)) {
+                try {
+                    this.db.exec(`ALTER TABLE merchants ADD COLUMN ${col.name} ${col.type};`);
+                }
+                catch { }
             }
         }
     }
@@ -626,8 +641,19 @@ export class DatabaseService {
         return stmt.get(id);
     }
     insertMerchant(params) {
-        const stmt = this.db.prepare('INSERT INTO merchants (id, name, api_key, webhook_url) VALUES (?, ?, ?, ?)');
-        return stmt.run(params.id, params.name, params.api_key, params.webhook_url || '');
+        const stmt = this.db.prepare(`
+      INSERT INTO merchants (id, name, api_key, webhook_url, email, phone, status, plan, payment_status, password_hash)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        name = excluded.name,
+        email = excluded.email,
+        phone = excluded.phone,
+        status = excluded.status,
+        plan = excluded.plan,
+        payment_status = excluded.payment_status,
+        password_hash = excluded.password_hash
+    `);
+        return stmt.run(params.id, params.name, params.api_key, params.webhook_url || '', params.email || '', params.phone || '', params.status || 'ACTIVE', params.plan || 'FREE', params.payment_status || 'FREE', params.password_hash || '');
     }
     getPendingInvoicesForMerchant(merchantId, amount) {
         const stmt = this.db.prepare('SELECT * FROM invoices WHERE merchant_id = ? AND expected_amount = ? AND status = ?');
@@ -1024,6 +1050,12 @@ export class DatabaseService {
       SELECT 
         m.id, 
         m.name, 
+        COALESCE(m.email, m.id || '@merchant.syncpaybd.site') as email,
+        COALESCE(m.phone, 'N/A') as phone,
+        COALESCE(m.status, 'ACTIVE') as status,
+        COALESCE(m.plan, 'FREE') as plan,
+        COALESCE(m.payment_status, 'FREE') as payment_status,
+        m.payment_note,
         m.api_key, 
         m.webhook_url, 
         m.created_at,
@@ -1036,11 +1068,43 @@ export class DatabaseService {
       GROUP BY m.id
       ORDER BY m.created_at DESC
     `).all();
-        return merchants.map((m) => ({
-            ...m,
-            status: 'ACTIVE',
-            email: `${m.id}@merchant.syncpaybd.site`,
-        }));
+        return merchants;
+    }
+    async updateMerchantPlanAdmin(id, params) {
+        const updates = [];
+        const values = [];
+        if (params.plan) {
+            updates.push('plan = ?');
+            values.push(params.plan);
+        }
+        if (params.status) {
+            updates.push('status = ?');
+            values.push(params.status);
+        }
+        if (params.payment_status) {
+            updates.push('payment_status = ?');
+            values.push(params.payment_status);
+        }
+        if (params.payment_note !== undefined) {
+            updates.push('payment_note = ?');
+            values.push(params.payment_note);
+        }
+        if (updates.length > 0) {
+            values.push(id);
+            this.db.prepare(`UPDATE merchants SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+        }
+        try {
+            const { getSupabaseClient, isSupabaseConfigured } = await import('./supabase.js');
+            const supabase = getSupabaseClient();
+            if (supabase && isSupabaseConfigured()) {
+                const sbPayload = {};
+                if (params.status)
+                    sbPayload.status = params.status;
+                await supabase.from('merchants').update(sbPayload).eq('id', id);
+            }
+        }
+        catch { }
+        return this.getMerchantById(id);
     }
     createMerchantAdmin(name, webhookUrl) {
         const id = 'm_' + Math.random().toString(36).substring(2, 9);

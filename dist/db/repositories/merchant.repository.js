@@ -20,7 +20,11 @@ export class MerchantRepository {
                 id: local.id,
                 business_name: local.name,
                 email: local.email || 'merchant@example.com',
-                status: 'ACTIVE',
+                phone: local.phone || null,
+                status: local.status || 'ACTIVE',
+                plan: local.plan || 'FREE',
+                payment_status: local.payment_status || 'FREE',
+                payment_note: local.payment_note || null,
                 webhook_url: local.webhook_url,
                 password_hash: local.password_hash || null,
             };
@@ -46,8 +50,12 @@ export class MerchantRepository {
             return {
                 id: local.id,
                 business_name: local.name,
-                email,
-                status: 'ACTIVE',
+                email: local.email || email,
+                phone: local.phone || null,
+                status: local.status || 'ACTIVE',
+                plan: local.plan || 'FREE',
+                payment_status: local.payment_status || 'FREE',
+                payment_note: local.payment_note || null,
                 webhook_url: local.webhook_url,
                 password_hash: local.password_hash || null,
             };
@@ -59,6 +67,8 @@ export class MerchantRepository {
                 business_name: 'Demo Merchant Store',
                 email,
                 status: 'ACTIVE',
+                plan: 'PRO',
+                payment_status: 'PAID',
             };
         }
         return null;

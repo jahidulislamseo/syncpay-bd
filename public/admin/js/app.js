@@ -21,7 +21,7 @@ class AdminApp {
   }
 
   initTheme() {
-    const savedTheme = localStorage.getItem('payflow_admin_theme') || 'dark';
+    const savedTheme = localStorage.getItem('payflow_admin_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const themeIcon = document.getElementById('themeIcon');
     if (themeIcon) {
@@ -397,13 +397,13 @@ class AdminApp {
             <thead>
               <tr>
                 <th>Merchant Business</th>
-                <th>Contact Email</th>
-                <th>Connected Devices</th>
-                <th>Total Txs</th>
-                <th>Processed Volume</th>
-                <th>Status</th>
+                <th>Contact Info</th>
+                <th>Plan Tier</th>
+                <th>Account Status</th>
+                <th>Devices</th>
+                <th>Total Volume</th>
                 <th>Created</th>
-                <th>Actions</th>
+                <th>Approval & Plan Action</th>
               </tr>
             </thead>
             <tbody>
@@ -1419,6 +1419,49 @@ class AdminApp {
         this.showToast(err.message, 'error');
       }
     };
+
+    // Merchant Plan & Approval Handlers
+    window.setMerchantPlan = async (id, plan = 'FREE', status = 'ACTIVE', payment_status = 'FREE', payment_note = '') => {
+      try {
+        await adminApi.updateMerchantPlan(id, { plan, status, payment_status, payment_note });
+        this.showToast(`✅ Merchant approved with ${plan} plan`, 'success');
+        const container = document.getElementById('view-content');
+        if (container) await this.renderMerchantsView(container);
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    window.promptRequirePayment = async (id, name) => {
+      const note = prompt(`Require Payment from "${name}". Enter instructions/amount (e.g. ৳999/month for Pro tier):`, '৳999/month — Please pay to bKash/Nagad: 01700000000');
+      if (note === null) return;
+      try {
+        await adminApi.updateMerchantPlan(id, {
+          plan: 'PRO',
+          status: 'PAYMENT_REQUIRED',
+          payment_status: 'UNPAID',
+          payment_note: note.trim(),
+        });
+        this.showToast(`⚠️ Payment requirement sent to ${name}`, 'warning');
+        const container = document.getElementById('view-content');
+        if (container) await this.renderMerchantsView(container);
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    window.toggleMerchantStatus = async (id, newStatus) => {
+      try {
+        await adminApi.updateMerchantStatus(id, newStatus);
+        this.showToast(`Merchant status changed to ${newStatus}`, 'info');
+        const container = document.getElementById('view-content');
+        if (container) await this.renderMerchantsView(container);
+      } catch (err) {
+        this.showToast(err.message, 'error');
+      }
+    };
+
+    window.payflowAdmin = this;
   }
 }
 

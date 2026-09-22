@@ -57,6 +57,20 @@ class AdminApiClient {
     });
   }
 
+  async updateMerchantPlan(id, { plan, status, payment_status, payment_note }) {
+    return this.request(`/api/v1/admin/merchants/${id}/plan`, {
+      method: 'PATCH',
+      body: JSON.stringify({ plan, status, payment_status, payment_note }),
+    });
+  }
+
+  async updateMerchantStatus(id, status) {
+    return this.request(`/api/v1/admin/merchants/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  }
+
   // Devices
   async getDevices() {
     return this.request('/api/v1/admin/devices');

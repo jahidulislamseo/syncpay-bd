@@ -377,6 +377,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     const apiKey = 'live_sk_' + Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14);
     const businessName = body.business_name || body.name + ' Store';
 
+    // 1. Sync to Supabase (if available)
     try {
       await MerchantRepository.create({
         id,
@@ -392,13 +393,26 @@ export async function merchantRoutes(fastify: FastifyInstance) {
         name: 'Default Live Key',
         rawApiKey: apiKey,
       });
-    } catch {
+    } catch (e: any) {
+      console.warn('Supabase merchant create notice:', e?.message);
+    }
+
+    // 2. Always persist into local SQLite database for instant Admin Panel visibility
+    try {
       dbService.insertMerchant({
         id,
         name: businessName,
         api_key: apiKey,
         webhook_url: '',
+        email,
+        phone: body.phone || '',
+        status: 'ACTIVE',
+        plan: 'FREE',
+        payment_status: 'FREE',
+        password_hash: passwordHash,
       });
+    } catch (e: any) {
+      console.warn('Local SQLite insertMerchant notice:', e?.message);
     }
 
     const token = CryptoUtil.signJwt({
@@ -414,6 +428,10 @@ export async function merchantRoutes(fastify: FastifyInstance) {
         id,
         name: businessName,
         email,
+        phone: body.phone || '',
+        status: 'ACTIVE',
+        plan: 'FREE',
+        payment_status: 'FREE',
         api_key: apiKey,
       },
       token,
@@ -468,6 +486,11 @@ export async function merchantRoutes(fastify: FastifyInstance) {
         id: merchant.id,
         name: merchant.business_name,
         email: merchant.email,
+        phone: merchant.phone || '',
+        status: merchant.status || 'ACTIVE',
+        plan: merchant.plan || 'FREE',
+        payment_status: merchant.payment_status || 'FREE',
+        payment_note: merchant.payment_note || '',
         api_key: apiKey,
       },
       token,

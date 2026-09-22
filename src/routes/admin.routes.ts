@@ -85,6 +85,40 @@ export const adminRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
     }
   });
 
+  server.patch('/api/v1/admin/merchants/:id/plan', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = request.body as {
+        plan?: 'FREE' | 'BASIC' | 'PRO' | 'ENTERPRISE';
+        status?: 'ACTIVE' | 'PENDING' | 'PAYMENT_REQUIRED' | 'SUSPENDED';
+        payment_status?: 'FREE' | 'PAID' | 'UNPAID';
+        payment_note?: string;
+      };
+
+      const result = await dbService.updateMerchantPlanAdmin(id, {
+        plan: body.plan,
+        status: body.status,
+        payment_status: body.payment_status,
+        payment_note: body.payment_note,
+      });
+
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
+  server.patch('/api/v1/admin/merchants/:id/status', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = request.body as { status: 'ACTIVE' | 'PENDING' | 'PAYMENT_REQUIRED' | 'SUSPENDED' };
+      const result = await dbService.updateMerchantPlanAdmin(id, { status: body.status });
+      return reply.send({ success: true, data: result });
+    } catch (err: any) {
+      return reply.status(500).send({ success: false, error: err.message });
+    }
+  });
+
   // Device management
   server.get('/api/v1/admin/devices', async (_request, reply) => {
     try {

@@ -6,7 +6,10 @@ export interface MerchantEntity {
   business_name: string;
   email: string;
   phone?: string | null;
-  status: 'ACTIVE' | 'SUSPENDED' | 'PENDING';
+  status: 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'PAYMENT_REQUIRED';
+  plan?: string;
+  payment_status?: string;
+  payment_note?: string;
   webhook_url?: string | null;
   redirect_url?: string | null;
   password_hash?: string | null;
@@ -36,7 +39,11 @@ export class MerchantRepository {
         id: local.id,
         business_name: local.name,
         email: (local as any).email || 'merchant@example.com',
-        status: 'ACTIVE',
+        phone: (local as any).phone || null,
+        status: ((local as any).status as any) || 'ACTIVE',
+        plan: (local as any).plan || 'FREE',
+        payment_status: (local as any).payment_status || 'FREE',
+        payment_note: (local as any).payment_note || null,
         webhook_url: local.webhook_url,
         password_hash: (local as any).password_hash || null,
       };
@@ -67,8 +74,12 @@ export class MerchantRepository {
       return {
         id: local.id,
         business_name: local.name,
-        email,
-        status: 'ACTIVE',
+        email: local.email || email,
+        phone: local.phone || null,
+        status: (local.status as any) || 'ACTIVE',
+        plan: local.plan || 'FREE',
+        payment_status: local.payment_status || 'FREE',
+        payment_note: local.payment_note || null,
         webhook_url: local.webhook_url,
         password_hash: (local as any).password_hash || null,
       };
@@ -81,6 +92,8 @@ export class MerchantRepository {
         business_name: 'Demo Merchant Store',
         email,
         status: 'ACTIVE',
+        plan: 'PRO',
+        payment_status: 'PAID',
       };
     }
 

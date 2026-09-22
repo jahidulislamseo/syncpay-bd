@@ -347,6 +347,7 @@ export async function merchantRoutes(fastify) {
         const id = '00000000-0000-4' + Math.random().toString(16).substring(2, 5) + '-a' + Math.random().toString(16).substring(2, 5) + '-' + Math.random().toString(16).substring(2, 14);
         const apiKey = 'live_sk_' + Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14);
         const businessName = body.business_name || body.name + ' Store';
+        // 1. Sync to Supabase (if available)
         try {
             await MerchantRepository.create({
                 id,
@@ -362,13 +363,26 @@ export async function merchantRoutes(fastify) {
                 rawApiKey: apiKey,
             });
         }
-        catch {
+        catch (e) {
+            console.warn('Supabase merchant create notice:', e?.message);
+        }
+        // 2. Always persist into local SQLite database for instant Admin Panel visibility
+        try {
             dbService.insertMerchant({
                 id,
                 name: businessName,
                 api_key: apiKey,
                 webhook_url: '',
+                email,
+                phone: body.phone || '',
+                status: 'ACTIVE',
+                plan: 'FREE',
+                payment_status: 'FREE',
+                password_hash: passwordHash,
             });
+        }
+        catch (e) {
+            console.warn('Local SQLite insertMerchant notice:', e?.message);
         }
         const token = CryptoUtil.signJwt({
             id,
@@ -382,6 +396,10 @@ export async function merchantRoutes(fastify) {
                 id,
                 name: businessName,
                 email,
+                phone: body.phone || '',
+                status: 'ACTIVE',
+                plan: 'FREE',
+                payment_status: 'FREE',
                 api_key: apiKey,
             },
             token,
@@ -431,6 +449,11 @@ export async function merchantRoutes(fastify) {
                 id: merchant.id,
                 name: merchant.business_name,
                 email: merchant.email,
+                phone: merchant.phone || '',
+                status: merchant.status || 'ACTIVE',
+                plan: merchant.plan || 'FREE',
+                payment_status: merchant.payment_status || 'FREE',
+                payment_note: merchant.payment_note || '',
                 api_key: apiKey,
             },
             token,
