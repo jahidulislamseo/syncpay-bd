@@ -193,7 +193,6 @@ class AgentNotifier extends StateNotifier<AgentState> {
           rejectedCount: 0,
           isSyncing: false,
         )) {
-    _queueService = OfflineQueueService(vault: _vault, apiClient: _apiClient);
     _queueService.onStateChanged = (queue, history) {
       state = state.copyWith(
         offlineQueue: queue,

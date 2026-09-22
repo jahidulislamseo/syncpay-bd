@@ -9,21 +9,17 @@ android {
     compileSdk = flutter.compileSdkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
     defaultConfig {
         applicationId = "com.zinipay.payflow_agent"
-        minSdk = 21 // Android 5.0 Lollipop (Supports 99.8% of all devices)
+        minSdk = flutter.minSdkVersion // Android 5.0 Lollipop (Supports 99.8% of all devices)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        // Filter for real Android physical phones (eliminates bulky x86 emulator binaries)
-        ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
-        }
     }
 
     buildTypes {
@@ -49,4 +45,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

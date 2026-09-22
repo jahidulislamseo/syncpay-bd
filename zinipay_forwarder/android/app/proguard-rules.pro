@@ -13,3 +13,11 @@
 # Keep AndroidX & FileProvider for APK installation
 -keep class androidx.core.content.FileProvider { *; }
 -dontwarn androidx.core.content.FileProvider
+
+# Play Core deferred components suppression
+-dontwarn com.google.android.play.core.**
+
+# Aggressive bytecode optimization
+-repackageclasses ''
+-allowaccessmodification
+-optimizationpasses 5
