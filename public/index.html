@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="canonical" href="https://syncpaybd.site/">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     if (window.location.pathname.endsWith('.html')) {
       const clean = window.location.pathname.replace(/\.html$/, '') || '/';
@@ -188,9 +188,10 @@
     }
     .btn-account-pill svg {
       transition: transform 0.2s ease;
+      flex-shrink: 0;
     }
-    .btn-account-pill:hover svg {
-      transform: translateX(3px);
+    .btn-account-pill:hover svg:last-child {
+      transform: translateX(2px);
     }
     .theme-toggle-btn {
       width: 34px;
@@ -1794,32 +1795,58 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 28px;
+      margin-bottom: 12px;
+    }
+    .pricing-toggle-pill {
+      display: inline-flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle);
     }
     .btn-toggle {
-      padding: 7px 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
+      padding: 7px 18px;
+      border-radius: 9999px;
+      border: none;
+      background: transparent;
       font-size: 13px;
       font-weight: 700;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     .btn-toggle.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
-    .badge-save {
+    .save-tag {
       background: #dcfce7;
       color: #15803d;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 20px;
-      border: 1px solid #bbf7d0;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .pricing-guarantee-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .pricing-guarantee-note span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .plans-grid {
@@ -1957,6 +1984,10 @@
       color: var(--text-main);
       cursor: pointer;
       box-shadow: var(--shadow-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       transition: all 0.2s;
     }
     .btn-compare-toggle:hover {
@@ -1964,17 +1995,20 @@
       color: var(--primary);
       background: var(--primary-subtle);
     }
+    .btn-compare-toggle svg {
+      color: var(--primary);
+    }
     .pricing-matrix-wrap {
       margin-top: 24px;
       background: #ffffff;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
       overflow: hidden;
-      box-shadow: var(--shadow-card);
-      text-align: left;
     }
     .pricing-table-scroll {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .pricing-matrix-table {
       width: 100%;
@@ -2031,7 +2065,7 @@
       background: #ffffff;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 24px;
       box-shadow: var(--shadow-sm);
       transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -2040,8 +2074,24 @@
       box-shadow: var(--shadow-card);
     }
     .trust-icon {
-      font-size: 24px;
-      margin-bottom: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      transition: all 0.25s ease;
+    }
+    .trust-icon-shield { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+    .trust-icon-bolt { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+    .trust-icon-signal { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+    .trust-icon-plug { background: #f5f3ff; color: #7c3aed; border: 1px solid #ede9fe; }
+    .trust-icon-webhook { background: #f0fdfa; color: #0d9488; border: 1px solid #ccfbf1; }
+    .trust-icon-chat { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .trust-card:hover .trust-icon {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
     .trust-title {
       font-size: 15px;
@@ -2436,14 +2486,27 @@
       margin-bottom: 64px;
     }
     .btn-expand-plans {
-      background: transparent;
+      background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 8px 18px;
+      padding: 9px 20px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-expand-plans:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #f8fafc;
+    }
+    .btn-expand-plans svg {
+      color: #f59e0b;
     }
     .secondary-plans-wrap {
       display: none;
@@ -2645,11 +2708,15 @@
           </svg>
         </button>
 
-        <!-- Guest View (Pill Action Button matching ScaleUp reference) -->
+        <!-- Guest View: Account Pill Button with User Icon -->
         <div id="nav-guest-btns" style="display:flex; align-items:center; gap:8px;">
-          <button type="button" onclick="openPlanAuthModal('business', 'login')" class="btn-account-pill" title="Start Free or Sign In">
-            <span>CONTACT US</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <button type="button" onclick="openPlanAuthModal('business', 'login')" class="btn-account-pill" title="My Account / Sign In">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>ACCOUNT</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
@@ -3523,20 +3590,26 @@
 
     <!-- Pricing Section -->
     <section id="pricing" class="container">
-      <div class="sec-head">
-        <span class="sec-tag">Transparent Pricing</span>
-        <h2 class="sec-title">Simple Pricing. Powerful Features. No Hidden Fees.</h2>
-        <p class="sec-sub">Process unlimited bKash, Nagad, Rocket & Upay transactions through your own SIMs without 1.5%–2% gateway commissions.</p>
+      <div class="sec-head" style="margin-bottom: 24px;">
+        <span class="sec-tag">Pricing</span>
+        <h2 class="sec-title">Zero Commission. Predictable Pricing.</h2>
+        <p class="sec-sub">Keep 100% of your earnings with automated SIM-based payment verification.</p>
       </div>
 
       <!-- Billing Cycle Toggle -->
       <div class="pricing-toggle">
-        <button class="btn-toggle active" id="btn-monthly" onclick="setBillingCycle('monthly')">Monthly Billing</button>
-        <button class="btn-toggle" id="btn-yearly" onclick="setBillingCycle('yearly')">Yearly Billing</button>
-        <span class="badge-save">🔥 Save 50% on Yearly</span>
+        <div class="pricing-toggle-pill">
+          <button class="btn-toggle active" id="btn-monthly" onclick="setBillingCycle('monthly')">Monthly</button>
+          <button class="btn-toggle" id="btn-yearly" onclick="setBillingCycle('yearly')">
+            <span>Yearly</span>
+            <span class="save-tag">50% OFF</span>
+          </button>
+        </div>
       </div>
       <div class="pricing-guarantee-note">
-        <span>No Setup Fee • No Hidden Charges • 3-Day Money-Back Guarantee</span>
+        <span>✓ 0% Gateway Commission</span>
+        <span>✓ Zero Setup Fees</span>
+        <span>✓ 3-Day Money-Back Guarantee</span>
       </div>
 
       <!-- Core 4 Plans Grid -->
@@ -3547,7 +3620,8 @@
       <!-- Secondary High-Volume Plans Toggle -->
       <div class="plans-expander">
         <button class="btn-expand-plans" id="btn-toggle-extra" onclick="toggleExtraPlans()">
-          ⚡ Need More Websites? View High-Volume Scale Plans (4 to 50 Sites)
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Need More Websites? View High-Volume Scale Plans (4 to 50 Sites)</span>
         </button>
         <div class="secondary-plans-wrap" id="extra-plans-container">
           <!-- Injected via JS -->
@@ -3557,7 +3631,8 @@
       <!-- Feature Comparison Table Toggle -->
       <div class="pricing-compare-section">
         <button class="btn-compare-toggle" id="btn-toggle-matrix" onclick="toggleComparisonMatrix()">
-          📊 Compare All Plan Features Side-by-Side
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Compare All Plan Features Side-by-Side</span>
         </button>
         <div class="pricing-matrix-wrap" id="pricing-matrix-wrap" style="display: none;">
           <div class="pricing-table-scroll">
@@ -3675,32 +3750,44 @@
         </div>
         <div class="pricing-trust-grid">
           <div class="trust-card">
-            <div class="trust-icon">🔒</div>
+            <div class="trust-icon trust-icon-shield">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
             <div class="trust-title">Zero Financial Credential Access</div>
             <div class="trust-desc">We never ask for or store your bKash/Nagad PIN, OTP, or account passwords. Verification runs strictly via device incoming SMS broadcasts.</div>
           </div>
           <div class="trust-card">
-            <div class="trust-icon">⚡</div>
+            <div class="trust-icon trust-icon-bolt">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
             <div class="trust-title">Fast 50 Processing Architecture</div>
             <div class="trust-desc">Sub-50ms regex parsing isolates TrxID, sender number, and BDT amounts in real-time, dispatching webhooks to your store instantly.</div>
           </div>
           <div class="trust-card">
-            <div class="trust-icon">📡</div>
+            <div class="trust-icon trust-icon-signal">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path></svg>
+            </div>
             <div class="trust-title">Offline SMS Cache & Resync</div>
             <div class="trust-desc">If mobile data drops, incoming SMS records are safely buffered in the Android SQLite cache and dispatched the moment connectivity restores.</div>
           </div>
           <div class="trust-card">
-            <div class="trust-icon">🔌</div>
+            <div class="trust-icon trust-icon-plug">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
             <div class="trust-title">Ready-Made Plugins & SDKs</div>
             <div class="trust-desc">Official WordPress/WooCommerce plugin, WHMCS billing module, and PHP, Node.js, and Python SDKs for custom applications.</div>
           </div>
           <div class="trust-card">
-            <div class="trust-icon">🛠️</div>
+            <div class="trust-icon trust-icon-webhook">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+            </div>
             <div class="trust-title">Signed Webhooks (HMAC SHA-256)</div>
             <div class="trust-desc">Every HTTP notification includes a cryptographic signature header to prevent spoofing and ensure only genuine payments update orders.</div>
           </div>
           <div class="trust-card">
-            <div class="trust-icon">💬</div>
+            <div class="trust-icon trust-icon-chat">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </div>
             <div class="trust-title">Direct WhatsApp Support</div>
             <div class="trust-desc">Fast troubleshooting and onboarding assistance from our engineering team when you need immediate guidance.</div>
           </div>
@@ -4210,10 +4297,10 @@
       if (!wrap) return;
       if (wrap.style.display === 'grid') {
         wrap.style.display = 'none';
-        btn.innerText = '⚡ Need More Websites? View High-Volume Scale Plans (4 to 50 Sites)';
+        btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> <span>Need More Websites? View High-Volume Scale Plans (4 to 50 Sites)</span>';
       } else {
         wrap.style.display = 'grid';
-        btn.innerText = '▲ Hide High-Volume Scale Plans';
+        btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg> <span>Hide High-Volume Scale Plans</span>';
       }
     }
 
@@ -4224,10 +4311,10 @@
       if (!wrap) return;
       if (wrap.style.display === 'none' || wrap.style.display === '') {
         wrap.style.display = 'block';
-        btn.innerText = '▲ Hide Plan Features Comparison';
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg> <span>Hide Plan Features Comparison</span>';
       } else {
         wrap.style.display = 'none';
-        btn.innerText = '📊 Compare All Plan Features Side-by-Side';
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> <span>Compare All Plan Features Side-by-Side</span>';
       }
     }
 
@@ -4630,85 +4717,161 @@
     }
 
     // ==========================================
-    // SUPABASE AUTH & GOOGLE OAUTH
+    // DIRECT GOOGLE IDENTITY SERVICES (NO SUPABASE)
     // ==========================================
-    const SUPABASE_PROJECT_URL = 'https://qytfwngstqhqrhymuupk.supabase.co';
-    const SUPABASE_ANON_PUBLIC_KEY = 'sb_publishable_ZjppJLWHpfb4Z3oGhMOrXg_4tAccGBn';
-    let supabaseAuthClient = null;
+    const GOOGLE_CLIENT_ID = '88955533450-5k3rautrd678ve4adupp8j6oo057go3n.apps.googleusercontent.com';
+    let googleTokenClient = null;
 
-    try {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        supabaseAuthClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY);
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
       }
-    } catch (err) {
-      console.warn('Supabase client error:', err);
     }
 
-    async function handleGoogleSignIn() {
-      if (!supabaseAuthClient) {
-        alert('Google authentication service is initializing. Please refresh and try again.');
-        return;
+    function initGoogleAuth() {
+      if (window.google && window.google.accounts) {
+        if (window.google.accounts.id) {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+          });
+        }
+        if (window.google.accounts.oauth2) {
+          googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: 'openid email profile',
+            callback: async (tokenResponse) => {
+              if (tokenResponse && tokenResponse.access_token) {
+                try {
+                  const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+                  }).then(r => r.json());
+                  await completeGoogleAuthLogin({
+                    email: userInfo.email,
+                    name: userInfo.name || userInfo.email.split('@')[0],
+                    sub: userInfo.sub
+                  });
+                } catch (err) {
+                  console.error('Failed to fetch userinfo:', err);
+                }
+              }
+            }
+          });
+        }
+      }
+    }
+
+    async function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      const payload = parseJwt(response.credential);
+      if (!payload || !payload.email) return;
+      await completeGoogleAuthLogin({
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        sub: payload.sub
+      });
+    }
+
+    async function completeGoogleAuthLogin(profile) {
+      const savedPlan = sessionStorage.getItem('syncpay_auth_plan') || selectedPlanForAuth || 'business';
+      const savedBilling = sessionStorage.getItem('syncpay_auth_billing') || currentBilling || 'monthly';
+
+      try {
+        const res = await fetch('/api/v1/merchant/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: profile.email,
+            name: profile.name,
+            sub: profile.sub,
+            plan: savedPlan,
+            billing: savedBilling
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.merchant) {
+          const merchantSession = {
+            merchantId: data.merchant.id,
+            email: data.merchant.email,
+            phone: data.merchant.phone || '',
+            name: data.merchant.name,
+            business: data.merchant.name,
+            plan: data.merchant.plan || savedPlan,
+            planStatus: data.merchant.payment_status || 'PENDING_PAYMENT',
+            apiKey: data.merchant.api_key || ('live_sk_' + Math.random().toString(36).slice(2, 18)),
+            billing: savedBilling,
+            token: data.token,
+            loginAt: new Date().toISOString()
+          };
+          localStorage.setItem('syncpay_session', JSON.stringify(merchantSession));
+          localStorage.setItem('payflow_merchant_session', JSON.stringify(merchantSession));
+          if (data.token) {
+            localStorage.setItem('syncpay_token', data.token);
+          }
+          closePlanAuthModal();
+          updateNavUserState();
+          redirectToPlanCheckout(merchantSession);
+          return;
+        }
+      } catch (err) {
+        console.warn('Direct Google backend auth error:', err);
       }
 
+      // Offline / Direct Client Session Fallback
+      const fallbackSession = {
+        merchantId: 'm_g_' + (profile.sub || Math.random().toString(36).slice(2, 8)).slice(0, 10),
+        email: profile.email,
+        phone: '',
+        name: profile.name,
+        business: profile.name + ' Store',
+        plan: savedPlan,
+        planStatus: 'PENDING_PAYMENT',
+        apiKey: 'live_sk_' + Math.random().toString(36).slice(2, 18),
+        billing: savedBilling,
+        loginAt: new Date().toISOString()
+      };
+      localStorage.setItem('syncpay_session', JSON.stringify(fallbackSession));
+      localStorage.setItem('payflow_merchant_session', JSON.stringify(fallbackSession));
+      closePlanAuthModal();
+      updateNavUserState();
+      redirectToPlanCheckout(fallbackSession);
+    }
+
+    function handleGoogleSignIn() {
       if (selectedPlanForAuth) {
         sessionStorage.setItem('syncpay_auth_plan', selectedPlanForAuth);
         sessionStorage.setItem('syncpay_auth_billing', currentBilling);
       }
 
-      const redirectDestination = window.location.origin + window.location.pathname + '?oauth_provider=google';
-      const { data, error } = await supabaseAuthClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectDestination
-        }
-      });
+      if (!window.google || !window.google.accounts) {
+        alert('Google Sign-In is initializing. Please wait a moment and click again.');
+        return;
+      }
 
-      if (error) {
-        console.error('Google sign-in error:', error);
-        const errEl = document.getElementById('modal-login-error') || document.getElementById('modal-reg-error');
-        if (errEl) {
-          errEl.textContent = 'Google sign-in failed: ' + error.message;
-          errEl.style.display = 'block';
-        }
+      if (!googleTokenClient) {
+        initGoogleAuth();
+      }
+
+      if (googleTokenClient) {
+        googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+      } else if (window.google.accounts.id) {
+        window.google.accounts.id.prompt();
       }
     }
 
-    async function syncGoogleAuthSession() {
-      if (!supabaseAuthClient) return;
-      try {
-        const { data: { session }, error } = await supabaseAuthClient.auth.getSession();
-        if (session && session.user) {
-          const user = session.user;
-          const email = user.email || (user.user_metadata && user.user_metadata.email) || 'google_user@syncpaybd.site';
-          const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || email.split('@')[0];
-          const savedPlan = sessionStorage.getItem('syncpay_auth_plan') || selectedPlanForAuth || 'business';
-          const savedBilling = sessionStorage.getItem('syncpay_auth_billing') || currentBilling || 'monthly';
-
-          const merchantSession = {
-            merchantId: 'm_g_' + (user.id || Math.random().toString(36).slice(2, 8)).slice(0, 10),
-            email: email,
-            phone: (user.phone || (user.user_metadata && user.user_metadata.phone)) || '',
-            name: name,
-            business: name + ' Store',
-            plan: savedPlan,
-            planStatus: 'PENDING_PAYMENT',
-            apiKey: 'live_sk_' + Math.random().toString(36).slice(2, 18),
-            billing: savedBilling,
-            loginAt: new Date().toISOString()
-          };
-
-          localStorage.setItem('syncpay_session', JSON.stringify(merchantSession));
-          updateNavUserState();
-
-          if (window.location.search.includes('oauth_provider=google')) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-            redirectToPlanCheckout(merchantSession);
-          }
-        }
-      } catch (e) {
-        console.warn('OAuth session sync error:', e);
-      }
-    }
+    // Auto-init GIS when page loads
+    window.addEventListener('load', () => {
+      setTimeout(initGoogleAuth, 800);
+    });
 
     function handleModalLogin(e) {
       e.preventDefault();

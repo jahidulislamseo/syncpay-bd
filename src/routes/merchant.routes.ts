@@ -98,13 +98,45 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     return reply.send({ success: true, data: devices || [] });
   });
 
+  const PLAN_DEVICE_LIMITS: Record<string, number> = {
+    FREE: 1,
+    STARTER: 1,
+    PRO: 2,
+    BUSINESS: 3,
+    ENTERPRISE: 5,
+    AGENCY: 4,
+    ELITE: 10,
+    GROWTH: 20,
+    SCALE: 30,
+    MEGA: 50,
+  };
+
   // Register new device
   fastify.post('/api/v1/merchant/devices', async (request: FastifyRequest, reply: FastifyReply) => {
-    const body = request.body as { device_name?: string; sim_number?: string };
+    const body = request.body as { device_name?: string; sim_number?: string; merchant_id?: string };
+    const merchantId = body.merchant_id || DEMO_MERCHANT_ID;
     const deviceName = body.device_name || 'Android Forwarder';
 
+    try {
+      const merchant = await MerchantRepository.findById(merchantId);
+      const plan = (merchant?.plan || 'STARTER').toUpperCase();
+      const limit = PLAN_DEVICE_LIMITS[plan] || 5;
+      const existingDevices = await DeviceService.listMerchantDevices(merchantId);
+
+      if (existingDevices && existingDevices.length >= limit) {
+        return reply.status(403).send({
+          success: false,
+          error: `Device limit reached. Your ${plan} plan allows up to ${limit} device(s). Please upgrade your plan.`,
+          limit,
+          current: existingDevices.length,
+        });
+      }
+    } catch (e: any) {
+      fastify.log.warn(`Device limit verification notice: ${e.message}`);
+    }
+
     const { device, token } = await DeviceService.registerDevice({
-      merchantId: DEMO_MERCHANT_ID,
+      merchantId,
       deviceName,
     });
 
@@ -505,6 +537,97 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       },
       token,
       message: 'Authentication successful',
+    });
+  });
+
+  // Merchant Auth: Direct Google OAuth (No Supabase dependency)
+  fastify.post('/api/v1/merchant/auth/google', async (request: FastifyRequest, reply: FastifyReply) => {
+    const body = request.body as {
+      email?: string;
+      name?: string;
+      sub?: string;
+      plan?: string;
+      billing?: string;
+      credential?: string;
+    };
+
+    if (!body.email) {
+      return reply.status(400).send({ success: false, error: 'Email is required for Google authentication' });
+    }
+
+    const email = body.email.trim().toLowerCase();
+    let merchant = await MerchantRepository.findByEmail(email);
+
+    if (!merchant) {
+      const id = '00000000-0000-4' + Math.random().toString(16).substring(2, 5) + '-a' + Math.random().toString(16).substring(2, 5) + '-' + Math.random().toString(16).substring(2, 14);
+      const apiKey = 'live_sk_' + Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14);
+      const businessName = body.name?.trim() || email.split('@')[0];
+      const plan = (body.plan || 'FREE').toUpperCase();
+
+      try {
+        dbService.insertMerchant({
+          id,
+          name: businessName,
+          api_key: apiKey,
+          webhook_url: '',
+          email,
+          phone: '',
+          status: 'ACTIVE',
+          plan,
+          payment_status: plan === 'FREE' ? 'FREE' : 'PENDING',
+          password_hash: 'oauth_google_' + (body.sub || id).slice(0, 12),
+        });
+      } catch (e: any) {
+        console.warn('[GoogleAuth] Local SQLite insert notice:', e?.message);
+      }
+
+      merchant = await MerchantRepository.findByEmail(email);
+      if (!merchant) {
+        merchant = {
+          id,
+          business_name: businessName,
+          email,
+          phone: '',
+          status: 'ACTIVE',
+          plan,
+          payment_status: plan === 'FREE' ? 'FREE' : 'PENDING',
+          payment_note: '',
+        } as any;
+      }
+    }
+
+    const activeMerchant = merchant!;
+    let apiKey = 'live_sec_' + activeMerchant.id.slice(0, 8);
+    try {
+      const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
+      const keys = await ApiKeyRepository.listByMerchant(activeMerchant.id);
+      if (keys && keys.length > 0) {
+        apiKey = keys[0].key_prefix + '...';
+      }
+    } catch {}
+
+    const token = CryptoUtil.signJwt({
+      id: activeMerchant.id,
+      email: activeMerchant.email,
+      name: activeMerchant.business_name,
+      role: 'merchant',
+    });
+
+    return reply.send({
+      success: true,
+      merchant: {
+        id: activeMerchant.id,
+        name: activeMerchant.business_name,
+        email: activeMerchant.email,
+        phone: activeMerchant.phone || '',
+        status: activeMerchant.status || 'ACTIVE',
+        plan: activeMerchant.plan || 'FREE',
+        payment_status: activeMerchant.payment_status || 'FREE',
+        payment_note: activeMerchant.payment_note || '',
+        api_key: apiKey,
+      },
+      token,
+      message: 'Google authentication successful',
     });
   });
 

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     if (window.location.pathname.endsWith('.html')) {
       const clean = window.location.pathname.replace(/\.html$/, '') || '/';
@@ -799,83 +799,156 @@
     }
 
     // ==========================================
-    // SUPABASE CLIENT & GOOGLE OAUTH
+    // DIRECT GOOGLE IDENTITY SERVICES (NO SUPABASE)
     // ==========================================
-    const SUPABASE_PROJECT_URL = 'https://qytfwngstqhqrhymuupk.supabase.co';
-    const SUPABASE_ANON_PUBLIC_KEY = 'sb_publishable_ZjppJLWHpfb4Z3oGhMOrXg_4tAccGBn';
-    let supabaseAuthClient = null;
+    const GOOGLE_CLIENT_ID = '88955533450-5k3rautrd678ve4adupp8j6oo057go3n.apps.googleusercontent.com';
+    let googleTokenClient = null;
 
-    try {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        supabaseAuthClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY);
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
       }
-    } catch (err) {
-      console.warn('Supabase client error:', err);
     }
 
-    async function handleGoogleSignIn() {
-      if (!supabaseAuthClient) {
-        alert('Google authentication service is initializing. Please refresh and try again.');
+    function initGoogleAuth() {
+      if (window.google && window.google.accounts) {
+        if (window.google.accounts.id) {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+          });
+        }
+        if (window.google.accounts.oauth2) {
+          googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: 'openid email profile',
+            callback: async (tokenResponse) => {
+              if (tokenResponse && tokenResponse.access_token) {
+                try {
+                  const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+                  }).then(r => r.json());
+                  await completeGoogleAuthLogin({
+                    email: userInfo.email,
+                    name: userInfo.name || userInfo.email.split('@')[0],
+                    sub: userInfo.sub
+                  });
+                } catch (err) {
+                  console.error('Failed to fetch userinfo:', err);
+                }
+              }
+            }
+          });
+        }
+      }
+    }
+
+    async function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      const payload = parseJwt(response.credential);
+      if (!payload || !payload.email) return;
+      await completeGoogleAuthLogin({
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        sub: payload.sub
+      });
+    }
+
+    async function completeGoogleAuthLogin(profile) {
+      try {
+        const res = await fetch('/api/v1/merchant/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: profile.email,
+            name: profile.name,
+            sub: profile.sub,
+            plan: 'business',
+            billing: 'monthly'
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.merchant) {
+          const merchantSession = {
+            merchantId: data.merchant.id,
+            email: data.merchant.email,
+            phone: data.merchant.phone || '',
+            name: data.merchant.name,
+            business: data.merchant.name,
+            plan: data.merchant.plan || 'business',
+            planStatus: data.merchant.payment_status || 'FREE',
+            apiKey: data.merchant.api_key || ('live_sk_' + Math.random().toString(36).slice(2, 18)),
+            token: data.token,
+            loginAt: new Date().toISOString()
+          };
+          localStorage.setItem('syncpay_session', JSON.stringify(merchantSession));
+          localStorage.setItem('payflow_merchant_session', JSON.stringify(merchantSession));
+          if (data.token) {
+            localStorage.setItem('syncpay_token', data.token);
+          }
+          window.location.href = '/dashboard';
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend google auth request notice:', err);
+      }
+
+      // Offline / Direct Client Session Fallback
+      const fallbackSession = {
+        merchantId: 'm_g_' + (profile.sub || Math.random().toString(36).slice(2, 8)).slice(0, 10),
+        email: profile.email,
+        phone: '',
+        name: profile.name,
+        business: profile.name + ' Store',
+        plan: 'business',
+        apiKey: 'live_sk_' + Math.random().toString(36).slice(2, 18),
+        loginAt: new Date().toISOString()
+      };
+      localStorage.setItem('syncpay_session', JSON.stringify(fallbackSession));
+      localStorage.setItem('payflow_merchant_session', JSON.stringify(fallbackSession));
+      window.location.href = '/dashboard';
+    }
+
+    function handleGoogleSignIn() {
+      if (!window.google || !window.google.accounts) {
+        alert('Google Sign-In is initializing. Please wait a moment and click again.');
         return;
       }
-
-      const redirectDestination = window.location.origin + '/dashboard';
-      const { data, error } = await supabaseAuthClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectDestination
-        }
-      });
-
-      if (error) {
-        console.error('Google sign-in error:', error);
-        const errAlert = document.getElementById('auth-error-alert');
-        if (errAlert) {
-          errAlert.textContent = 'Google sign-in failed: ' + error.message;
-          errAlert.style.display = 'block';
-        }
+      if (!googleTokenClient) {
+        initGoogleAuth();
+      }
+      if (googleTokenClient) {
+        googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+      } else if (window.google.accounts.id) {
+        window.google.accounts.id.prompt();
       }
     }
+
+    // Auto-init GIS when page loads
+    window.addEventListener('load', () => {
+      setTimeout(initGoogleAuth, 800);
+    });
 
     // Check if session already exists
     async function checkExistingAuthSession() {
-      // 1. LocalStorage session
       try {
         const localSession = JSON.parse(localStorage.getItem('syncpay_session'));
         if (localSession && localSession.email) {
-          // If already logged in, redirect to dashboard
           if (!window.location.search.includes('force_login=true')) {
             window.location.href = '/dashboard';
             return;
           }
         }
       } catch (e) {}
-
-      // 2. Supabase OAuth callback session
-      if (supabaseAuthClient) {
-        try {
-          const { data: { session } } = await supabaseAuthClient.auth.getSession();
-          if (session && session.user) {
-            const user = session.user;
-            const email = user.email || 'google_user@syncpaybd.site';
-            const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || email.split('@')[0];
-
-            const merchantSession = {
-              merchantId: 'm_g_' + (user.id || Math.random().toString(36).slice(2, 8)).slice(0, 10),
-              email: email,
-              phone: user.phone || '',
-              name: name,
-              business: name + ' Store',
-              plan: 'business',
-              apiKey: 'live_sk_' + Math.random().toString(36).slice(2, 18),
-              loginAt: new Date().toISOString()
-            };
-
-            localStorage.setItem('syncpay_session', JSON.stringify(merchantSession));
-            window.location.href = '/dashboard';
-          }
-        } catch(e) {}
-      }
     }
 
     // ==========================================

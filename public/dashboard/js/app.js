@@ -232,8 +232,18 @@ class PayFlowDashboardApp {
     const plans = auth.getAllPlans();
     const p = plans[targetPlan];
     if (!p) return;
-    const prices = { starter: '৳999/mo', growth: '৳2,999/mo', enterprise: '৳9,999/mo' };
-    const confirmed = confirm(`Upgrade to ${p.label} plan? (${prices[targetPlan] || ''})\n\nDemo mode will apply instant upgrade.`);
+    const prices = {
+      starter: '৳100/mo',
+      pro: '৳150/mo',
+      business: '৳200/mo',
+      enterprise: '৳300/mo',
+      agency: '৳250/mo',
+      elite: '৳350/mo',
+      growth: '৳700/mo',
+      scale: '৳1000/mo',
+      mega: '৳2000/mo'
+    };
+    const confirmed = confirm(`Upgrade to ${p.label} plan? (${prices[targetPlan] || p.price || ''})\n\nApply plan upgrade?`);
     if (confirmed) {
       auth.upgradePlan(targetPlan);
       this.session = auth.getSession();
@@ -2261,6 +2271,15 @@ class PayFlowDashboardApp {
   }
 
   async openAddDeviceModal() {
+    const plan = auth.getPlan(this.session?.plan || 'starter');
+    const currentDeviceCount = (this.devices || []).length;
+    if (plan && plan.deviceLimit && currentDeviceCount >= plan.deviceLimit) {
+      alert(`⚠️ Device Limit Reached!\n\nYour current ${plan.label} plan allows a maximum of ${plan.deviceLimit} device(s).\nYou already have ${currentDeviceCount} active device(s).\n\nPlease upgrade your plan to add more Android forwarder devices.`);
+      const nextPlan = this.session?.plan === 'starter' ? 'pro' : (this.session?.plan === 'pro' ? 'business' : 'enterprise');
+      this.openUpgradeModal(nextPlan);
+      return;
+    }
+
     const modal = document.getElementById('modal-add-device');
     if (!modal) return;
     this.switchDeviceModalTab('qr');
@@ -2298,6 +2317,13 @@ class PayFlowDashboardApp {
   }
 
   async submitAddDevice() {
+    const plan = auth.getPlan(this.session?.plan || 'starter');
+    const currentDeviceCount = (this.devices || []).length;
+    if (plan && plan.deviceLimit && currentDeviceCount >= plan.deviceLimit) {
+      alert(`⚠️ Device Limit Reached!\n\nYour current ${plan.label} plan allows up to ${plan.deviceLimit} device(s).\nPlease upgrade to add more.`);
+      return;
+    }
+
     const name = document.getElementById('dev-name-input').value.trim();
     const sim = document.getElementById('dev-sim-input').value.trim();
 
@@ -3217,28 +3243,69 @@ class PayFlowDashboardApp {
   }
 
   async doGoogleLogin() {
+    const GOOGLE_CLIENT_ID = '88955533450-5k3rautrd678ve4adupp8j6oo057go3n.apps.googleusercontent.com';
     try {
-      const SUPABASE_PROJECT_URL = 'https://qytfwngstqhqrhymuupk.supabase.co';
-      const SUPABASE_ANON_PUBLIC_KEY = 'sb_publishable_ZjppJLWHpfb4Z3oGhMOrXg_4tAccGBn';
-      const client = (window.supabase && typeof window.supabase.createClient === 'function')
-        ? window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY)
-        : null;
-      if (!client) {
-        alert('Google authentication service is initializing. Please refresh and try again.');
-        return;
-      }
-      const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/dashboard'
-        }
-      });
-      if (error) {
-        const errEl = document.getElementById('auth-error');
-        if (errEl) {
-          errEl.textContent = 'Google sign-in error: ' + error.message;
-          errEl.style.display = 'block';
-        }
+      if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'openid email profile',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              try {
+                const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+                }).then(r => r.json());
+
+                const email = userInfo.email;
+                const name = userInfo.name || email.split('@')[0];
+
+                // Sync to backend SQLite
+                let currentSession = {
+                  merchantId: 'm_g_' + (userInfo.sub || Math.random().toString(36).slice(2, 8)).slice(0, 10),
+                  email: email,
+                  phone: '',
+                  name: name,
+                  business: name + ' Store',
+                  plan: 'starter',
+                  planStatus: 'ACTIVE',
+                  billingCycle: 'monthly',
+                  apiKey: 'live_sk_' + Math.random().toString(36).substring(2, 14),
+                };
+
+                try {
+                  const res = await fetch('/api/v1/merchant/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: name,
+                      email: email,
+                      sub: userInfo.sub,
+                      plan: 'STARTER'
+                    })
+                  });
+                  const d = await res.json();
+                  if (d.success && d.merchant) {
+                    currentSession.merchantId = d.merchant.id;
+                    currentSession.apiKey = d.merchant.api_key || currentSession.apiKey;
+                    if (d.token) localStorage.setItem('syncpay_token', d.token);
+                  }
+                } catch(e) {}
+
+                localStorage.setItem(auth.SESSION_KEY, JSON.stringify(currentSession));
+                localStorage.setItem('syncpay_session', JSON.stringify(currentSession));
+                this.session = currentSession;
+                this.closeAuthModal();
+                this.loadDashboardData();
+                this.showToast(`Welcome, ${name}! 👋`, 'success');
+              } catch (err) {
+                console.error('Google profile fetch error:', err);
+              }
+            }
+          }
+        });
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+      } else {
+        alert('Google Sign-in is initializing. Please wait a moment and try again.');
       }
     } catch(e) {
       console.error(e);
@@ -3246,57 +3313,7 @@ class PayFlowDashboardApp {
   }
 
   async checkOAuthCallback() {
-    try {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        const SUPABASE_PROJECT_URL = 'https://qytfwngstqhqrhymuupk.supabase.co';
-        const SUPABASE_ANON_PUBLIC_KEY = 'sb_publishable_ZjppJLWHpfb4Z3oGhMOrXg_4tAccGBn';
-        const client = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY);
-        const { data: { session } } = await client.auth.getSession();
-        if (session && session.user) {
-          const user = session.user;
-          const email = user.email || 'merchant@syncpaybd.site';
-          const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || email.split('@')[0];
-          
-          let currentSession = auth.getSession();
-          if (!currentSession || currentSession.email !== email) {
-            currentSession = {
-              merchantId: 'm_g_' + (user.id || Math.random().toString(36).slice(2, 8)).slice(0, 10),
-              email: email,
-              phone: user.phone || '',
-              name: name,
-              business: name + ' Store',
-              plan: 'starter',
-              planStatus: 'ACTIVE',
-              billingCycle: 'monthly',
-              apiKey: 'live_sk_' + Math.random().toString(36).substring(2, 14),
-            };
-            localStorage.setItem(auth.SESSION_KEY, JSON.stringify(currentSession));
-
-            // Sync to database so Admin sees Google registered merchants immediately
-            try {
-              fetch('/api/v1/merchant/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  name: name,
-                  email: email,
-                  business_name: name + ' Store',
-                  password: 'oauth_google_' + (user.id || 'verified').slice(0, 8),
-                  phone: user.phone || '',
-                }),
-              }).catch(() => {});
-            } catch(e) {}
-          }
-
-          // Clean url hash if returning from OAuth
-          if (window.location.hash.includes('access_token')) {
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('OAuth callback verification notice:', err);
-    }
+    // Session is maintained locally and synced with SQLite backend
   }
 
   async doRegister() {
