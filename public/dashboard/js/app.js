@@ -1407,12 +1407,12 @@ class PayFlowDashboardApp {
 
   downloadPlugin(pluginName) {
     const fileMap = {
-      woocommerce: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-woocommerce-v2.4.2.zip', name: 'syncpay-woocommerce-v2.4.2.zip' },
-      whmcs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-whmcs-v1.8.0.zip', name: 'syncpay-whmcs-v1.8.0.zip' },
-      php: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-php-sdk.zip', name: 'syncpay-php-sdk.zip' },
-      nodejs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-node-sdk.zip', name: 'syncpay-node-sdk.zip' },
-      python: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-python-sdk.zip', name: 'syncpay-python-sdk.zip' },
-      apk: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
+      woocommerce: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-woocommerce-v2.4.2.zip', name: 'syncpay-woocommerce-v2.4.2.zip' },
+      whmcs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-whmcs-v1.8.0.zip', name: 'syncpay-whmcs-v1.8.0.zip' },
+      php: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-php-sdk.zip', name: 'syncpay-php-sdk.zip' },
+      nodejs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-node-sdk.zip', name: 'syncpay-node-sdk.zip' },
+      python: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-python-sdk.zip', name: 'syncpay-python-sdk.zip' },
+      apk: { url: '/downloads/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
     };
 
     const target = fileMap[pluginName];

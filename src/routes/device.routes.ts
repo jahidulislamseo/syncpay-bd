@@ -205,7 +205,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       version_code: 3,
       min_supported_version: '1.0.0',
       force_update: false,
-      download_url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.0.0/syncpay-forwarder.apk',
+      download_url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-forwarder.apk',
       file_size_bytes: 16038881,
       file_size_formatted: '15 MB',
       release_date: '2026-09-19',
