@@ -2,6 +2,7 @@ import QRCode from 'qrcode';
 import { MerchantService } from '../services/merchant.service.js';
 import { DeviceService } from '../services/device.service.js';
 import { TransactionService } from '../services/transaction.service.js';
+import { EmailService } from '../services/email.service.js';
 import { dbService } from '../db/database.js';
 import { CryptoUtil } from '../utils/crypto.js';
 import { MerchantRepository } from '../db/repositories/merchant.repository.js';
@@ -384,6 +385,14 @@ export async function merchantRoutes(fastify) {
         catch (e) {
             console.warn('Local SQLite insertMerchant notice:', e?.message);
         }
+        // 3. Dispatch Welcome Email asynchronously
+        EmailService.sendMerchantWelcomeEmail({
+            to: email,
+            businessName,
+            merchantName: body.name,
+            apiKey,
+            loginUrl: 'https://syncpaybd.site/dashboard',
+        }).catch((err) => console.warn('[MerchantRoute] Welcome email notice:', err?.message));
         const token = CryptoUtil.signJwt({
             id,
             email,

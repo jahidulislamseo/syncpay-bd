@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import os from 'node:os';
 import { dbService } from '../db/database.js';
+import { EmailService } from '../services/email.service.js';
 
 export const adminRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
   // Global admin stats
@@ -101,6 +102,16 @@ export const adminRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
         payment_status: body.payment_status,
         payment_note: body.payment_note,
       });
+
+      if (result && (result as any).email) {
+        EmailService.sendPlanApprovalEmail({
+          to: (result as any).email,
+          businessName: (result as any).name,
+          plan: body.plan || (result as any).plan || 'FREE',
+          status: body.status || (result as any).status || 'ACTIVE',
+          paymentNote: body.payment_note,
+        }).catch((err: any) => console.warn('[AdminRoute] Plan email notice:', err?.message));
+      }
 
       return reply.send({ success: true, data: result });
     } catch (err: any) {

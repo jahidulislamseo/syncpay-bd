@@ -1,5 +1,6 @@
 import os from 'node:os';
 import { dbService } from '../db/database.js';
+import { EmailService } from '../services/email.service.js';
 export const adminRoutes = async (server) => {
     // Global admin stats
     server.get('/api/v1/admin/stats', async (_request, reply) => {
@@ -91,6 +92,15 @@ export const adminRoutes = async (server) => {
                 payment_status: body.payment_status,
                 payment_note: body.payment_note,
             });
+            if (result && result.email) {
+                EmailService.sendPlanApprovalEmail({
+                    to: result.email,
+                    businessName: result.name,
+                    plan: body.plan || result.plan || 'FREE',
+                    status: body.status || result.status || 'ACTIVE',
+                    paymentNote: body.payment_note,
+                }).catch((err) => console.warn('[AdminRoute] Plan email notice:', err?.message));
+            }
             return reply.send({ success: true, data: result });
         }
         catch (err) {
