@@ -496,46 +496,6 @@
       text-align: left;
     }
 
-    /* Demo Accounts Chips */
-    .demo-chips-bar {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid #f1f5f9;
-      text-align: center;
-    }
-
-    .demo-chips-bar span {
-      font-size: 11px;
-      font-weight: 600;
-      color: #94a3b8;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .demo-chips {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .demo-chip-btn {
-      padding: 4px 8px;
-      font-size: 11px;
-      font-weight: 700;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      color: #334155;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .demo-chip-btn:hover {
-      background: #e2e8f0;
-      border-color: #cbd5e1;
-    }
-
     /* Responsive */
     @media (max-width: 900px) {
       .login-container {
@@ -675,16 +635,6 @@
 
           <div class="card-footer">
             Not a member yet? <button type="button" onclick="toggleAuthMode('register')">Create a New Account</button>
-          </div>
-
-          <!-- Quick Test Demo Accounts -->
-          <div class="demo-chips-bar">
-            <span>Quick Test Demo Accounts:</span>
-            <div class="demo-chips">
-              <button type="button" class="demo-chip-btn" onclick="fillDemo('demo@syncpaybd.site','demo1234')">⚡ Demo Merchant</button>
-              <button type="button" class="demo-chip-btn" onclick="fillDemo('01711000000','demo1234')">📱 01711-000000</button>
-              <button type="button" class="demo-chip-btn" onclick="fillDemo('starter@test.com','test1234')">Starter User</button>
-            </div>
           </div>
         </form>
 
@@ -831,12 +781,6 @@
         input.type = 'password';
         btn.textContent = 'Show';
       }
-    }
-
-    function fillDemo(identifier, pass) {
-      document.getElementById('login-identifier').value = identifier;
-      document.getElementById('login-password').value = pass;
-      toggleAuthMode('login');
     }
 
     function handleForgotPassword(e) {

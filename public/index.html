@@ -2378,40 +2378,6 @@
     .modal-divider span {
       padding: 0 12px;
     }
-    .modal-demo-bar {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid #f1f5f9;
-      text-align: center;
-    }
-    .modal-demo-bar span {
-      font-size: 11px;
-      color: #64748b;
-      font-weight: 600;
-      display: block;
-      margin-bottom: 8px;
-    }
-    .modal-demo-btns {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .modal-demo-btn {
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 700;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      color: #334155;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .modal-demo-btn:hover {
-      background: #e2e8f0;
-      border-color: #cbd5e1;
-    }
     .modal-logged-box {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -4638,12 +4604,6 @@
       }
     }
 
-    function fillModalDemo(email, password) {
-      document.getElementById('modal-login-email').value = email;
-      document.getElementById('modal-login-password').value = password;
-      switchModalAuthTab('login');
-    }
-
     function redirectToPlanCheckout(session) {
       const plan = getSelectedPlanDetails(selectedPlanForAuth);
       const isYearly = currentBilling === 'yearly';
@@ -5136,16 +5096,6 @@
               <span>Proceed to Official Checkout</span>
               <span>→</span>
             </button>
-            
-            <div class="modal-demo-bar">
-              <span>Quick Test Demo Accounts:</span>
-              <div class="modal-demo-btns">
-                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('demo@syncpaybd.site','demo1234')">⚡ Demo Merchant</button>
-                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('01711000000','demo1234')">📱 01711-000000</button>
-                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('starter@test.com','test1234')">Starter User</button>
-                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('enterprise@test.com','ent1234')">Enterprise Corp</button>
-              </div>
-            </div>
           </form>
 
           <!-- REGISTER FORM -->
