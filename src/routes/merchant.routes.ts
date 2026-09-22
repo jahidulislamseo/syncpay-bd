@@ -14,22 +14,23 @@ export async function merchantRoutes(fastify: FastifyInstance) {
   // Get merchant dashboard stats
   fastify.get('/api/v1/merchant/stats', async (_request: FastifyRequest, reply: FastifyReply) => {
     const stats = await MerchantService.getMerchantStats(DEMO_MERCHANT_ID);
-    if (!stats.devices || stats.devices.length === 0) {
-      // Check fallback ID
-      const fallback = dbService.getMerchantStats(FALLBACK_MERCHANT_ID);
-      return reply.send({ success: true, data: fallback });
-    }
-    return reply.send({ success: true, data: stats });
+    return reply.send({
+      success: true,
+      data: stats || {
+        todayRevenue: 0,
+        todayCount: 0,
+        totalVerified: 0,
+        pendingCount: 0,
+        failedCount: 0,
+        devices: [],
+      },
+    });
   });
 
   // Get recent transactions feed
   fastify.get('/api/v1/merchant/transactions', async (_request: FastifyRequest, reply: FastifyReply) => {
     const txs = await MerchantService.getTransactions(DEMO_MERCHANT_ID, 50);
-    if (!txs || txs.length === 0) {
-      const fallback = dbService.getRecentTransactions(FALLBACK_MERCHANT_ID, 50);
-      return reply.send({ success: true, data: fallback });
-    }
-    return reply.send({ success: true, data: txs });
+    return reply.send({ success: true, data: txs || [] });
   });
 
   // Simulate an incoming SMS (for dashboard test trigger)
@@ -64,8 +65,8 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     }
 
     const ingest = await TransactionService.ingestSms({
-      merchantId: FALLBACK_MERCHANT_ID,
-      deviceId: 'dev_phone_1',
+      merchantId: DEMO_MERCHANT_ID,
+      deviceId: '00000000-0000-0000-0000-000000000001',
       sms: rawSms,
       sender: senderAddress,
     });
@@ -87,21 +88,13 @@ export async function merchantRoutes(fastify: FastifyInstance) {
   // Get merchant invoices
   fastify.get('/api/v1/merchant/invoices', async (_request: FastifyRequest, reply: FastifyReply) => {
     const invoices = await MerchantService.getInvoices(DEMO_MERCHANT_ID, 100);
-    if (!invoices || invoices.length === 0) {
-      const fallback = dbService.getAllInvoices(FALLBACK_MERCHANT_ID, 100);
-      return reply.send({ success: true, data: fallback });
-    }
-    return reply.send({ success: true, data: invoices });
+    return reply.send({ success: true, data: invoices || [] });
   });
 
   // Get merchant devices
   fastify.get('/api/v1/merchant/devices', async (_request: FastifyRequest, reply: FastifyReply) => {
     const devices = await DeviceService.listMerchantDevices(DEMO_MERCHANT_ID);
-    if (!devices || devices.length === 0) {
-      const fallback = dbService.getAllDevices(FALLBACK_MERCHANT_ID);
-      return reply.send({ success: true, data: fallback });
-    }
-    return reply.send({ success: true, data: devices });
+    return reply.send({ success: true, data: devices || [] });
   });
 
   // Register new device
@@ -160,8 +153,8 @@ export async function merchantRoutes(fastify: FastifyInstance) {
   fastify.get('/api/v1/merchant/chart-data', async (request: FastifyRequest, reply: FastifyReply) => {
     const query = request.query as { days?: string };
     const days = parseInt(query.days || '7', 10);
-    const chartData = dbService.getChartData(FALLBACK_MERCHANT_ID, days);
-    return reply.send({ success: true, data: chartData });
+    const chartData = dbService.getChartData(DEMO_MERCHANT_ID, days);
+    return reply.send({ success: true, data: chartData || [] });
   });
 
   // Device Pairing QR Code Generation
