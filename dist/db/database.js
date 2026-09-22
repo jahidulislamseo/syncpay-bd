@@ -7,8 +7,20 @@ const DB_PATH = process.env.DB_PATH || (process.env.VERCEL ? '/tmp/syncpay.db' :
 export class DatabaseService {
     db;
     constructor(dbPath = DB_PATH) {
-        this.db = new DatabaseSync(dbPath);
-        this.initSchema();
+        try {
+            this.db = new DatabaseSync(dbPath);
+            this.initSchema();
+        }
+        catch (err) {
+            console.warn(`[DatabaseService] Could not open SQLite at ${dbPath}, falling back to in-memory:`, err);
+            try {
+                this.db = new DatabaseSync(':memory:');
+                this.initSchema();
+            }
+            catch (memErr) {
+                console.error('[DatabaseService] Fatal: Failed to initialize in-memory SQLite:', memErr);
+            }
+        }
     }
     initSchema() {
         // Enable foreign keys & WAL mode with retry busy timeout

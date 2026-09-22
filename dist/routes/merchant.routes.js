@@ -102,9 +102,24 @@ export async function merchantRoutes(fastify) {
     // Delete device
     fastify.delete('/api/v1/merchant/devices/:id', async (request, reply) => {
         const deviceId = request.params.id;
-        await DeviceService.removeDevice(deviceId, DEMO_MERCHANT_ID);
-        await DeviceService.removeDevice(deviceId, FALLBACK_MERCHANT_ID);
-        dbService.deleteDevice(deviceId);
+        try {
+            await DeviceService.removeDevice(deviceId, DEMO_MERCHANT_ID);
+        }
+        catch (e) {
+            fastify.log.warn(`Failed removing device from DEMO_MERCHANT_ID: ${e.message}`);
+        }
+        try {
+            await DeviceService.removeDevice(deviceId, FALLBACK_MERCHANT_ID);
+        }
+        catch (e) {
+            fastify.log.warn(`Failed removing device from FALLBACK_MERCHANT_ID: ${e.message}`);
+        }
+        try {
+            dbService.deleteDevice(deviceId);
+        }
+        catch (e) {
+            fastify.log.warn(`Failed removing device from dbService: ${e.message}`);
+        }
         return reply.send({ success: true, message: 'Device deleted successfully' });
     });
     // Get merchant API keys
@@ -133,18 +148,28 @@ export async function merchantRoutes(fastify) {
     // Device Pairing QR Code Generation
     fastify.get('/api/v1/merchant/devices/:id/qr', async (request, reply) => {
         const deviceId = request.params.id;
-        const devices = (await DeviceService.listMerchantDevices(DEMO_MERCHANT_ID)) || [];
-        let dev = devices.find(d => d.id === deviceId);
-        if (!dev) {
-            const fallback = dbService.getAllDevices(FALLBACK_MERCHANT_ID);
-            dev = fallback.find((d) => d.id === deviceId);
+        let dev = null;
+        try {
+            const devices = (await DeviceService.listMerchantDevices(DEMO_MERCHANT_ID)) || [];
+            dev = devices.find(d => d.id === deviceId);
         }
-        const token = dev ? dev.device_token || dev.id : deviceId;
-        const host = request.headers.host || 'localhost:4000';
-        const protocol = request.headers['x-forwarded-proto'] || 'http';
-        const serverUrl = host.includes('localhost') || host.includes('127.0.0.1')
-            ? 'http://10.10.26.121:4000'
-            : `${protocol}://${host}`;
+        catch (e) {
+            fastify.log.warn(`DeviceService.listMerchantDevices error: ${e.message}`);
+        }
+        if (!dev) {
+            try {
+                const fallback = dbService.getAllDevices(FALLBACK_MERCHANT_ID);
+                dev = fallback.find((d) => d.id === deviceId);
+            }
+            catch (e) {
+                fastify.log.warn(`dbService.getAllDevices error: ${e.message}`);
+            }
+        }
+        const token = dev ? dev.device_token || dev.id : (deviceId === 'dev_phone_1' ? 'token_phone_primary' : deviceId);
+        const host = request.headers.host || 'syncpaybd.site';
+        const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+        const protocol = request.headers['x-forwarded-proto'] || (isLocal ? 'http' : 'https');
+        const serverUrl = isLocal ? 'http://10.10.26.121:4000' : `${protocol}://${host}`;
         const pairingPayload = {
             backend_url: serverUrl,
             merchant_id: FALLBACK_MERCHANT_ID,

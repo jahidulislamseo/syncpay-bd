@@ -1893,13 +1893,15 @@ class PayFlowDashboardApp {
       qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">Generating QR Code...</div>`;
     }
 
+    const sUrl = document.getElementById('add-qr-server-url');
+    if (sUrl) sUrl.innerText = window.location.origin;
+
     try {
       const res = await api.getDeviceQr(primaryDeviceId);
       if (res.success) {
         if (qrSlot) {
           qrSlot.innerHTML = `<img src="${res.qr_code}" alt="Pairing QR Code" style="width:200px; height:200px; display:block;" />`;
         }
-        const sUrl = document.getElementById('add-qr-server-url');
         const dToken = document.getElementById('add-qr-device-token');
         const mId = document.getElementById('add-qr-merchant-id');
         if (sUrl) sUrl.innerText = res.payload.backend_url;
