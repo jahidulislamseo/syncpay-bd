@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -103,7 +102,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: Colors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -150,7 +149,7 @@ class _ScannerOverlayPainter extends CustomPainter {
     final double left = (size.width - scanSize) / 2;
     final double top = (size.height - scanSize) / 2;
 
-    final paint = Paint()..color = Colors.black.withOpacity(0.6);
+    final paint = Paint()..color = Colors.black.withValues(alpha: 0.6);
 
     // Top
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, top), paint);

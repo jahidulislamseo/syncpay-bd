@@ -74,7 +74,7 @@ class ConnectionScreen extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withOpacity(0.12),
+                            color: const Color(0xFF10B981).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Row(
@@ -157,7 +157,7 @@ class ConnectionScreen extends ConsumerWidget {
             // Disconnect Action Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444).withOpacity(0.12),
+                backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.12),
                 foregroundColor: const Color(0xFFEF4444),
                 elevation: 0,
                 side: const BorderSide(color: Color(0xFFEF4444), width: 1),

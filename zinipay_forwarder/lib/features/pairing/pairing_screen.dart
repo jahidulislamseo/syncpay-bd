@@ -16,7 +16,6 @@ class PairingScreen extends ConsumerStatefulWidget {
 class _PairingScreenState extends ConsumerState<PairingScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isManual = true;
-  bool _isScanning = false;
 
   late final TextEditingController _merchantIdCtrl;
   late final TextEditingController _businessNameCtrl;
@@ -161,7 +160,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1).withOpacity(0.12),
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(

@@ -236,7 +236,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 title: const Text('পেমেন্ট ভয়েস প্রম্পট (Voice Announcements)', style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: const Text('বিকাশ, নগদ বা রকেটে পেমেন্ট এলে বাংলায় ভয়েস ঘোষণা করবে', style: TextStyle(fontSize: 12)),
                 value: _soundboxEnabled,
-                activeColor: const Color(0xFF6366F1),
+                activeThumbColor: const Color(0xFF6366F1),
                 onChanged: (val) async {
                   await _soundbox.setEnabled(val);
                   setState(() => _soundboxEnabled = val);

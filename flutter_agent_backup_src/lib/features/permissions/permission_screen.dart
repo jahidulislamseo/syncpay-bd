@@ -75,8 +75,8 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: _allGranted
-                      ? const Color(0xFF10B981).withOpacity(0.12)
-                      : const Color(0xFFEF4444).withOpacity(0.12),
+                      ? const Color(0xFF10B981).withValues(alpha: 0.12)
+                      : const Color(0xFFEF4444).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _allGranted ? const Color(0xFF10B981) : const Color(0xFFEF4444),
@@ -206,8 +206,8 @@ class _PermissionRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: isGranted
-                    ? const Color(0xFF10B981).withOpacity(0.15)
-                    : Colors.amber.withOpacity(0.15),
+                    ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                    : Colors.amber.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(

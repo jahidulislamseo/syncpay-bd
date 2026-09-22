@@ -72,7 +72,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF6366F1).withOpacity(0.4),
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.4),
                       blurRadius: 30,
                       spreadRadius: 2,
                     ),
@@ -98,7 +98,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
               Text(
                 'Secure Payment Agent',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.5,
@@ -111,7 +111,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    const Color(0xFF6366F1).withOpacity(0.8),
+                    const Color(0xFF6366F1).withValues(alpha: 0.8),
                   ),
                 ),
               ),
@@ -119,7 +119,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
               Text(
                 'Loading...',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                   fontSize: 12,
                 ),
               ),

@@ -1170,7 +1170,8 @@
       growth: { name: 'Growth 20', monthly: 700, yearly: 4200, sites: '20 Websites Integration', bonus: 'Dedicated Cluster' },
       scale: { name: 'Scale 30', monthly: 1000, yearly: 6000, sites: '30 Websites Integration', bonus: 'Dedicated Node & IP' },
       mega: { name: 'Mega 50', monthly: 2000, yearly: 12000, sites: '50 Websites Integration', bonus: 'Custom Forwarder Node' },
-      ultra: { name: 'Ultra Unlimited', monthly: 5000, yearly: 30000, sites: 'Unlimited Websites', bonus: 'White-Label Dedicated Cloud' }
+      ultra: { name: 'Ultra Unlimited', monthly: 5000, yearly: 30000, sites: 'Unlimited Websites', bonus: 'White-Label Dedicated Cloud' },
+      custom_domain: { name: 'Custom Domain Add-on', monthly: 299, yearly: 1999, sites: '1 White-Label Domain', bonus: '256-Bit SSL & Custom CNAME' }
     };
 
     async function init() {
@@ -1686,7 +1687,7 @@
             if (!session) {
               session = {
                 merchantId: 'm_' + Math.random().toString(36).slice(2, 9),
-                email: invoiceData.customer_email || 'demo@syncpaybd.site',
+                email: invoiceData.customer_email || 'merchant@store.com',
                 name: invoiceData.customer_name || 'Merchant User',
                 business: 'Merchant Store BD',
                 apiKey: 'live_sk_' + Math.random().toString(36).slice(2, 18)
@@ -1706,13 +1707,28 @@
             session.lastPaidTrx = trxId;
             session.lastPaidAmount = invoiceData.amount;
 
+            if (invoiceData.plan_id === 'custom_domain') {
+              session.has_custom_domain = true;
+              fetch('/api/v1/merchant/branding', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'syncpay-api-key': session.apiKey || '',
+                },
+                body: JSON.stringify({ has_custom_domain: 1 })
+              }).catch(() => {});
+            }
+
             localStorage.setItem('syncpay_session', JSON.stringify(session));
 
             // Sync with registered accounts in localStorage
             const accounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
             const idx = accounts.findIndex(a => a.email === session.email);
             if (idx !== -1) {
-              accounts[idx].plan = invoiceData.plan_id;
+              if (invoiceData.plan_id !== 'custom_domain') {
+                accounts[idx].plan = invoiceData.plan_id;
+              }
+              accounts[idx].has_custom_domain = true;
               accounts[idx].planStatus = 'ACTIVE';
               accounts[idx].expiresAt = expiresAt;
               accounts[idx].billingCycle = invoiceData.billing_cycle;

@@ -33,8 +33,8 @@ class DashboardScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: agentState.isOnline
-                    ? const Color(0xFF10B981).withOpacity(0.15)
-                    : const Color(0xFFEF4444).withOpacity(0.15),
+                    ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                    : const Color(0xFFEF4444).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: agentState.isOnline ? const Color(0xFF10B981) : const Color(0xFFEF4444),
@@ -167,7 +167,7 @@ class DashboardScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF6366F1).withOpacity(0.3),
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.3),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),

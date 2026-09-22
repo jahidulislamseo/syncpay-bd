@@ -86,7 +86,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
                     label: Text(prov),
                     selected: isSelected,
                     onSelected: (_) => setState(() => _selectedProvider = prov),
-                    selectedColor: const Color(0xFF6366F1).withOpacity(0.2),
+                    selectedColor: const Color(0xFF6366F1).withValues(alpha: 0.2),
                     checkmarkColor: const Color(0xFF6366F1),
                   ),
                 );
@@ -174,7 +174,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: statusColor.withOpacity(0.12),
+                                        color: statusColor.withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(

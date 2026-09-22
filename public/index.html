@@ -82,118 +82,123 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* === UDDOKTAPAY STYLE CLEAN HEADER NAVBAR === */
+    /* === SYNCPAY BD FLOATING CURVED TRANSPARENT STICKY NAVBAR === */
     header {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 1080px;
       z-index: 9999;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid #f1f5f9;
-      box-shadow: 0 1px 12px rgba(0, 0, 0, 0.03);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 9999px;
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(226, 232, 240, 0.7);
       padding: 0;
-      transition: all 0.25s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    header.is-scrolled {
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 14px 35px -8px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(203, 213, 225, 0.85);
+      top: 12px;
     }
     .nav-wrap {
-      height: 72px;
-      max-width: 1200px;
+      height: 58px;
+      width: 100%;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
+      padding: 0 8px 0 20px;
       background: transparent;
+      box-sizing: border-box;
     }
     .brand {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 10px;
       text-decoration: none;
-      color: #0f172a;
-      font-weight: 800;
-      font-size: 22px;
-      letter-spacing: -0.02em;
+      flex-shrink: 0;
     }
-    .brand-logo-badge {
-      width: 34px;
-      height: 34px;
-      background: #0052ff;
-      color: #fff;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 2px 8px rgba(0, 82, 255, 0.25);
-    }
-    .brand-text {
-      font-size: 22px;
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: -0.02em;
-    }
-    .brand-text span {
-      color: #0052ff;
+    .brand img {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
+      display: block;
     }
 
     .nav-links {
       display: flex;
-      gap: 28px;
+      gap: 20px;
       list-style: none;
       align-items: center;
+      margin: 0;
+      padding: 0;
     }
     .nav-links a {
       text-decoration: none;
-      color: #4b5563;
-      font-size: 13px;
-      font-weight: 700;
+      color: #1e293b;
+      font-size: 12px;
+      font-weight: 750;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       transition: color 0.15s ease;
+      padding: 6px 4px;
     }
-    .nav-links a:hover,
+    .nav-links a:hover {
+      color: #0284c7;
+    }
     .nav-links a.active {
-      color: #0052ff;
+      color: #0284c7 !important;
+      font-weight: 800;
     }
 
     .nav-cta-wrap {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      flex-shrink: 0;
     }
     .btn-account-pill {
-      background: #0052ff;
+      background: linear-gradient(105deg, #059669 0%, #10b981 60%, #eab308 100%);
       color: #ffffff;
-      font-size: 13.5px;
-      font-weight: 700;
-      padding: 9px 18px;
-      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 9px 20px;
+      border-radius: 9999px;
       border: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      box-shadow: 0 2px 8px rgba(0, 82, 255, 0.22);
-      transition: all 0.18s ease;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       text-decoration: none;
     }
     .btn-account-pill:hover {
-      background: #0043d0;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(0, 82, 255, 0.32);
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+      filter: brightness(1.05);
+    }
+    .btn-account-pill svg {
+      transition: transform 0.2s ease;
+    }
+    .btn-account-pill:hover svg {
+      transform: translateX(3px);
     }
     .theme-toggle-btn {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       border: 1px solid #e2e8f0;
       background: #ffffff;
-      color: #64748b;
+      color: #475569;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -202,8 +207,46 @@
     }
     .theme-toggle-btn:hover {
       background: #f8fafc;
-      color: #0f172a;
+      color: #015fb2;
       border-color: #cbd5e1;
+    }
+    .mobile-menu-toggle {
+      display: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #1e293b;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    @media (max-width: 980px) {
+      .nav-links {
+        display: none;
+      }
+      .nav-links.mobile-open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 20px;
+        padding: 16px 20px;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+        gap: 12px;
+        z-index: 9999;
+      }
+      .mobile-menu-toggle {
+        display: flex;
+      }
     }
     .btn-subtle {
       background: #f1f5f9;
@@ -630,43 +673,52 @@
       color: var(--text-main);
     }
 
-    /* === UDDOKTAPAY STYLE HERO SECTION === */
+    /* === MODERN CLEAN HERO SECTION === */
     .hero-section-outer {
       position: relative;
       background: #ffffff;
       overflow: hidden;
-      padding: 135px 0 60px;
+      min-height: 80vh;
+      min-height: 80dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 0 100px;
+      box-sizing: border-box;
     }
-    .hero-bg-curve-left {
+    .syncpay-bg-top-dome {
       position: absolute;
-      top: -60px;
-      left: -140px;
-      width: 520px;
-      height: 720px;
-      background: radial-gradient(ellipse at center, rgba(0, 82, 255, 0.05) 0%, rgba(0, 82, 255, 0) 70%);
-      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .hero-bg-curve-right {
-      position: absolute;
-      top: -40px;
-      right: -120px;
-      width: 580px;
-      height: 740px;
-      background: radial-gradient(ellipse at center, rgba(2, 132, 199, 0.05) 0%, rgba(2, 132, 199, 0) 70%);
-      border-radius: 60% 40% 30% 70% / 50% 60% 40% 60%;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .hero-top-glow {
-      position: absolute;
-      top: -100px;
+      top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 700px;
-      height: 380px;
-      background: radial-gradient(ellipse at top, rgba(0, 82, 255, 0.04) 0%, rgba(255, 255, 255, 0) 70%);
+      width: 440px;
+      height: 96px;
+      background: #f6f7f9;
+      border-bottom-left-radius: 220px 96px;
+      border-bottom-right-radius: 220px 96px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .syncpay-bg-left-wave {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 140px;
+      height: 480px;
+      background: #f6f7f9;
+      border-top-right-radius: 140px 240px;
+      border-bottom-right-radius: 140px 240px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .syncpay-bg-right-hill {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 220px;
+      height: 480px;
+      background: #f6f7f9;
+      border-top-left-radius: 220px 320px;
       pointer-events: none;
       z-index: 1;
     }
@@ -674,70 +726,73 @@
       position: relative;
       z-index: 2;
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: 0.92fr 1.08fr;
       gap: 36px;
       align-items: center;
+      max-width: 1240px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 24px 0 32px;
     }
     .hero-left {
       text-align: left;
     }
-    .hero-h1-uddokta {
-      font-size: 50px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      color: #111827;
-      margin-bottom: 20px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+    .hero-h1-main {
+      font-size: 46px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.18;
+      color: #1f2937;
+      margin-bottom: 18px;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
-    .hero-h1-uddokta .blue-text {
-      color: #0052ff;
+    .hero-h1-main .blue-text {
+      color: #015fb2;
       display: block;
     }
-    .hero-sub-uddokta {
-      font-size: 17px;
+    .hero-sub-main {
+      font-size: 15.5px;
       color: #6b7280;
       line-height: 1.65;
-      margin-bottom: 34px;
-      max-width: 490px;
+      margin-bottom: 30px;
+      max-width: 480px;
     }
-    .hero-actions-uddokta {
+    .hero-actions-main {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
     }
-    .btn-uddokta-primary {
-      padding: 13px 30px;
-      background: #0052ff;
+    .btn-syncpay-primary {
+      padding: 10.5px 24px;
+      background: #015fb2;
       color: #ffffff;
-      font-size: 15px;
-      font-weight: 700;
-      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 5px;
       text-decoration: none;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0, 82, 255, 0.28);
+      box-shadow: 0 2px 8px rgba(1, 95, 178, 0.22);
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-family: inherit;
     }
-    .btn-uddokta-primary:hover {
-      background: #0043d0;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 22px rgba(0, 82, 255, 0.38);
+    .btn-syncpay-primary:hover {
+      background: #004d94;
+      transform: translateY(-1px);
     }
-    .btn-uddokta-outline {
-      padding: 12px 28px;
+    .btn-syncpay-outline {
+      padding: 9px 24px;
       background: #ffffff;
-      color: #0052ff;
-      font-size: 15px;
+      color: #015fb2;
+      font-size: 13.5px;
       font-weight: 600;
-      border-radius: 6px;
+      border-radius: 5px;
       text-decoration: none;
-      border: 1.5px solid #0052ff;
+      border: 1.5px solid #015fb2;
       cursor: pointer;
       transition: all 0.2s ease;
       display: inline-flex;
@@ -745,24 +800,40 @@
       justify-content: center;
       font-family: inherit;
     }
-    .btn-uddokta-outline:hover {
-      background: #f0f5ff;
-      transform: translateY(-2px);
+    .btn-syncpay-outline:hover {
+      background: #f0f7ff;
+      transform: translateY(-1px);
     }
 
-    /* Isometric 3D Illustration Container */
+    /* Hero Right Illustration Container */
+    .hero-right-illustration,
     .hero-right-isometric {
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 440px;
+      min-height: 480px;
+      width: 100%;
+    }
+    .syncpay-hero-img {
+      max-width: 680px;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.04));
+      transition: transform 0.3s ease;
+    }
+    .syncpay-hero-img:hover {
+      transform: translateY(-4px);
     }
     .isometric-svg-stage {
       width: 100%;
-      max-width: 580px;
+      max-width: 720px;
       height: auto;
       filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.07));
+      transform: scale(1.05);
+      transform-origin: center center;
     }
     @keyframes rocketLaunchHover {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -789,27 +860,85 @@
     .anim-bar-3 { animation: barPulse 2.6s ease-in-out infinite 0.8s; transform-origin: bottom; }
 
     @media (max-width: 900px) {
+      .hero-section-outer {
+        min-height: auto;
+        padding: 95px 0 60px;
+      }
       .hero-grid {
         grid-template-columns: 1fr;
         gap: 40px;
         text-align: center;
+        padding: 0;
       }
       .hero-left {
         text-align: center;
         margin: 0 auto;
       }
-      .hero-h1-uddokta {
+      .hero-h1-main {
         font-size: 36px;
       }
-      .hero-sub-uddokta {
+      .hero-sub-main {
         margin: 0 auto 28px;
       }
-      .hero-actions-uddokta {
+      .hero-actions-main {
         justify-content: center;
       }
       .hero-right-isometric {
         min-height: 320px;
       }
+      .isometric-svg-stage {
+        transform: scale(1);
+        max-width: 520px;
+      }
+    }
+
+    /* Dark Mode Transitions & Rules */
+    body.dark-theme {
+      background-color: #0b1120 !important;
+      color: #e2e8f0;
+    }
+    body.dark-theme header {
+      background: rgba(11, 17, 32, 0.96) !important;
+      border-bottom-color: #1e293b !important;
+    }
+    body.dark-theme .brand-text {
+      color: #f8fafc !important;
+    }
+    body.dark-theme .nav-links a {
+      color: #94a3b8;
+    }
+    body.dark-theme .nav-links a:hover,
+    body.dark-theme .nav-links a.active {
+      color: #38bdf8 !important;
+    }
+    body.dark-theme .hero-section-outer {
+      background: #0b1120 !important;
+    }
+    body.dark-theme .hero-h1-main {
+      color: #f8fafc !important;
+    }
+    body.dark-theme .hero-sub-main {
+      color: #94a3b8 !important;
+    }
+    body.dark-theme .theme-toggle-btn {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f1f5f9 !important;
+    }
+    body.dark-theme .btn-syncpay-outline {
+      background: transparent !important;
+      color: #38bdf8 !important;
+      border-color: #38bdf8 !important;
+    }
+    body.dark-theme .dropdown-menu {
+      background: #0f172a !important;
+      border-color: #334155 !important;
+    }
+    body.dark-theme .dropdown-item strong {
+      color: #f8fafc !important;
+    }
+    body.dark-theme .dropdown-item span {
+      color: #94a3b8 !important;
     }
     .btn-hero-alt {
       padding: 13px 24px;
@@ -1464,6 +1593,79 @@
       white-space: pre-wrap;
     }
 
+    /* Amazing Features 9-Grid Section (Exact Centered Card & Icon Badge Design) */
+    .features-section {
+      margin-bottom: 76px;
+    }
+    .features-grid-3x3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+    }
+    @media (max-width: 980px) {
+      .features-grid-3x3 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+    }
+    @media (max-width: 640px) {
+      .features-grid-3x3 {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+    .feature-card-modern {
+      background: #ffffff;
+      border: 1px solid #eef2f6;
+      border-radius: 16px;
+      padding: 38px 26px 34px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+    }
+    .feature-card-modern:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08);
+      border-color: #cbd5e1;
+    }
+    .feature-card-modern .feature-icon-badge {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      background: #f0f7ff;
+      border: 1.5px solid #dbeafe;
+      color: #0284c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.06);
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .feature-card-modern:hover .feature-icon-badge {
+      transform: scale(1.05);
+      background: #e0f2fe;
+    }
+    .feature-card-modern h3 {
+      font-size: 17.5px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 12px 0;
+      line-height: 1.35;
+      letter-spacing: -0.2px;
+    }
+    .feature-card-modern p {
+      font-size: 13.5px;
+      color: #64748b;
+      line-height: 1.65;
+      margin: 0;
+      max-width: 320px;
+    }
+
     /* Feature Split Section (Android Forwarder & Encryption) */
     .feature-split {
       display: grid;
@@ -1730,6 +1932,181 @@
       color: #fff;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .pricing-guarantee-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    /* Comparison Table */
+    .pricing-compare-section {
+      text-align: center;
+      margin: 36px 0;
+    }
+    .btn-compare-toggle {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+    }
+    .btn-compare-toggle:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-subtle);
+    }
+    .pricing-matrix-wrap {
+      margin-top: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      text-align: left;
+    }
+    .pricing-table-scroll {
+      overflow-x: auto;
+    }
+    .pricing-matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .pricing-matrix-table th,
+    .pricing-matrix-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: center;
+    }
+    .pricing-matrix-table th:first-child,
+    .pricing-matrix-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .pricing-matrix-table th {
+      background: #f8fafc;
+      font-weight: 800;
+      color: var(--text-main);
+      font-size: 13px;
+    }
+    .pricing-matrix-table .col-featured {
+      background: rgba(2, 132, 199, 0.04);
+      font-weight: 700;
+    }
+    .pricing-matrix-table th.col-featured {
+      background: rgba(2, 132, 199, 0.08);
+      color: var(--primary);
+    }
+
+    /* Trust Grid */
+    .pricing-trust-section {
+      margin: 48px 0;
+    }
+    .pricing-trust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    @media (max-width: 850px) {
+      .pricing-trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 550px) {
+      .pricing-trust-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .trust-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .trust-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+    .trust-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .trust-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .trust-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Final Pricing CTA */
+    .pricing-cta-card {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-radius: var(--radius);
+      padding: 40px;
+      color: #ffffff;
+      text-align: center;
+      margin: 48px 0 24px;
+      box-shadow: 0 10px 30px rgba(2, 132, 199, 0.25);
+    }
+    .pricing-cta-content h3 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .pricing-cta-content p {
+      font-size: 14px;
+      color: #e0f2fe;
+      max-width: 600px;
+      margin: 0 auto 24px;
+    }
+    .pricing-cta-btns {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .pricing-cta-btns .btn-syncpay-primary {
+      background: #ffffff;
+      color: var(--primary);
+      border-color: #ffffff;
+      font-weight: 800;
+      padding: 12px 24px;
+    }
+    .pricing-cta-btns .btn-syncpay-primary:hover {
+      background: #f8fafc;
+      color: var(--primary-hover);
+    }
+    .pricing-cta-btns .btn-demo-outline {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .pricing-cta-btns .btn-demo-outline:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
 
     /* === PLAN AUTH MODAL DIALOG === */
@@ -2278,68 +2655,51 @@
 </head>
 <body>
 
-  <!-- Sticky Navbar -->
+  <!-- Sticky Navbar (SyncPay BD) -->
   <header>
-    <div class="container nav-wrap">
-      <a href="#" class="brand">
-        <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height: 48px; width: auto; object-fit: contain; display: block;">
-        <span class="badge-pill">v1.0</span>
+    <div class="nav-wrap">
+      <a href="/" class="brand">
+        <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height: 32px; width: auto; object-fit: contain; display: block;">
       </a>
 
-      <ul class="nav-links">
-        <li><a href="#how-it-works">How It Works</a></li>
-        <li><a href="#pricing">Pricing</a></li>
-        <li><a href="#faq">FAQ</a></li>
-        <li class="nav-dropdown">
-          <a href="#developers">Developers</a>
-          <div class="dropdown-menu">
-            <a href="/docs/api" class="dropdown-item">
-              <div class="dropdown-item-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              </div>
-              <div class="dropdown-item-text">
-                <strong>API Documentation</strong>
-                <span>Invoice, payment verification, and webhook guides.</span>
-              </div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="/docs/trx-verification" class="dropdown-item">
-              <div class="dropdown-item-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-              </div>
-              <div class="dropdown-item-text">
-                <strong>Transaction Verification API</strong>
-                <span>Backend-side advanced payment verification flow।</span>
-              </div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="/docs/webhook" class="dropdown-item">
-              <div class="dropdown-item-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 16.98h4v5h-4z"/><path d="M2 16.98h4v5H2z"/><path d="M10 2h4v5h-4z"/><path d="M12 7v5"/><path d="M5 12v5"/><path d="M19 12v5"/><path d="M5 12h14"/></svg>
-              </div>
-              <div class="dropdown-item-text">
-                <strong>Webhook API</strong>
-                <span>Send real-time SMS payment events to your URL.</span>
-              </div>
-            </a>
-          </div>
-        </li>
+      <ul class="nav-links" id="main-nav-links">
+        <li><a href="#" class="active">HOME</a></li>
+        <li><a href="#features">FEATURES</a></li>
+        <li><a href="#how-it-works">ABOUT US</a></li>
+        <li><a href="javascript:void(0)" onclick="launchMerchantDemo()" title="Open Full Live Merchant Demo">DEMO</a></li>
+        <li><a href="#pricing">PRICING</a></li>
+        <li><a href="/docs/api">DOCS</a></li>
       </ul>
 
       <div class="nav-cta-wrap" id="nav-cta-wrap">
-        <!-- Guest View (Login / Get Started) -->
+        <!-- Theme Toggle Button -->
+        <button type="button" class="theme-toggle-btn" onclick="toggleSiteTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Guest View (Pill Action Button matching ScaleUp reference) -->
         <div id="nav-guest-btns" style="display:flex; align-items:center; gap:8px;">
-          <button type="button" onclick="openPlanAuthModal('business', 'login')" class="btn-subtle" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-family:inherit; border:none;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-            <span>Login</span>
-          </button>
-          <button type="button" onclick="openPlanAuthModal('business', 'register')" class="btn-primary" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-family:inherit; border:none;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            Get Started
+          <button type="button" onclick="openPlanAuthModal('business', 'login')" class="btn-account-pill" title="Start Free or Sign In">
+            <span>CONTACT US</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
           </button>
         </div>
 
-        <!-- Logged-in User Profile Dropdown View (Screenshot Match) -->
+        <!-- Mobile Menu Toggle Button -->
+        <button type="button" class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Navigation Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Logged-in User Profile Dropdown View -->
         <div id="nav-user-dropdown-wrap" class="nav-user-dropdown-wrap" style="display:none;">
           <button type="button" id="nav-user-btn" class="nav-user-pill-btn" onclick="toggleNavUserMenu(event)">
             <div class="nav-user-pill-avatar" id="nav-user-avatar">JI</div>
@@ -2384,63 +2744,261 @@
   </header>
 
   <main>
-    <!-- Modern Immersive Hero Section (Lenden-inspired) -->
+    <!-- SyncPay BD Clean Hero Section -->
     <section class="hero-section-outer">
+      <!-- Organic background curves -->
+      <div class="syncpay-bg-top-dome"></div>
+      <div class="syncpay-bg-left-wave"></div>
+      <div class="syncpay-bg-right-hill"></div>
+
       <div class="container">
         <div class="hero-grid">
           <!-- Left Content -->
           <div class="hero-left">
-            <div class="hero-tag">
-              <span class="tag-dot"></span>
-              <span>Bangladesh Personal MFS Payment Automation</span>
-            </div>
-
-            <h1 class="hero-h1">
-              Automate MFS Payments on Personal Numbers<br>
-              <span class="gradient-text">bKash • Nagad • Rocket • Upay</span>
+            <h1 class="hero-h1-main">
+              Simplify Your Payment<br>
+              <span class="blue-text">Management</span>
             </h1>
 
-            <p class="hero-sub">
-              Verify incoming bKash, Nagad, and Rocket payments in seconds without requiring official merchant accounts or trade licenses. Automatic instant delivery with TrxID and amount verification—0% per-transaction fee.
+            <p class="hero-sub-main">
+              SyncPay BD offers a range of payment automation solutions for your business.
             </p>
 
-            <div class="hero-actions">
-              <a href="#hub" class="btn-hero-main">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                <span>Test Live Sandbox</span>
-              </a>
-              <a href="#pricing" class="btn-hero-alt">
-                <span>View Pricing Plans</span>
-                <span>→</span>
-              </a>
+            <div class="hero-actions-main">
+              <a href="#pricing" class="btn-syncpay-primary">Start For Free</a>
+              <a href="javascript:void(0)" onclick="launchMerchantDemo()" class="btn-syncpay-outline" title="Launch Full Live Merchant Demo">Demo</a>
             </div>
-
           </div>
 
-          <!-- Right Showcase Mockup with Floating Status Badges -->
-          <div class="hero-right">
-            <!-- Floating Pill Top Left -->
-            <div class="hero-float-pill top-left">
-              <div class="pill-icon-wrap success">✓</div>
-              <div>
-                <div class="pill-text-title">Instant Auto-Verification</div>
-                <div class="pill-text-sub">bKash & Nagad Ingestion Active</div>
-              </div>
-            </div>
+          <!-- Right Showcase: Animated Isometric 3D Fintech Stage -->
+          <div class="hero-right-isometric">
+            <svg class="isometric-svg-stage" viewBox="110 65 500 390" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <!-- Gradients -->
+                <linearGradient id="rocketBodyGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ffffff"/>
+                  <stop offset="70%" stop-color="#f1f5f9"/>
+                  <stop offset="100%" stop-color="#cbd5e1"/>
+                </linearGradient>
+                <linearGradient id="rocketFinGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#015fb2"/>
+                  <stop offset="100%" stop-color="#003e7e"/>
+                </linearGradient>
+                <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fef08a"/>
+                  <stop offset="40%" stop-color="#eab308"/>
+                  <stop offset="100%" stop-color="#f97316"/>
+                </linearGradient>
+                <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f8fafc"/>
+                  <stop offset="100%" stop-color="#edf2f7"/>
+                </linearGradient>
+                <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#015fb2" flood-opacity="0.09"/>
+                </filter>
+                <filter id="rocketGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#f59e0b" flood-opacity="0.35"/>
+                </filter>
+              </defs>
 
-            <!-- Dashboard Mockup Card -->
-            <div class="hero-mockup-frame">
-              <img src="/images/hero-preview.jpg" alt="SyncPay BD Dashboard and Mobile Payment Verification" class="hero-mockup-img">
-            </div>
+              <!-- Isometric Ground Floor Shadow -->
+              <ellipse cx="370" cy="385" rx="230" ry="60" fill="#e2e8f0" fill-opacity="0.5"/>
+              <ellipse cx="220" cy="355" rx="70" ry="24" fill="#015fb2" fill-opacity="0.07"/>
 
-            <!-- Floating Pill Bottom Right -->
-            <div class="hero-float-pill bottom-right">
-              <div class="pill-icon-wrap blue">⚡</div>
-              <div>
-                <div class="pill-text-title">TrxID Auto-Matched</div>
-                <div class="pill-text-sub">&lt; 3s Verification Speed</div>
-              </div>
-            </div>
+              <!-- ============================================== -->
+              <!-- 3D ISOMETRIC MONITOR DISPLAY SCREEN (RIGHT)   -->
+              <!-- ============================================== -->
+              <g id="isometricMonitor" filter="url(#softShadow)">
+                <!-- Monitor Stand Base (Isometric Ellipse) -->
+                <path d="M 390 355 L 435 340 L 460 350 L 415 365 Z" fill="#cbd5e1"/>
+                <path d="M 415 365 L 460 350 L 460 356 L 415 371 Z" fill="#94a3b8"/>
+                <path d="M 390 355 L 415 365 L 415 371 L 390 361 Z" fill="#64748b"/>
+                <!-- Stand Pillar -->
+                <path d="M 420 315 L 435 310 L 435 345 L 420 350 Z" fill="#94a3b8"/>
+                <path d="M 410 320 L 420 315 L 420 350 L 410 355 Z" fill="#cbd5e1"/>
+
+                <!-- Monitor Outer Frame (Angled 3D Isometric Polygon) -->
+                <!-- Back depth edge -->
+                <polygon points="380,120 545,190 545,355 380,285" fill="#cbd5e1"/>
+                <!-- Top thickness -->
+                <polygon points="370,115 535,185 545,190 380,120" fill="#f8fafc"/>
+                <!-- Left thickness -->
+                <polygon points="370,115 380,120 380,285 370,280" fill="#e2e8f0"/>
+                <!-- Front Display Bezel -->
+                <polygon points="370,115 535,185 535,350 370,280" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+
+                <!-- Screen Face (Glass Area) -->
+                <polygon points="382,130 523,190 523,338 382,278" fill="url(#screenGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
+
+                <!-- Top App Bar on Screen -->
+                <polygon points="383,131 522,190 522,204 383,145" fill="#015fb2"/>
+                <circle cx="392" cy="140" r="2.2" fill="#ffffff"/>
+                <circle cx="399" cy="143" r="2.2" fill="#ffffff" fill-opacity="0.6"/>
+                <circle cx="406" cy="146" r="2.2" fill="#ffffff" fill-opacity="0.6"/>
+
+                <!-- Left Sidebar Nav Lines on Screen -->
+                <polygon points="384,152 410,163 410,270 384,259" fill="#eef2f6"/>
+                <line x1="388" y1="172" x2="406" y2="180" stroke="#015fb2" stroke-width="2" stroke-linecap="round"/>
+                <line x1="388" y1="187" x2="404" y2="194" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
+                <line x1="388" y1="202" x2="405" y2="209" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
+                <line x1="388" y1="217" x2="402" y2="223" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
+
+                <!-- Mini Metric Tiles on Dashboard -->
+                <polygon points="418,170 460,188 460,215 418,197" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+                <line x1="424" y1="184" x2="445" y2="193" stroke="#015fb2" stroke-width="2"/>
+                <line x1="424" y1="193" x2="438" y2="199" stroke="#64748b" stroke-width="1.2"/>
+
+                <polygon points="468,191 512,210 512,237 468,218" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+                <line x1="474" y1="205" x2="498" y2="215" stroke="#10b981" stroke-width="2"/>
+                <line x1="474" y1="214" x2="490" y2="221" stroke="#64748b" stroke-width="1.2"/>
+
+                <!-- 3D Bar Chart Visual on Screen (with Live CSS Keyframe Pulse) -->
+                <!-- Bar 1 (Short) -->
+                <g class="anim-bar-1">
+                  <polygon points="426,260 433,263 433,285 426,282" fill="#015fb2"/>
+                  <polygon points="426,260 430,258 437,261 433,263" fill="#60a5fa"/>
+                </g>
+                <!-- Bar 2 (Medium) -->
+                <g class="anim-bar-2">
+                  <polygon points="443,245 450,248 450,292 443,289" fill="#0284c7"/>
+                  <polygon points="443,245 447,243 454,246 450,248" fill="#38bdf8"/>
+                </g>
+                <!-- Bar 3 (Tall - Peak) -->
+                <g class="anim-bar-3">
+                  <polygon points="460,225 468,228 468,300 460,296" fill="#015fb2"/>
+                  <polygon points="460,225 465,223 473,226 468,228" fill="#93c5fd"/>
+                </g>
+                <!-- Bar 4 (Sustained High) -->
+                <g class="anim-bar-1">
+                  <polygon points="478,238 485,241 485,307 478,304" fill="#0284c7"/>
+                  <polygon points="478,238 482,236 489,239 485,241" fill="#38bdf8"/>
+                </g>
+                <!-- Bar 5 (Highest Target) -->
+                <g class="anim-bar-2">
+                  <polygon points="495,215 503,218 503,314 495,311" fill="#015fb2"/>
+                  <polygon points="495,215 500,213 508,216 503,218" fill="#60a5fa"/>
+                </g>
+
+                <!-- Connecting Trend Polynomial Curve on Screen -->
+                <path d="M 424 265 Q 448 245 465 220 T 505 210" fill="none" stroke="#015fb2" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="465" cy="220" r="2.8" fill="#015fb2"/>
+                <circle cx="505" cy="210" r="2.8" fill="#10b981"/>
+              </g>
+
+              <!-- ============================================== -->
+              <!-- 3D LAUNCHING SPACE ROCKET (LEFT OF MONITOR)   -->
+              <!-- ============================================== -->
+              <g id="launchingRocket" class="anim-rocket">
+                <!-- Flame Exhaust Stream -->
+                <g class="anim-flame" filter="url(#rocketGlow)">
+                  <polygon points="214,272 226,272 220,325" fill="url(#flameGrad)"/>
+                  <polygon points="216,272 224,272 220,310" fill="#fef08a"/>
+                </g>
+
+                <!-- Launch Smoke Clouds / Exhaust Puffs -->
+                <ellipse cx="220" cy="335" rx="36" ry="14" fill="#f1f5f9" fill-opacity="0.9"/>
+                <ellipse cx="205" cy="330" rx="20" ry="10" fill="#e2e8f0" fill-opacity="0.8"/>
+                <ellipse cx="235" cy="330" rx="22" ry="11" fill="#e2e8f0" fill-opacity="0.8"/>
+                <ellipse cx="220" cy="324" rx="16" ry="7" fill="#ffffff"/>
+
+                <!-- Rocket Side Wings / Stabilizer Fins -->
+                <!-- Left Fin -->
+                <path d="M 207 235 L 182 272 L 207 265 Z" fill="url(#rocketFinGrad)"/>
+                <!-- Right Fin -->
+                <path d="M 233 235 L 258 272 L 233 265 Z" fill="#003e7e"/>
+                <!-- Center Fin (Front Perspective) -->
+                <path d="M 218 240 L 222 240 L 222 270 L 218 270 Z" fill="#015fb2"/>
+
+                <!-- Rocket Engine Nozzle -->
+                <polygon points="212,267 228,267 225,274 215,274" fill="#475569"/>
+
+                <!-- Rocket Main Fuselage Body -->
+                <!-- Conical Nosecone Cap (Deep Blue Accent) -->
+                <path d="M 220 148 Q 212 175 208 195 L 232 195 Q 228 175 220 148 Z" fill="#015fb2"/>
+                <!-- Cylindrical Main Body (White to Soft Slate Gradient) -->
+                <path d="M 208 195 L 207 265 Q 220 268 233 265 L 232 195 Z" fill="url(#rocketBodyGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
+                
+                <!-- Twin Glass Cockpit Windows -->
+                <circle cx="220" cy="180" r="5" fill="#0f172a" stroke="#ffffff" stroke-width="1.2"/>
+                <circle cx="220" cy="180" r="3.2" fill="#38bdf8"/>
+                <circle cx="220" cy="202" r="5" fill="#0f172a" stroke="#ffffff" stroke-width="1.2"/>
+                <circle cx="220" cy="202" r="3.2" fill="#38bdf8"/>
+
+                <!-- Stripe Body Decals -->
+                <line x1="208" y1="228" x2="232" y2="228" stroke="#015fb2" stroke-width="2.5"/>
+              </g>
+
+              <!-- ============================================== -->
+              <!-- OPERATOR FIGURES (HUMAN FINTECH TEAM)          -->
+              <!-- ============================================== -->
+              <!-- Operator 1: Console / Launch Controller (Left Front) -->
+              <g id="operator1">
+                <!-- Control Console Pedestal -->
+                <path d="M 228 340 L 255 330 L 268 342 L 241 352 Z" fill="#cbd5e1"/>
+                <path d="M 228 340 L 241 352 L 241 390 L 228 378 Z" fill="#94a3b8"/>
+                <path d="M 241 352 L 268 342 L 268 380 L 241 390 Z" fill="#64748b"/>
+                <!-- Buttons on Console -->
+                <circle cx="242" cy="344" r="2.5" fill="#015fb2"/>
+                <circle cx="250" cy="341" r="2.5" fill="#10b981"/>
+                <circle cx="258" cy="337" r="2" fill="#f59e0b"/>
+
+                <!-- Person: Head & Hair -->
+                <circle cx="222" cy="336" r="6" fill="#fcd34d"/>
+                <path d="M 218 333 Q 222 328 226 333 Z" fill="#1e293b"/>
+                <!-- Body (Shirt) -->
+                <path d="M 216 343 L 228 343 L 230 365 L 214 365 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
+                <!-- Hands on Console -->
+                <line x1="226" y1="349" x2="238" y2="346" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- Legs (Blue Pants) -->
+                <rect x="216" y="365" width="4" height="24" rx="1.5" fill="#015fb2"/>
+                <rect x="223" y="365" width="4" height="24" rx="1.5" fill="#003e7e"/>
+                <!-- Shoes -->
+                <ellipse cx="218" cy="390" rx="3.5" ry="2" fill="#1e293b"/>
+                <ellipse cx="225" cy="390" rx="3.5" ry="2" fill="#1e293b"/>
+              </g>
+
+              <!-- Operator 2: Analyst holding Tablet (Right Front of Screen) -->
+              <g id="operator2">
+                <!-- Head & Hair -->
+                <circle cx="496" cy="328" r="6" fill="#fcd34d"/>
+                <path d="M 492 325 Q 496 320 500 324 L 501 330 L 492 330 Z" fill="#475569"/>
+                <!-- Body (Smart Dress / Suit) -->
+                <path d="M 490 335 L 502 335 L 504 362 L 488 362 Z" fill="#015fb2"/>
+                <!-- Arms holding Tablet -->
+                <path d="M 491 342 L 484 348" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M 501 342 L 490 349" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- White Tablet / Clipboard -->
+                <polygon points="480,344 492,348 490,358 478,354" fill="#ffffff" stroke="#015fb2" stroke-width="0.8"/>
+                <!-- Legs -->
+                <rect x="492" y="362" width="3.5" height="26" rx="1.2" fill="#1e293b"/>
+                <rect x="497" y="362" width="3.5" height="26" rx="1.2" fill="#334155"/>
+                <!-- Shoes -->
+                <ellipse cx="494" cy="389" rx="3.5" ry="1.8" fill="#0f172a"/>
+                <ellipse cx="499" cy="389" rx="3.5" ry="1.8" fill="#0f172a"/>
+              </g>
+
+              <!-- Floating MFS Fintech Badges Hovering with Depth -->
+              <!-- bKash Pink Floating Badge -->
+              <g transform="translate(140, 195)" filter="url(#softShadow)">
+                <rect x="0" y="0" width="58" height="28" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+                <circle cx="14" cy="14" r="6" fill="#e2136e"/>
+                <text x="24" y="18" font-size="10" font-weight="800" fill="#e2136e" font-family="'Plus Jakarta Sans', sans-serif">bKash</text>
+              </g>
+
+              <!-- Nagad Orange Floating Badge -->
+              <g transform="translate(520, 140)" filter="url(#softShadow)">
+                <rect x="0" y="0" width="62" height="28" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+                <circle cx="14" cy="14" r="6" fill="#f7941d"/>
+                <text x="24" y="18" font-size="10" font-weight="800" fill="#f7941d" font-family="'Plus Jakarta Sans', sans-serif">Nagad</text>
+              </g>
+
+              <!-- Rocket Purple Floating Badge -->
+              <g transform="translate(320, 100)" filter="url(#softShadow)">
+                <rect x="0" y="0" width="64" height="28" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+                <circle cx="14" cy="14" r="6" fill="#8c3494"/>
+                <text x="24" y="18" font-size="10" font-weight="800" fill="#8c3494" font-family="'Plus Jakarta Sans', sans-serif">Rocket</text>
+              </g>
+            </svg>
           </div>
         </div>
       </div>
@@ -2526,11 +3084,11 @@
           <div class="kpi-row">
             <div class="kpi-mini">
               <div class="kpi-mini-lbl">Today's Collections</div>
-              <div class="kpi-mini-val" id="kpi-today-rev">৳ 0.00</div>
+              <div class="kpi-mini-val" id="kpi-today-rev">৳ 4,050.00</div>
             </div>
             <div class="kpi-mini">
               <div class="kpi-mini-lbl">Verified Transactions</div>
-              <div class="kpi-mini-val" id="kpi-verified-count" style="color: #10b981;">0</div>
+              <div class="kpi-mini-val" id="kpi-verified-count" style="color: #10b981;">2</div>
             </div>
             <div class="kpi-mini">
               <div class="kpi-mini-lbl">Connected Forwarder</div>
@@ -2562,10 +3120,49 @@
                       </tr>
                     </thead>
                     <tbody id="tx-tbody">
-                      <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-light); padding: 24px;">
-                          Waiting for SMS payment events...
+                      <tr onclick="selectDemoTxn('BL78A4982J', 1500, 'bKash')" style="cursor: pointer;" title="Click to test in checkout panel">
+                        <td>
+                          <div class="table-logo-cell">
+                            <img src="/images/bkash.svg" alt="bKash" class="mfs-mini-img">
+                            <span style="font-weight:600; font-size:12px;">bKash</span>
+                          </div>
                         </td>
+                        <td><span class="mono" style="font-weight:700; color:#0284c7;">BL78A4982J</span></td>
+                        <td style="font-weight:700;">৳1500.00</td>
+                        <td><span class="pill-pending">PENDING</span></td>
+                      </tr>
+                      <tr onclick="selectDemoTxn('NG92X0117K', 850, 'Nagad')" style="cursor: pointer;" title="Click to test in checkout panel">
+                        <td>
+                          <div class="table-logo-cell">
+                            <img src="/images/nagad.svg" alt="Nagad" class="mfs-mini-img">
+                            <span style="font-weight:600; font-size:12px;">Nagad</span>
+                          </div>
+                        </td>
+                        <td><span class="mono" style="font-weight:700; color:#0284c7;">NG92X0117K</span></td>
+                        <td style="font-weight:700;">৳850.00</td>
+                        <td><span class="pill-verified">VERIFIED</span></td>
+                      </tr>
+                      <tr onclick="selectDemoTxn('RK45M9810P', 500, 'Rocket')" style="cursor: pointer;" title="Click to test in checkout panel">
+                        <td>
+                          <div class="table-logo-cell">
+                            <img src="/images/rocket.svg" alt="Rocket" class="mfs-mini-img">
+                            <span style="font-weight:600; font-size:12px;">Rocket</span>
+                          </div>
+                        </td>
+                        <td><span class="mono" style="font-weight:700; color:#0284c7;">RK45M9810P</span></td>
+                        <td style="font-weight:700;">৳500.00</td>
+                        <td><span class="pill-verified">VERIFIED</span></td>
+                      </tr>
+                      <tr onclick="selectDemoTxn('UP12Z8834Q', 1200, 'Upay')" style="cursor: pointer;" title="Click to test in checkout panel">
+                        <td>
+                          <div class="table-logo-cell">
+                            <img src="/images/upay.svg" alt="Upay" class="mfs-mini-img">
+                            <span style="font-weight:600; font-size:12px;">Upay</span>
+                          </div>
+                        </td>
+                        <td><span class="mono" style="font-weight:700; color:#0284c7;">UP12Z8834Q</span></td>
+                        <td style="font-weight:700;">৳1200.00</td>
+                        <td><span class="pill-pending">PENDING</span></td>
                       </tr>
                     </tbody>
                   </table>
@@ -2691,6 +3288,135 @@
               <div class="code-view" id="pf-verify-response" style="color: #4ade80;">// Verification JSON will appear here</div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Amazing Features Showcase Section -->
+    <section id="features" class="container features-section">
+      <div class="sec-head">
+        <span class="sec-tag">Core Capabilities</span>
+        <h2 class="sec-title">Amazing Features of SyncPay BD</h2>
+        <p class="sec-sub">Say goodbye to manual screenshot verifications with automated MFS software.</p>
+      </div>
+
+      <div class="features-grid-3x3">
+        <!-- Feature 1: Simple Integration System -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+          </div>
+          <h3>Simple Integration System</h3>
+          <p>Integrate with ease using our system. Connect applications and data sources, automate order workflows, and establish reliable checkout experiences across WooCommerce, WHMCS, or custom REST APIs.</p>
+        </div>
+
+        <!-- Feature 2: Automate Personal Account -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <h3>Automate Personal Account</h3>
+          <p>Get paid directly to your personal or agent account with SyncPay BD's payment automation software. Receive customer funds instantly without accepting payments manually.</p>
+        </div>
+
+        <!-- Feature 3: Invoice Generator -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <line x1="10" y1="9" x2="8" y2="9"></line>
+            </svg>
+          </div>
+          <h3>Invoice Generator</h3>
+          <p>Get paid quickly and easily by sending custom payment links via email or SMS—no website or storefront required. Generate itemized digital bills with automated status updates.</p>
+        </div>
+
+        <!-- Feature 4: Manage Billing -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+          </div>
+          <h3>Manage Billing</h3>
+          <p>Easily manage billing with SyncPay BD's automated system. Track payments, generate invoices, and streamline incoming transaction reconciliation for your business.</p>
+        </div>
+
+        <!-- Feature 5: Payment Link -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </div>
+          <h3>Payment Link</h3>
+          <p>Offer your customers a frictionless payment experience by sharing payment links that enable them to pay via WhatsApp, social media, or chat without requiring a complex website.</p>
+        </div>
+
+        <!-- Feature 6: Pre Included MFS API Integration -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="7" rx="2"></rect>
+              <rect x="2" y="14" width="20" height="7" rx="2"></rect>
+              <line x1="6" y1="6.5" x2="6.01" y2="6.5"></line>
+              <line x1="6" y1="17.5" x2="6.01" y2="17.5"></line>
+              <line x1="10" y1="6.5" x2="18" y2="6.5"></line>
+              <line x1="10" y1="17.5" x2="18" y2="17.5"></line>
+            </svg>
+          </div>
+          <h3>Pre Included MFS API Integration</h3>
+          <p>SyncPay BD's software comes equipped with built-in MFS API integrations for bKash, Nagad, Rocket, and Upay, providing businesses with centralized payment capture.</p>
+        </div>
+
+        <!-- Feature 7: Built-in MFS Regex Engine -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <h3>Built-in MFS Regex Engine</h3>
+          <p>Production regex parsers extract TrxID, sender numbers, and BDT amounts from incoming SMS in under 50 milliseconds with zero dropped notifications.</p>
+        </div>
+
+        <!-- Feature 8: Multi-SIM & Device Clustering -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+              <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            </svg>
+          </div>
+          <h3>Multi-SIM & Device Clustering</h3>
+          <p>Connect dual-SIM mobile phones or link multiple Android forwarder devices to distribute transaction volume across SIM slots with automated failover safeguards.</p>
+        </div>
+
+        <!-- Feature 9: Zero Commission Payment Flow -->
+        <div class="feature-card-modern">
+          <div class="feature-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="9" y1="15" x2="15" y2="9"></line>
+              <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor"></circle>
+              <circle cx="14.5" cy="14.5" r="1.5" fill="currentColor"></circle>
+            </svg>
+          </div>
+          <h3>Zero Commission Payment Flow</h3>
+          <p>Retain 100% of your earnings with zero per-transaction gateway cuts. Replace manual SMS verification with automated sub-3-second transaction matching.</p>
         </div>
       </div>
     </section>
@@ -2832,15 +3558,19 @@
     <!-- Pricing Section -->
     <section id="pricing" class="container">
       <div class="sec-head">
-        <span class="sec-tag">Pricing</span>
-        <h2 class="sec-title">Simple & Transparent Pricing Plans</h2>
-        <p class="sec-sub">Zero transaction fees. Unlimited verifications and 3-day money-back guarantee.</p>
+        <span class="sec-tag">Transparent Pricing</span>
+        <h2 class="sec-title">Simple Pricing. Powerful Features. No Hidden Fees.</h2>
+        <p class="sec-sub">Process unlimited bKash, Nagad, Rocket & Upay transactions through your own SIMs without 1.5%–2% gateway commissions.</p>
       </div>
 
+      <!-- Billing Cycle Toggle -->
       <div class="pricing-toggle">
         <button class="btn-toggle active" id="btn-monthly" onclick="setBillingCycle('monthly')">Monthly Billing</button>
         <button class="btn-toggle" id="btn-yearly" onclick="setBillingCycle('yearly')">Yearly Billing</button>
-        <span class="badge-save">Save 50% on Yearly</span>
+        <span class="badge-save">🔥 Save 50% on Yearly</span>
+      </div>
+      <div class="pricing-guarantee-note">
+        <span>No Setup Fee • No Hidden Charges • 3-Day Money-Back Guarantee</span>
       </div>
 
       <!-- Core 4 Plans Grid -->
@@ -2851,10 +3581,175 @@
       <!-- Secondary High-Volume Plans Toggle -->
       <div class="plans-expander">
         <button class="btn-expand-plans" id="btn-toggle-extra" onclick="toggleExtraPlans()">
-          + View High-Volume Plans (Elite, Growth, Scale, Mega)
+          ⚡ Need More Websites? View High-Volume Scale Plans (4 to 50 Sites)
         </button>
         <div class="secondary-plans-wrap" id="extra-plans-container">
           <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Feature Comparison Table Toggle -->
+      <div class="pricing-compare-section">
+        <button class="btn-compare-toggle" id="btn-toggle-matrix" onclick="toggleComparisonMatrix()">
+          📊 Compare All Plan Features Side-by-Side
+        </button>
+        <div class="pricing-matrix-wrap" id="pricing-matrix-wrap" style="display: none;">
+          <div class="pricing-table-scroll">
+            <table class="pricing-matrix-table">
+              <thead>
+                <tr>
+                  <th style="width: 28%;">Feature</th>
+                  <th>Starter (৳100)</th>
+                  <th>Pro (৳150)</th>
+                  <th class="col-featured">Business (৳200) 🔥</th>
+                  <th>Enterprise (৳300)</th>
+                  <th>High-Volume (Agency-Mega)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Website Integrations</td>
+                  <td>1 Website</td>
+                  <td>2 Websites</td>
+                  <td class="col-featured">3 Websites</td>
+                  <td>5 Websites</td>
+                  <td>4 to 50 Websites</td>
+                </tr>
+                <tr>
+                  <td>Android Device Slots</td>
+                  <td>1 Device (Dual-SIM)</td>
+                  <td>2 Devices</td>
+                  <td class="col-featured">3 Devices</td>
+                  <td>5 Devices</td>
+                  <td>Up to 50 Devices</td>
+                </tr>
+                <tr>
+                  <td>Per-Transaction Commission</td>
+                  <td><span class="chk">0% (Zero)</span></td>
+                  <td><span class="chk">0% (Zero)</span></td>
+                  <td class="col-featured"><span class="chk">0% (Zero)</span></td>
+                  <td><span class="chk">0% (Zero)</span></td>
+                  <td><span class="chk">0% (Zero)</span></td>
+                </tr>
+                <tr>
+                  <td>Monthly Transactions Limit</td>
+                  <td><span class="chk">Unlimited</span></td>
+                  <td><span class="chk">Unlimited</span></td>
+                  <td class="col-featured"><span class="chk">Unlimited</span></td>
+                  <td><span class="chk">Unlimited</span></td>
+                  <td><span class="chk">Unlimited</span></td>
+                </tr>
+                <tr>
+                  <td>Free Landing Page Bonus</td>
+                  <td>—</td>
+                  <td>1 Free Page</td>
+                  <td class="col-featured">1 Free Page</td>
+                  <td>1 Free Page</td>
+                  <td>Agency Included</td>
+                </tr>
+                <tr>
+                  <td>MFS Channels (bKash/Nagad/Rocket/Upay)</td>
+                  <td><span class="chk">✓</span> All 4</td>
+                  <td><span class="chk">✓</span> All 4</td>
+                  <td class="col-featured"><span class="chk">✓</span> All 4</td>
+                  <td><span class="chk">✓</span> All 4</td>
+                  <td><span class="chk">✓</span> All 4</td>
+                </tr>
+                <tr>
+                  <td>Processing Engine</td>
+                  <td>Standard Engine</td>
+                  <td>Optimized (25 Threads)</td>
+                  <td class="col-featured">Fast 50 (50 Threads)</td>
+                  <td>Dedicated Cluster</td>
+                  <td>High-Throughput Pool</td>
+                </tr>
+                <tr>
+                  <td>Webhook Retry Mechanism</td>
+                  <td>3 Retry Cycles</td>
+                  <td>5 Retry Cycles</td>
+                  <td class="col-featured">5 Retry Cycles</td>
+                  <td>5 Retry Cycles</td>
+                  <td>5 Retry Cycles</td>
+                </tr>
+                <tr>
+                  <td>Offline SMS Caching</td>
+                  <td><span class="chk">✓</span> Included</td>
+                  <td><span class="chk">✓</span> Included</td>
+                  <td class="col-featured"><span class="chk">✓</span> Included</td>
+                  <td><span class="chk">✓</span> Included</td>
+                  <td><span class="chk">✓</span> Included</td>
+                </tr>
+                <tr>
+                  <td>Support Channel</td>
+                  <td>Standard Ticket</td>
+                  <td>Priority Ticket & Chat</td>
+                  <td class="col-featured">Priority Live Chat</td>
+                  <td>24/7 Dedicated WhatsApp</td>
+                  <td>Dedicated Account Manager</td>
+                </tr>
+                <tr>
+                  <td>Money-Back Guarantee</td>
+                  <td>3 Days</td>
+                  <td>3 Days</td>
+                  <td class="col-featured">3 Days</td>
+                  <td>3 Days</td>
+                  <td>3 Days</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust & Security Pillars -->
+      <div class="pricing-trust-section">
+        <div class="sec-head" style="margin-bottom: 24px;">
+          <span class="sec-tag">Why Businesses Choose Us</span>
+          <h3 class="sec-title" style="font-size: 24px;">Engineered for High-Reliability Payment Operations</h3>
+        </div>
+        <div class="pricing-trust-grid">
+          <div class="trust-card">
+            <div class="trust-icon">🔒</div>
+            <div class="trust-title">Zero Financial Credential Access</div>
+            <div class="trust-desc">We never ask for or store your bKash/Nagad PIN, OTP, or account passwords. Verification runs strictly via device incoming SMS broadcasts.</div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-icon">⚡</div>
+            <div class="trust-title">Fast 50 Processing Architecture</div>
+            <div class="trust-desc">Sub-50ms regex parsing isolates TrxID, sender number, and BDT amounts in real-time, dispatching webhooks to your store instantly.</div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-icon">📡</div>
+            <div class="trust-title">Offline SMS Cache & Resync</div>
+            <div class="trust-desc">If mobile data drops, incoming SMS records are safely buffered in the Android SQLite cache and dispatched the moment connectivity restores.</div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-icon">🔌</div>
+            <div class="trust-title">Ready-Made Plugins & SDKs</div>
+            <div class="trust-desc">Official WordPress/WooCommerce plugin, WHMCS billing module, and PHP, Node.js, and Python SDKs for custom applications.</div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-icon">🛠️</div>
+            <div class="trust-title">Signed Webhooks (HMAC SHA-256)</div>
+            <div class="trust-desc">Every HTTP notification includes a cryptographic signature header to prevent spoofing and ensure only genuine payments update orders.</div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-icon">💬</div>
+            <div class="trust-title">Direct WhatsApp Support</div>
+            <div class="trust-desc">Fast troubleshooting and onboarding assistance from our engineering team when you need immediate guidance.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Pricing CTA -->
+      <div class="pricing-cta-card">
+        <div class="pricing-cta-content">
+          <h3>Ready to Eliminate Payment Gateway Fees?</h3>
+          <p>Join hundreds of Bangladeshi e-commerce merchants and hosting providers saving thousands every month.</p>
+          <div class="pricing-cta-btns">
+            <button type="button" class="btn-syncpay-primary" onclick="openPlanAuthModal('business', 'register')">Get Started with Business Plan →</button>
+            <a href="#hub" class="btn-demo-outline" onclick="switchHubTab('demo')">Test Live Interactive Demo</a>
+          </div>
         </div>
       </div>
     </section>
@@ -2910,43 +3805,102 @@
       </div>
 
       <div class="faq-container">
+        <!-- Q1 -->
         <div class="faq-card active">
           <div class="faq-q" onclick="toggleFaq(this)">
             <span>Can payment automation run on personal numbers?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            Yes, 100% possible. SyncPay BD reads incoming SMS on standard personal numbers via Android forwarder to instantly verify payments without trade licenses.
+            Yes, 100% possible. SyncPay BD reads incoming SMS on standard personal numbers via Android forwarder to instantly verify payments without needing trade licenses or merchant accounts.
           </div>
         </div>
 
+        <!-- Q2 -->
         <div class="faq-card">
           <div class="faq-q" onclick="toggleFaq(this)">
             <span>Is SyncPay BD a custodial payment gateway?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            No. Custodial gateways hold your funds for days and deduct commissions. SyncPay BD never holds your funds—customers pay directly into your wallet, and our system verifies orders.
+            No. Custodial gateways hold your funds for days and deduct 1.5%–2% commissions. SyncPay BD never holds your funds—customers pay directly into your wallet SIM, and our system confirms orders immediately.
           </div>
         </div>
 
+        <!-- Q3 -->
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Are transactions really 100% unlimited?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            Yes. Unlike aggregator payment gateways that deduct percentage cuts on every order, SyncPay BD charges zero per-transaction fee and does not throttle or limit your transaction count or turnover.
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Will my SIM card get blocked by bKash or Nagad?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            No. SyncPay BD operates as a passive SMS listener using official Android notification & telephony APIs. It never sends unauthorized USSD commands or executes transfers, operating fully within operator standards.
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What happens if my phone loses internet connectivity?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            The SyncPay BD Android Forwarder stores incoming SMS messages in an encrypted local offline queue. As soon as internet connectivity reconnects, all queued transactions synchronize and trigger merchant webhooks automatically.
+          </div>
+        </div>
+
+        <!-- Q6 -->
         <div class="faq-card">
           <div class="faq-q" onclick="toggleFaq(this)">
             <span>Is there plugin support for WooCommerce or SMM panels?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            Yes. Our ready-made WooCommerce plugins, SMM panel modules, Laravel SDK, and REST APIs allow you to connect in under 5 minutes.
+            Yes. Ready-to-use plugins are available for WooCommerce, WHMCS billing, SMM panel auto-fund modules, PHP/Laravel SDKs, and standard REST APIs.
           </div>
         </div>
 
+        <!-- Q7 -->
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Can I change or upgrade my plan later?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            Yes, you can upgrade, downgrade, or switch between monthly and yearly billing anytime from your merchant dashboard. Upgrades take effect immediately with prorated billing.
+          </div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="faq-card">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Are there any setup fees or hidden charges?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            None. We do not charge setup fees, maintenance fees, or hidden transaction percentages. You only pay the flat subscription fee shown on your plan.
+          </div>
+        </div>
+
+        <!-- Q9 -->
         <div class="faq-card">
           <div class="faq-q" onclick="toggleFaq(this)">
             <span>Is there a refund or money-back guarantee?</span>
             <span class="faq-arrow">▼</span>
           </div>
           <div class="faq-a">
-            We provide a 3-day full money-back guarantee on monthly plans and 15 days on yearly plans with zero hassle.
+            Yes. We provide a 3-day full money-back guarantee on monthly plans and a 15-day money-back guarantee on yearly subscriptions.
           </div>
         </div>
       </div>
@@ -3155,18 +4109,67 @@
 
     // Pricing dataset
     const primaryPlans = [
-      { id: 'starter', name: 'Starter 1', monthly: 100, yearly: 50, sites: '1 Website', bonus: 'Standard Features', support: 'Basic Support' },
-      { id: 'pro', name: 'Pro 2', monthly: 150, yearly: 75, sites: '2 Websites', bonus: '1 Landing Page Bonus', support: 'Priority Support' },
-      { id: 'business', name: 'Business 3', monthly: 200, yearly: 100, sites: '3 Websites', bonus: '1 Landing Page Bonus', support: 'Priority Support', featured: true, badge: 'Popular' },
-      { id: 'enterprise', name: 'Enterprise 5', monthly: 300, yearly: 150, sites: '5 Websites', bonus: '1 Landing Page Bonus', support: '24/7 Premium Support' }
+      {
+        id: 'starter',
+        name: 'Starter',
+        badge: 'For Beginners',
+        monthly: 100,
+        yearly: 50,
+        sites: '1 Website Integration',
+        devices: '1 Android Device (Dual SIM)',
+        workers: 'Standard Worker (10 Threads)',
+        bonus: 'Full API & Plugin Access',
+        support: 'Basic Ticket Support',
+        ctaText: 'Get Started →'
+      },
+      {
+        id: 'pro',
+        name: 'Pro',
+        badge: 'Growing Business',
+        monthly: 150,
+        yearly: 75,
+        sites: '2 Websites Integration',
+        devices: '2 Android Devices',
+        workers: 'Optimized Worker (25 Threads)',
+        bonus: '1 Free Landing Page Bonus',
+        support: 'Priority Ticket & Chat',
+        ctaText: 'Start Growing →'
+      },
+      {
+        id: 'business',
+        name: 'Business',
+        badge: 'Most Popular 🔥',
+        featured: true,
+        monthly: 200,
+        yearly: 100,
+        sites: '3 Websites Integration',
+        devices: '3 Android Devices',
+        workers: 'Fast 50 Engine (50 Threads)',
+        bonus: '1 Free Landing Page Bonus',
+        support: 'Priority Live Chat Support',
+        ctaText: 'Choose Business →'
+      },
+      {
+        id: 'enterprise',
+        name: 'Enterprise',
+        badge: 'For High Volume',
+        monthly: 300,
+        yearly: 150,
+        sites: '5 Websites Integration',
+        devices: '5 Android Devices (Cluster Mode)',
+        workers: 'Dedicated Processing Pool',
+        bonus: '1 Free Landing Page Bonus',
+        support: '24/7 Dedicated WhatsApp Group',
+        ctaText: 'Go Enterprise →'
+      }
     ];
 
     const extraPlans = [
-      { id: 'agency', name: 'Agency 4', monthly: 250, yearly: 125, sites: '4 Websites' },
-      { id: 'elite', name: 'Elite 10', monthly: 350, yearly: 175, sites: '10 Websites' },
-      { id: 'growth', name: 'Growth 20', monthly: 700, yearly: 350, sites: '20 Websites' },
-      { id: 'scale', name: 'Scale 30', monthly: 1000, yearly: 500, sites: '30 Websites' },
-      { id: 'mega', name: 'Mega 50', monthly: 2000, yearly: 1000, sites: '50 Websites' }
+      { id: 'agency', name: 'Agency', badge: 'For Agencies', monthly: 250, yearly: 125, sites: '4 Websites', devices: '4 Devices', bonus: '1 Landing Page Bonus', ctaText: 'Select Agency' },
+      { id: 'elite', name: 'Elite', badge: 'High Volume', monthly: 350, yearly: 175, sites: '10 Websites', devices: '10 Devices', bonus: 'Dedicated Queue', ctaText: 'Select Elite' },
+      { id: 'growth', name: 'Growth', badge: 'Scale Up', monthly: 700, yearly: 350, sites: '20 Websites', devices: '20 Devices', bonus: 'Dedicated Queue', ctaText: 'Select Growth' },
+      { id: 'scale', name: 'Scale', badge: 'Large Business', monthly: 1000, yearly: 500, sites: '30 Websites', devices: '30 Devices', bonus: 'Enterprise Queue', ctaText: 'Scale Now' },
+      { id: 'mega', name: 'Mega', badge: 'Maximum Scale', monthly: 2000, yearly: 1000, sites: '50 Websites', devices: '50 Devices', bonus: 'Enterprise Queue', ctaText: 'Deploy Mega' }
     ];
 
     function renderPricing() {
@@ -3174,65 +4177,91 @@
       const coreContainer = document.getElementById('core-plans-container');
       const extraContainer = document.getElementById('extra-plans-container');
 
-      coreContainer.innerHTML = primaryPlans.map(p => {
-        const price = isYearly ? p.yearly : p.monthly;
-        return `
-          <div class="plan-card ${p.featured ? 'featured' : ''}">
-            ${p.badge ? `<div class="popular-flag">${p.badge}</div>` : ''}
-            <div>
-              <div class="plan-title">${p.name}</div>
-              <div class="plan-amount-wrap">
-                <span class="plan-price">৳${price}</span>
-                <span class="plan-dur">${isYearly ? '/mo (Yearly)' : '/mo'}</span>
+      if (coreContainer) {
+        coreContainer.innerHTML = primaryPlans.map(p => {
+          const price = isYearly ? p.yearly : p.monthly;
+          return `
+            <div class="plan-card ${p.featured ? 'featured' : ''}">
+              ${p.badge ? `<div class="popular-flag">${p.badge}</div>` : ''}
+              <div>
+                <div class="plan-title">${p.name}</div>
+                <div class="plan-amount-wrap">
+                  <span class="plan-price">৳${price}</span>
+                  <span class="plan-dur">${isYearly ? '/mo (Billed Yearly)' : '/mo (Monthly)'}</span>
+                </div>
+                <ul class="plan-bullets">
+                  <li><span class="chk">✓</span> <strong>${p.sites}</strong></li>
+                  <li><span class="chk">✓</span> ${p.devices}</li>
+                  <li><span class="chk">✓</span> Unlimited Transactions (0% Fee)</li>
+                  <li><span class="chk">✓</span> ${p.workers}</li>
+                  <li><span class="chk">✓</span> ${p.bonus}</li>
+                  <li><span class="chk">✓</span> ${p.support}</li>
+                  <li><span class="chk">✓</span> ${isYearly ? '15' : '3'}-Day Money-Back Guarantee</li>
+                </ul>
               </div>
-              <ul class="plan-bullets">
-                <li><span class="chk">✓</span> ${p.sites} Integration</li>
-                <li><span class="chk">✓</span> ${p.bonus}</li>
-                <li><span class="chk">✓</span> Unlimited Transactions</li>
-                <li><span class="chk">✓</span> Full API + Plugins</li>
-                <li><span class="chk">✓</span> ${p.support}</li>
-                <li><span class="chk">✓</span> ${isYearly ? '15' : '3'} Days Money Back</li>
-              </ul>
+              <button type="button" class="btn-choose-plan" onclick="openPlanAuthModal('${p.id}')">${p.ctaText || 'Get Started →'}</button>
             </div>
-            <button type="button" class="btn-choose-plan" onclick="openPlanAuthModal('${p.id}')">Get Started →</button>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
 
-      extraContainer.innerHTML = extraPlans.map(p => {
-        const price = isYearly ? p.yearly : p.monthly;
-        return `
-          <div class="plan-card" style="padding: 16px;">
-            <div class="plan-title">${p.name}</div>
-            <div class="plan-amount-wrap" style="margin: 8px 0;">
-              <span class="plan-price" style="font-size:24px;">৳${price}</span>
-              <span class="plan-dur">${isYearly ? '/mo' : '/mo'}</span>
+      if (extraContainer) {
+        extraContainer.innerHTML = extraPlans.map(p => {
+          const price = isYearly ? p.yearly : p.monthly;
+          return `
+            <div class="plan-card" style="padding: 18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="plan-title" style="font-size:15px;">${p.name}</div>
+                <span style="font-size:10px; font-weight:800; background:#f1f5f9; padding:2px 6px; border-radius:12px; color:var(--text-muted);">${p.badge}</span>
+              </div>
+              <div class="plan-amount-wrap" style="margin: 10px 0;">
+                <span class="plan-price" style="font-size:24px;">৳${price}</span>
+                <span class="plan-dur">${isYearly ? '/mo' : '/mo'}</span>
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height:1.6;">
+                ✓ <strong>${p.sites}</strong> • ${p.devices}<br>
+                ✓ Unlimited Trx • 24/7 Dedicated Support
+              </div>
+              <button type="button" class="btn-choose-plan" style="padding: 8px; font-size:12px;" onclick="openPlanAuthModal('${p.id}')">${p.ctaText || 'Select Plan'}</button>
             </div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
-              ✓ ${p.sites} • 24/7 Dedicated Support
-            </div>
-            <button type="button" class="btn-choose-plan" style="padding: 7px; font-size:12px;" onclick="openPlanAuthModal('${p.id}')">Select Plan</button>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
     }
 
     function setBillingCycle(c) {
       currentBilling = c;
-      document.getElementById('btn-monthly').className = 'btn-toggle ' + (c === 'monthly' ? 'active' : '');
-      document.getElementById('btn-yearly').className = 'btn-toggle ' + (c === 'yearly' ? 'active' : '');
+      const btnM = document.getElementById('btn-monthly');
+      const btnY = document.getElementById('btn-yearly');
+      if (btnM) btnM.className = 'btn-toggle ' + (c === 'monthly' ? 'active' : '');
+      if (btnY) btnY.className = 'btn-toggle ' + (c === 'yearly' ? 'active' : '');
       renderPricing();
     }
 
     function toggleExtraPlans() {
       const wrap = document.getElementById('extra-plans-container');
       const btn = document.getElementById('btn-toggle-extra');
+      if (!wrap) return;
       if (wrap.style.display === 'grid') {
         wrap.style.display = 'none';
-        btn.innerText = '+ View High-Volume Plans (Elite, Growth, Scale, Mega)';
+        btn.innerText = '⚡ Need More Websites? View High-Volume Scale Plans (4 to 50 Sites)';
       } else {
         wrap.style.display = 'grid';
-        btn.innerText = '- Hide High-Volume Plans';
+        btn.innerText = '▲ Hide High-Volume Scale Plans';
+      }
+    }
+
+    // Toggle Comparison Matrix Table
+    function toggleComparisonMatrix() {
+      const wrap = document.getElementById('pricing-matrix-wrap');
+      const btn = document.getElementById('btn-toggle-matrix');
+      if (!wrap) return;
+      if (wrap.style.display === 'none' || wrap.style.display === '') {
+        wrap.style.display = 'block';
+        btn.innerText = '▲ Hide Plan Features Comparison';
+      } else {
+        wrap.style.display = 'none';
+        btn.innerText = '📊 Compare All Plan Features Side-by-Side';
       }
     }
 
@@ -3498,7 +4527,10 @@
     }
 
     function toggleFaq(el) {
-      el.parentElement.classList.toggle('active');
+      const card = el.closest('.faq-card');
+      if (card) {
+        card.classList.toggle('active');
+      }
     }
 
     function switchTab(lang, btn) {
@@ -3911,6 +4943,71 @@
       if (btn) btn.classList.remove('active');
     }
 
+    // Mobile Menu Toggle for Curved Capsule Navbar
+    function toggleMobileMenu() {
+      const navLinks = document.getElementById('main-nav-links');
+      if (navLinks) {
+        navLinks.classList.toggle('mobile-open');
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('#main-nav-links a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          const navLinks = document.getElementById('main-nav-links');
+          if (navLinks) navLinks.classList.remove('mobile-open');
+        });
+      });
+    });
+
+    // Floating Navbar Scroll Shadow Handler
+    window.addEventListener('scroll', function() {
+      const header = document.querySelector('header');
+      if (header) {
+        if (window.scrollY > 20) {
+          header.classList.add('is-scrolled');
+        } else {
+          header.classList.remove('is-scrolled');
+        }
+      }
+    }, { passive: true });
+
+    // Dark/Light Mode Theme Toggle
+    function toggleSiteTheme() {
+      const isDark = document.body.classList.toggle('dark-theme');
+      localStorage.setItem('syncpay_theme', isDark ? 'dark' : 'light');
+    }
+
+    // Restore saved theme on initial page load
+    try {
+      if (localStorage.getItem('syncpay_theme') === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+    } catch (e) {}
+
+    // Launch Full Live Merchant Demo Dashboard
+    function launchMerchantDemo() {
+      const demoMerchantSession = {
+        merchantId: 'm_demo_101',
+        email: 'demo@syncpaybd.site',
+        phone: '01711000000',
+        name: 'Demo Merchant',
+        business: 'Demo Store BD',
+        plan: 'growth',
+        planStatus: 'ACTIVE',
+        billingCycle: 'monthly',
+        expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+        apiKey: 'live_sk_demo_99410abc',
+        isDemo: true,
+        loginAt: new Date().toISOString()
+      };
+      localStorage.setItem('syncpay_session', JSON.stringify(demoMerchantSession));
+      localStorage.setItem('syncpay_toast', JSON.stringify({
+        message: '⚡ Welcome to the Live Merchant Demo Portal! You have full access to transactions, devices, APIs, and invoices.',
+        type: 'success'
+      }));
+      window.location.href = '/dashboard?demo=true';
+    }
+
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closePlanAuthModal();
@@ -3928,7 +5025,7 @@
   <div id="plan-auth-modal" class="plan-auth-overlay" onclick="handleModalBackdropClick(event)">
     <div class="plan-auth-card">
       
-      <!-- LEFT HERO PANEL (UddoktaPay Aesthetic) -->
+      <!-- LEFT HERO PANEL (SyncPay BD) -->
       <div class="plan-modal-left">
         <div>
           <!-- Brand Logo -->

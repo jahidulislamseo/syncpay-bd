@@ -43,9 +43,9 @@ class SmsDetailDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: providerColor.withOpacity(0.15),
+                    color: providerColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: providerColor.withOpacity(0.4)),
+                    border: Border.all(color: providerColor.withValues(alpha: 0.4)),
                   ),
                   child: Text(
                     transaction.provider,

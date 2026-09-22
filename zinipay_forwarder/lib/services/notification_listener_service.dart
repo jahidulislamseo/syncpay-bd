@@ -1,4 +1,4 @@
-import 'dart:async';
+import '../core/storage/local_vault.dart';
 import 'telephony_channel_service.dart';
 import 'soundbox_service.dart';
 import 'offline_queue_service.dart';
@@ -10,15 +10,17 @@ class NotificationListenerService {
   final SoundboxService _soundboxService;
   final OfflineQueueService _queueService;
 
-  StreamSubscription? _subscription;
-
   NotificationListenerService({
     TelephonyChannelService? channelService,
     SoundboxService? soundboxService,
     OfflineQueueService? queueService,
+    LocalVault? vault,
   })  : _channelService = channelService ?? TelephonyChannelService(),
         _soundboxService = soundboxService ?? SoundboxService(),
-        _queueService = queueService ?? OfflineQueueService();
+        _queueService = queueService ??
+            (vault != null
+                ? OfflineQueueService(vault: vault)
+                : throw ArgumentError('NotificationListenerService requires either queueService or vault'));
 
   Future<bool> isPermissionGranted() async {
     return await _channelService.isNotificationListenerEnabled();

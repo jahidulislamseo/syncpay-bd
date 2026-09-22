@@ -136,17 +136,28 @@ export class ApiClient {
       }
     } catch (e) {}
 
-    return [
-      {
-        id: '00000000-0000-0000-0000-000000000001',
-        device_name: 'TECNO KM5 (SyncPay Forwarder)',
-        sim_number: '017•••••••',
-        status: 'ONLINE',
-        last_seen: new Date().toISOString(),
-        device_token: 'token_phone_primary_uuid',
-        sms_count: 0,
-      },
-    ];
+    // Only return simulated device when explicitly exploring in Demo Mode
+    let isDemo = false;
+    try {
+      const session = JSON.parse(localStorage.getItem('syncpay_session') || '{}');
+      isDemo = session.isDemo || session.merchantId === 'm_demo_101' || window.location.search.includes('demo=true');
+    } catch (err) {}
+
+    if (isDemo) {
+      return [
+        {
+          id: '00000000-0000-0000-0000-000000000001',
+          device_name: 'TECNO KM5 (Demo Forwarder)',
+          sim_number: '017•••••••',
+          status: 'ONLINE',
+          last_seen: new Date().toISOString(),
+          device_token: 'token_phone_primary_uuid',
+          sms_count: 3,
+        },
+      ];
+    }
+
+    return [];
   }
 
   // 7. Add Device

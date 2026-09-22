@@ -37,6 +37,14 @@ class PayFlowDashboardApp {
     this.session = auth.getSession();
     this.updateSidebarUser();
 
+    // Check and show Demo Mode Strip if exploring as demo merchant
+    const isDemoMode = (this.session && (this.session.isDemo || this.session.merchantId === 'm_demo_101')) || window.location.search.includes('demo=true');
+    this.isDemoMode = isDemoMode;
+    const demoStrip = document.getElementById('demo-mode-strip');
+    if (demoStrip && isDemoMode) {
+      demoStrip.style.display = 'flex';
+    }
+
     // Check plan upgrade param from URL if logged in
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -255,10 +263,184 @@ class PayFlowDashboardApp {
       this.chartData = chart;
       this.paymentMethods = methods || [];
 
+      // If user is exploring in Demo Mode and server returned 0 records, inject rich realistic demo data
+      if (this.isDemoMode && (!this.transactions || this.transactions.length === 0)) {
+        this.populateDemoData();
+      }
+
       this.renderCurrentView();
     } catch (e) {
       console.error('Failed to load dashboard data:', e);
-      this.showToast(i18n.t('toast.error'), 'error');
+      if (this.isDemoMode) {
+        this.populateDemoData();
+        this.renderCurrentView();
+      } else {
+        this.showToast(i18n.t('toast.error'), 'error');
+      }
+    }
+  }
+
+  populateDemoData() {
+    const now = new Date();
+    const ago = (mins) => new Date(now.getTime() - mins * 60000).toISOString();
+
+    this.stats = {
+      todayRevenue: 28450,
+      todayCount: 14,
+      totalVerified: 128,
+      pendingCount: 2,
+      failedCount: 1,
+      deviceCount: 1,
+      isDemo: true,
+      isLive: true,
+    };
+
+    this.transactions = [
+      {
+        id: 'tx_demo_01',
+        trx_id: 'BL78A4982J',
+        invoice_id: 'INV-9024',
+        customer_phone: '01712-345678',
+        customer_name: 'Tanvir Ahmed',
+        provider: 'bKash',
+        amount: 1500,
+        is_verified: 1,
+        created_at: ago(4),
+      },
+      {
+        id: 'tx_demo_02',
+        trx_id: 'NG92X0117K',
+        invoice_id: 'INV-9023',
+        customer_phone: '01823-998811',
+        customer_name: 'Sadia Rahman',
+        provider: 'Nagad',
+        amount: 2850,
+        is_verified: 1,
+        created_at: ago(18),
+      },
+      {
+        id: 'tx_demo_03',
+        trx_id: 'BK9912048A',
+        invoice_id: 'INV-9022',
+        customer_phone: '01911-223344',
+        customer_name: 'Mahmudul Hasan',
+        provider: 'bKash',
+        amount: 3400,
+        is_verified: 1,
+        created_at: ago(42),
+      },
+      {
+        id: 'tx_demo_04',
+        trx_id: 'RK45M9810P',
+        invoice_id: 'INV-9021',
+        customer_phone: '01678-554433',
+        customer_name: 'Anika Tabassum',
+        provider: 'Rocket',
+        amount: 850,
+        is_verified: 1,
+        created_at: ago(65),
+      },
+      {
+        id: 'tx_demo_05',
+        trx_id: 'NG1188429M',
+        invoice_id: 'INV-9020',
+        customer_phone: '01755-667788',
+        customer_name: 'Kazi Farhan',
+        provider: 'Nagad',
+        amount: 5200,
+        is_verified: 1,
+        created_at: ago(110),
+      },
+      {
+        id: 'tx_demo_06',
+        trx_id: 'UP12Z8834Q',
+        invoice_id: 'INV-9019',
+        customer_phone: '01300-112233',
+        customer_name: 'Mehedi Hasan',
+        provider: 'Upay',
+        amount: 1200,
+        is_verified: 0,
+        created_at: ago(150),
+      },
+      {
+        id: 'tx_demo_07',
+        trx_id: 'BL5567891W',
+        invoice_id: 'INV-9018',
+        customer_phone: '01811-990022',
+        customer_name: 'Sumaiya Akter',
+        provider: 'bKash',
+        amount: 4500,
+        is_verified: 1,
+        created_at: ago(210),
+      },
+      {
+        id: 'tx_demo_08',
+        trx_id: 'NG3344556P',
+        invoice_id: 'INV-9017',
+        customer_phone: '01799-881122',
+        customer_name: 'Rakib Chowdhury',
+        provider: 'Nagad',
+        amount: 3200,
+        is_verified: 1,
+        created_at: ago(280),
+      },
+      {
+        id: 'tx_demo_09',
+        trx_id: 'BL2211990K',
+        invoice_id: 'INV-9016',
+        customer_phone: '01611-334455',
+        customer_name: 'Nusrat Jahan',
+        provider: 'bKash',
+        amount: 900,
+        is_verified: 0,
+        created_at: ago(340),
+      },
+      {
+        id: 'tx_demo_10',
+        trx_id: 'RK7788990Z',
+        invoice_id: 'INV-9015',
+        customer_phone: '01922-445566',
+        customer_name: 'Fahim Shahriar',
+        provider: 'Rocket',
+        amount: 4850,
+        is_verified: 1,
+        created_at: ago(420),
+      }
+    ];
+
+    this.chartData = [
+      { date: 'Sep 16', revenue: 14200, total_txs: 11, successful_txs: 11, failed_txs: 0 },
+      { date: 'Sep 17', revenue: 18900, total_txs: 15, successful_txs: 14, failed_txs: 1 },
+      { date: 'Sep 18', revenue: 22400, total_txs: 18, successful_txs: 18, failed_txs: 0 },
+      { date: 'Sep 19', revenue: 16800, total_txs: 13, successful_txs: 12, failed_txs: 1 },
+      { date: 'Sep 20', revenue: 27500, total_txs: 21, successful_txs: 20, failed_txs: 1 },
+      { date: 'Sep 21', revenue: 24300, total_txs: 19, successful_txs: 19, failed_txs: 0 },
+      { date: 'Sep 22', revenue: 28450, total_txs: 22, successful_txs: 21, failed_txs: 1 },
+    ];
+
+    if (!this.invoices || this.invoices.length === 0) {
+      this.invoices = [
+        { id: 'INV-9024', order_id: 'ORD-8812', amount: 1500, customer_name: 'Tanvir Ahmed', customer_email: 'tanvir@gmail.com', status: 'PAID', created_at: ago(4) },
+        { id: 'INV-9023', order_id: 'ORD-8811', amount: 2850, customer_name: 'Sadia Rahman', customer_email: 'sadia@gmail.com', status: 'PAID', created_at: ago(18) },
+        { id: 'INV-9022', order_id: 'ORD-8810', amount: 3400, customer_name: 'Mahmudul Hasan', customer_email: 'mahmud@gmail.com', status: 'PAID', created_at: ago(42) },
+        { id: 'INV-9021', order_id: 'ORD-8809', amount: 850, customer_name: 'Anika Tabassum', customer_email: 'anika@gmail.com', status: 'PAID', created_at: ago(65) },
+        { id: 'INV-9020', order_id: 'ORD-8808', amount: 5200, customer_name: 'Kazi Farhan', customer_email: 'kazi@gmail.com', status: 'PAID', created_at: ago(110) },
+        { id: 'INV-9019', order_id: 'ORD-8807', amount: 1200, customer_name: 'Mehedi Hasan', customer_email: 'mehedi@gmail.com', status: 'PENDING', created_at: ago(150) },
+      ];
+    }
+
+    if (!this.devices || this.devices.length === 0) {
+      this.devices = [
+        {
+          id: 'dev_demo_01',
+          device_name: 'TECNO KM5 (Demo Forwarder)',
+          sim_number: '01712-345678 (Dual SIM)',
+          status: 'ONLINE',
+          last_seen: now.toISOString(),
+          battery_level: '94%',
+          sms_count: 128,
+        }
+      ];
     }
   }
 
@@ -268,8 +450,14 @@ class PayFlowDashboardApp {
         api.getStats(),
         api.getTransactions(50),
       ]);
-      this.stats = stats;
-      this.transactions = txs;
+      
+      if (txs && txs.length > 0) {
+        this.stats = stats;
+        this.transactions = txs;
+      } else if (!this.isDemoMode) {
+        this.stats = stats;
+        this.transactions = txs;
+      }
 
       if (this.currentView === 'home') {
         this.renderHomeKpis();
@@ -1770,6 +1958,17 @@ class PayFlowDashboardApp {
               <div style="margin-top:8px;">
                 <input type="text" id="settings-custom-domain" class="form-control" placeholder="pay.yourstore.com" style="font-weight:700; font-family:var(--font-mono);">
               </div>
+              <div id="custom-domain-purchase-box" style="margin-top:10px; display:none; padding:12px; background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.3); border-radius:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <div>
+                    <div style="font-size:12px; font-weight:700; color:#d97706;">Custom Domain Add-on (৳২৯৯ / মাস)</div>
+                    <div style="font-size:11px; color:var(--text-muted);">সম্পূর্ণ হোয়াইট-লেবেল ব্র্যান্ডিং ও SSL সিকিউরিটি</div>
+                  </div>
+                  <button class="btn btn-primary-action" onclick="window.payflowApp.buyCustomDomainAddon()" style="padding:6px 14px; font-size:12px; background:#d97706; border-color:#d97706; white-space:nowrap;">
+                    অ্যাড-অন কিনুন
+                  </button>
+                </div>
+              </div>
               <div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.15); border-radius:6px; font-size:11px; color:var(--text-muted);">
                 <div style="font-weight:700; color:var(--text); margin-bottom:4px;">DNS CNAME Configuration:</div>
                 <div>আপনার ডোমেনে একটি CNAME রেকর্ড যোগ করুন:</div>
@@ -1809,6 +2008,9 @@ class PayFlowDashboardApp {
       if (res.success && res.data) {
         const slugInput = document.getElementById('settings-brand-slug');
         const domainInput = document.getElementById('settings-custom-domain');
+        const purchaseBox = document.getElementById('custom-domain-purchase-box');
+        const badge = document.getElementById('custom-domain-status-badge');
+
         if (slugInput && res.data.brand_slug) {
           slugInput.value = res.data.brand_slug;
           this.updateSlugPreview(res.data.brand_slug);
@@ -1816,16 +2018,34 @@ class PayFlowDashboardApp {
         if (domainInput && res.data.custom_domain) {
           domainInput.value = res.data.custom_domain;
         }
-        const badge = document.getElementById('custom-domain-status-badge');
-        if (badge && res.data.can_use_custom_domain) {
-          badge.innerText = 'ENTERPRISE UNLOCKED';
-          badge.style.background = 'rgba(16, 185, 129, 0.15)';
-          badge.style.color = '#10b981';
+
+        if (res.data.can_use_custom_domain) {
+          if (badge) {
+            badge.innerText = 'ADD-ON ACTIVE';
+            badge.style.background = 'rgba(16, 185, 129, 0.15)';
+            badge.style.color = '#10b981';
+          }
+          if (purchaseBox) purchaseBox.style.display = 'none';
+          if (domainInput) domainInput.disabled = false;
+        } else {
+          if (badge) {
+            badge.innerText = 'OPTIONAL ADD-ON (৳২৯৯/মাস)';
+            badge.style.background = 'rgba(245, 158, 11, 0.15)';
+            badge.style.color = '#f59e0b';
+          }
+          if (purchaseBox) purchaseBox.style.display = 'block';
         }
       }
     } catch (e) {
       console.warn('Failed to load branding info:', e);
     }
+  }
+
+  buyCustomDomainAddon() {
+    const session = auth.getSession();
+    const origin = window.location.origin;
+    const checkoutUrl = `${origin}/checkout?plan=custom_domain&amount=299&billing=monthly&merchant=${encodeURIComponent(session?.email || '')}&name=${encodeURIComponent(session?.name || '')}`;
+    window.open(checkoutUrl, '_blank');
   }
 
   updateSlugPreview(val) {
@@ -2249,6 +2469,17 @@ class PayFlowDashboardApp {
   }
 
   openMerchantAuthModal() {
+    if (this.session) {
+      const midEl = document.getElementById('modal-active-merchant-id');
+      const bizEl = document.getElementById('modal-active-business-name');
+      const emailEl = document.getElementById('modal-active-email');
+      const keyEl = document.getElementById('modal-active-api-key');
+
+      if (midEl) midEl.textContent = this.session.merchantId || this.session.id || '--';
+      if (bizEl) bizEl.textContent = this.session.business || this.session.name || 'Merchant Store';
+      if (emailEl) emailEl.textContent = this.session.email || '--';
+      if (keyEl) keyEl.textContent = this.session.apiKey || '--';
+    }
     const modal = document.getElementById('modal-merchant-auth');
     if (modal) modal.classList.add('active');
   }
@@ -3101,12 +3332,14 @@ class PayFlowDashboardApp {
     const planInfo = auth.getPlan(this.session.plan);
     const sub = auth.checkSubscription(this.session);
 
-    // Update name + role
+    // Update name + role + home greeting
     const nameEl = document.querySelector('.user-name');
     const roleEl = document.querySelector('.user-role');
     const avatarEl = document.querySelector('.user-avatar');
+    const greetingEl = document.getElementById('home-greeting-name');
 
-    if (nameEl) nameEl.textContent = this.session.name;
+    if (nameEl) nameEl.textContent = this.session.name || 'Merchant Account';
+    if (greetingEl) greetingEl.textContent = this.session.name || this.session.business || 'Merchant';
     
     if (roleEl) {
       if (sub.isExpired) {
