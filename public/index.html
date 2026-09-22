@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="canonical" href="https://syncpaybd.site/">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     if (window.location.pathname.endsWith('.html')) {
       const clean = window.location.pathname.replace(/\.html$/, '') || '/';
@@ -81,86 +82,128 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* === STICKY / FIXED FLOATING PILL NAVBAR === */
+    /* === UDDOKTAPAY STYLE CLEAN HEADER NAVBAR === */
     header {
       position: fixed;
-      top: 16px;
+      top: 0;
       left: 0;
       right: 0;
       width: 100%;
       z-index: 9999;
-      padding: 0 20px;
-      pointer-events: none;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #f1f5f9;
+      box-shadow: 0 1px 12px rgba(0, 0, 0, 0.03);
+      padding: 0;
       transition: all 0.25s ease;
     }
     .nav-wrap {
-      height: 64px;
-      max-width: 1140px;
+      height: 72px;
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 999px;
-      padding: 0 12px 0 20px;
-      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      pointer-events: all;
+      padding: 0 24px;
+      background: transparent;
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
       text-decoration: none;
-      color: var(--text-main);
+      color: #0f172a;
       font-weight: 800;
-      font-size: 20px;
-      letter-spacing: -0.4px;
+      font-size: 22px;
+      letter-spacing: -0.02em;
     }
-    .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
+    .brand-logo-badge {
+      width: 34px;
+      height: 34px;
+      background: #0052ff;
       color: #fff;
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 19px;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(0, 82, 255, 0.25);
     }
-    .badge-pill {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
+    .brand-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+    .brand-text span {
+      color: #0052ff;
     }
 
     .nav-links {
       display: flex;
       gap: 28px;
       list-style: none;
+      align-items: center;
     }
     .nav-links a {
       text-decoration: none;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 600;
+      color: #4b5563;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       transition: color 0.15s ease;
     }
-    .nav-links a:hover {
-      color: var(--primary);
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #0052ff;
     }
 
     .nav-cta-wrap {
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+    .btn-account-pill {
+      background: #0052ff;
+      color: #ffffff;
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 9px 18px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 2px 8px rgba(0, 82, 255, 0.22);
+      transition: all 0.18s ease;
+      font-family: inherit;
+      text-decoration: none;
+    }
+    .btn-account-pill:hover {
+      background: #0043d0;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0, 82, 255, 0.32);
+    }
+    .theme-toggle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .theme-toggle-btn:hover {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: #cbd5e1;
     }
     .btn-subtle {
       background: #f1f5f9;
@@ -587,114 +630,186 @@
       color: var(--text-main);
     }
 
-    /* === MODERN IMMERSIVE HERO SECTION === */
+    /* === UDDOKTAPAY STYLE HERO SECTION === */
     .hero-section-outer {
       position: relative;
-      background: linear-gradient(145deg, #070e24 0%, #0b1a3d 40%, #0d2852 75%, #07132e 100%);
+      background: #ffffff;
       overflow: hidden;
-      padding: 110px 0 80px;
+      padding: 135px 0 60px;
     }
-    .hero-section-outer::before {
-      content: '';
+    .hero-bg-curve-left {
       position: absolute;
-      top: 10%;
-      right: 5%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, rgba(14, 165, 233, 0) 70%);
+      top: -60px;
+      left: -140px;
+      width: 520px;
+      height: 720px;
+      background: radial-gradient(ellipse at center, rgba(0, 82, 255, 0.05) 0%, rgba(0, 82, 255, 0) 70%);
+      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
       pointer-events: none;
+      z-index: 1;
     }
-    .hero-section-outer::after {
-      content: '';
+    .hero-bg-curve-right {
       position: absolute;
-      bottom: -10%;
-      left: 10%;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0) 70%);
+      top: -40px;
+      right: -120px;
+      width: 580px;
+      height: 740px;
+      background: radial-gradient(ellipse at center, rgba(2, 132, 199, 0.05) 0%, rgba(2, 132, 199, 0) 70%);
+      border-radius: 60% 40% 30% 70% / 50% 60% 40% 60%;
       pointer-events: none;
+      z-index: 1;
+    }
+    .hero-top-glow {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 380px;
+      background: radial-gradient(ellipse at top, rgba(0, 82, 255, 0.04) 0%, rgba(255, 255, 255, 0) 70%);
+      pointer-events: none;
+      z-index: 1;
     }
     .hero-grid {
       position: relative;
       z-index: 2;
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 48px;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 36px;
       align-items: center;
-      padding-bottom: 40px;
     }
     .hero-left {
       text-align: left;
     }
-    .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(14, 165, 233, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #38bdf8;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 22px;
-    }
-    .hero-tag .tag-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #38bdf8;
-      box-shadow: 0 0 8px #38bdf8;
-    }
-    .hero-h1 {
-      font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
-      font-size: 46px;
-      font-weight: 900;
-      letter-spacing: -0.8px;
-      line-height: 1.2;
-      color: #ffffff;
+    .hero-h1-uddokta {
+      font-size: 50px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: #111827;
       margin-bottom: 20px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .hero-h1 span.gradient-text {
-      background: linear-gradient(90deg, #38bdf8 0%, #34d399 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .hero-h1-uddokta .blue-text {
+      color: #0052ff;
+      display: block;
     }
-    .hero-sub {
-      font-size: 16px;
-      color: #94a3b8;
-      max-width: 540px;
-      line-height: 1.68;
-      margin-bottom: 32px;
+    .hero-sub-uddokta {
+      font-size: 17px;
+      color: #6b7280;
+      line-height: 1.65;
+      margin-bottom: 34px;
+      max-width: 490px;
     }
-    .hero-actions {
+    .hero-actions-uddokta {
       display: flex;
-      gap: 14px;
+      align-items: center;
+      gap: 16px;
       flex-wrap: wrap;
-      margin-bottom: 36px;
     }
-    .btn-hero-main {
-      padding: 13px 26px;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    .btn-uddokta-primary {
+      padding: 13px 30px;
+      background: #0052ff;
       color: #ffffff;
+      font-size: 15px;
       font-weight: 700;
-      font-size: 14px;
-      border-radius: 10px;
+      border-radius: 6px;
       text-decoration: none;
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 82, 255, 0.28);
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      justify-content: center;
+      font-family: inherit;
     }
-    .btn-hero-main:hover {
-      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    .btn-uddokta-primary:hover {
+      background: #0043d0;
       transform: translateY(-2px);
-      box-shadow: 0 12px 26px rgba(2, 132, 199, 0.45);
+      box-shadow: 0 8px 22px rgba(0, 82, 255, 0.38);
+    }
+    .btn-uddokta-outline {
+      padding: 12px 28px;
+      background: #ffffff;
+      color: #0052ff;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1.5px solid #0052ff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+    }
+    .btn-uddokta-outline:hover {
+      background: #f0f5ff;
+      transform: translateY(-2px);
+    }
+
+    /* Isometric 3D Illustration Container */
+    .hero-right-isometric {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 440px;
+    }
+    .isometric-svg-stage {
+      width: 100%;
+      max-width: 580px;
+      height: auto;
+      filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.07));
+    }
+    @keyframes rocketLaunchHover {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(1deg); }
+    }
+    .anim-rocket {
+      animation: rocketLaunchHover 3.5s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+    @keyframes flamePulse {
+      0%, 100% { transform: scaleY(1); opacity: 0.95; }
+      50% { transform: scaleY(1.25); opacity: 1; }
+    }
+    .anim-flame {
+      animation: flamePulse 0.4s ease-in-out infinite alternate;
+      transform-origin: center top;
+    }
+    @keyframes barPulse {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(1.08); }
+    }
+    .anim-bar-1 { animation: barPulse 2.8s ease-in-out infinite; transform-origin: bottom; }
+    .anim-bar-2 { animation: barPulse 3.4s ease-in-out infinite 0.4s; transform-origin: bottom; }
+    .anim-bar-3 { animation: barPulse 2.6s ease-in-out infinite 0.8s; transform-origin: bottom; }
+
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+      }
+      .hero-left {
+        text-align: center;
+        margin: 0 auto;
+      }
+      .hero-h1-uddokta {
+        font-size: 36px;
+      }
+      .hero-sub-uddokta {
+        margin: 0 auto 28px;
+      }
+      .hero-actions-uddokta {
+        justify-content: center;
+      }
+      .hero-right-isometric {
+        min-height: 320px;
+      }
     }
     .btn-hero-alt {
       padding: 13px 24px;
@@ -1639,24 +1754,55 @@
     .plan-auth-card {
       position: relative;
       background: #ffffff;
-      border-radius: 22px;
+      border-radius: 20px;
       width: 100%;
-      max-width: 490px;
-      box-shadow: 0 30px 65px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(226, 232, 240, 0.9);
-      padding: 32px 28px 28px;
+      max-width: 840px;
+      box-shadow: 0 30px 75px -12px rgba(0, 0, 0, 0.48), 0 0 0 1px rgba(226, 232, 240, 0.9);
+      padding: 0;
       transform: scale(0.94) translateY(12px);
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       overflow: hidden;
+      display: flex;
     }
     .plan-auth-overlay.active .plan-auth-card {
       transform: scale(1) translateY(0);
     }
+    .plan-modal-left {
+      flex: 0.92;
+      background: linear-gradient(160deg, #0033ad 0%, #0044d4 50%, #002380 100%);
+      color: #ffffff;
+      padding: 36px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .plan-modal-right {
+      flex: 1.08;
+      padding: 34px 30px 28px;
+      background: #ffffff;
+      overflow-y: auto;
+      max-height: 88vh;
+      position: relative;
+    }
+    @media (max-width: 768px) {
+      .plan-auth-card {
+        flex-direction: column;
+        max-width: 480px;
+      }
+      .plan-modal-left {
+        padding: 24px 20px;
+      }
+      .plan-modal-right {
+        padding: 24px 20px;
+      }
+    }
     .plan-auth-close {
       position: absolute;
-      top: 18px;
-      right: 18px;
-      width: 34px;
-      height: 34px;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: #f1f5f9;
       border: none;
@@ -1667,18 +1813,22 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.15s;
+      z-index: 10;
     }
     .plan-auth-close:hover {
       background: #e2e8f0;
       color: #0f172a;
     }
     .plan-banner-highlight {
-      background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
-      border: 1px solid rgba(2, 132, 199, 0.22);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 22px;
+      padding: 16px;
+      margin-top: 14px;
       text-align: left;
+      color: #ffffff;
     }
     .plan-banner-top {
       display: flex;
@@ -1692,7 +1842,7 @@
       gap: 6px;
       font-size: 11px;
       font-weight: 800;
-      color: #0284c7;
+      color: #38bdf8;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -1700,22 +1850,22 @@
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 6px #10b981;
+      background: #38bdf8;
+      box-shadow: 0 0 6px #38bdf8;
     }
     .plan-banner-price {
       font-size: 20px;
       font-weight: 800;
-      color: #0f172a;
+      color: #ffffff;
     }
     .plan-banner-price span {
       font-size: 12px;
       font-weight: 600;
-      color: #64748b;
+      color: rgba(255, 255, 255, 0.8);
     }
     .plan-banner-desc {
       font-size: 12px;
-      color: #475569;
+      color: rgba(255, 255, 255, 0.85);
       line-height: 1.45;
     }
     .modal-auth-tabs {
@@ -1725,7 +1875,7 @@
       background: #f1f5f9;
       padding: 4px;
       border-radius: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .modal-tab-btn {
       padding: 9px;
@@ -1805,6 +1955,51 @@
       background: linear-gradient(135deg, #0369a1, #075985);
       transform: translateY(-1px);
       box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+    }
+    .btn-google-auth {
+      width: 100%;
+      height: 44px;
+      border-radius: 9px;
+      background: #ffffff;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      font-size: 13.5px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      transition: all 0.18s;
+      margin-bottom: 6px;
+    }
+    .btn-google-auth:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .modal-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 14px 0 16px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .modal-divider::before,
+    .modal-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .modal-divider span {
+      padding: 0 12px;
     }
     .modal-demo-bar {
       margin-top: 18px;
@@ -3442,25 +3637,115 @@
       switchModalAuthTab('login');
     }
 
+    // ==========================================
+    // SUPABASE AUTH & GOOGLE OAUTH
+    // ==========================================
+    const SUPABASE_PROJECT_URL = 'https://qytfwngstqhqrhymuupk.supabase.co';
+    const SUPABASE_ANON_PUBLIC_KEY = 'sb_publishable_ZjppJLWHpfb4Z3oGhMOrXg_4tAccGBn';
+    let supabaseAuthClient = null;
+
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseAuthClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY);
+      }
+    } catch (err) {
+      console.warn('Supabase client error:', err);
+    }
+
+    async function handleGoogleSignIn() {
+      if (!supabaseAuthClient) {
+        alert('Google authentication service is initializing. Please refresh and try again.');
+        return;
+      }
+
+      if (selectedPlanForAuth) {
+        sessionStorage.setItem('syncpay_auth_plan', selectedPlanForAuth);
+        sessionStorage.setItem('syncpay_auth_billing', currentBilling);
+      }
+
+      const redirectDestination = window.location.origin + window.location.pathname + '?oauth_provider=google';
+      const { data, error } = await supabaseAuthClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectDestination
+        }
+      });
+
+      if (error) {
+        console.error('Google sign-in error:', error);
+        const errEl = document.getElementById('modal-login-error') || document.getElementById('modal-reg-error');
+        if (errEl) {
+          errEl.textContent = 'Google sign-in failed: ' + error.message;
+          errEl.style.display = 'block';
+        }
+      }
+    }
+
+    async function syncGoogleAuthSession() {
+      if (!supabaseAuthClient) return;
+      try {
+        const { data: { session }, error } = await supabaseAuthClient.auth.getSession();
+        if (session && session.user) {
+          const user = session.user;
+          const email = user.email || (user.user_metadata && user.user_metadata.email) || 'google_user@syncpaybd.site';
+          const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || email.split('@')[0];
+          const savedPlan = sessionStorage.getItem('syncpay_auth_plan') || selectedPlanForAuth || 'business';
+          const savedBilling = sessionStorage.getItem('syncpay_auth_billing') || currentBilling || 'monthly';
+
+          const merchantSession = {
+            merchantId: 'm_g_' + (user.id || Math.random().toString(36).slice(2, 8)).slice(0, 10),
+            email: email,
+            phone: (user.phone || (user.user_metadata && user.user_metadata.phone)) || '',
+            name: name,
+            business: name + ' Store',
+            plan: savedPlan,
+            planStatus: 'PENDING_PAYMENT',
+            apiKey: 'live_sk_' + Math.random().toString(36).slice(2, 18),
+            billing: savedBilling,
+            loginAt: new Date().toISOString()
+          };
+
+          localStorage.setItem('syncpay_session', JSON.stringify(merchantSession));
+          updateNavUserState();
+
+          if (window.location.search.includes('oauth_provider=google')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            redirectToPlanCheckout(merchantSession);
+          }
+        }
+      } catch (e) {
+        console.warn('OAuth session sync error:', e);
+      }
+    }
+
     function handleModalLogin(e) {
       e.preventDefault();
-      const emailInput = document.getElementById('modal-login-email').value.trim().toLowerCase();
+      const loginVal = document.getElementById('modal-login-email').value.trim();
+      const cleanInput = loginVal.toLowerCase();
+      const cleanPhone = loginVal.replace(/[\s\-\(\)\+]/g, '');
       const passInput = document.getElementById('modal-login-password').value;
       const errEl = document.getElementById('modal-login-error');
 
       const DEFAULT_ACCOUNTS = [
-        { id: 'm_demo_101', email: 'demo@syncpaybd.site', password: 'demo1234', name: 'Demo Merchant', business: 'Demo Store BD', apiKey: 'live_sk_demo_99410abc' },
-        { id: 'm_starter_001', email: 'starter@test.com', password: 'test1234', name: 'Starter User', business: 'My Small Shop', apiKey: 'live_sk_starter_11111' },
-        { id: 'm_ent_001', email: 'enterprise@test.com', password: 'test1234', name: 'Enterprise Corp', business: 'BigCorp BD Ltd', apiKey: 'live_sk_ent_999abc' }
+        { id: 'm_demo_101', email: 'demo@syncpaybd.site', phone: '01711000000', password: 'demo1234', name: 'Demo Merchant', business: 'Demo Store BD', apiKey: 'live_sk_demo_99410abc' },
+        { id: 'm_starter_001', email: 'starter@test.com', phone: '01811000000', password: 'test1234', name: 'Starter User', business: 'My Small Shop', apiKey: 'live_sk_starter_11111' },
+        { id: 'm_ent_001', email: 'enterprise@test.com', phone: '01911000000', password: 'test1234', name: 'Enterprise Corp', business: 'BigCorp BD Ltd', apiKey: 'live_sk_ent_999abc' }
       ];
 
       const storedAccounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
       const storedEmails = storedAccounts.map(a => a.email);
       const allAccounts = [...DEFAULT_ACCOUNTS.filter(d => !storedEmails.includes(d.email)), ...storedAccounts];
 
-      const merchant = allAccounts.find(a => a.email === emailInput);
+      const merchant = allAccounts.find(a => {
+        const aEmail = (a.email || '').toLowerCase();
+        const aPhone = (a.phone || '').replace(/[\s\-\(\)\+]/g, '');
+        if (aEmail && aEmail === cleanInput) return true;
+        if (cleanPhone.length >= 6 && aPhone && (aPhone === cleanPhone || aPhone.endsWith(cleanPhone.slice(-10)))) return true;
+        return false;
+      });
+
       if (!merchant) {
-        errEl.textContent = 'Email not found. Please enter valid credentials or register.';
+        errEl.textContent = 'Account not found with this email or phone number. Please enter valid credentials or register.';
         errEl.style.display = 'block';
         return;
       }
@@ -3473,7 +3758,8 @@
       // Login Succeeded -> Redirect to Official Checkout Page
       const session = {
         merchantId: merchant.id,
-        email: merchant.email,
+        email: merchant.email || cleanInput,
+        phone: merchant.phone || (cleanPhone.length >= 6 ? cleanPhone : ''),
         name: merchant.name,
         business: merchant.business,
         plan: selectedPlanForAuth,
@@ -3492,6 +3778,8 @@
       const name = document.getElementById('modal-reg-name').value.trim();
       const business = document.getElementById('modal-reg-business').value.trim();
       const email = document.getElementById('modal-reg-email').value.trim().toLowerCase();
+      const phone = (document.getElementById('modal-reg-phone') ? document.getElementById('modal-reg-phone').value.trim() : '');
+      const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
       const password = document.getElementById('modal-reg-password').value;
       const errEl = document.getElementById('modal-reg-error');
 
@@ -3501,6 +3789,14 @@
         errEl.textContent = 'An account with this email already exists. Please log in.';
         errEl.style.display = 'block';
         return;
+      }
+
+      if (cleanPhone && cleanPhone.length >= 6) {
+        if (storedAccounts.some(a => (a.phone && a.phone.replace(/[\s\-\(\)\+]/g, '') === cleanPhone))) {
+          errEl.textContent = 'An account with this phone number already exists. Please log in.';
+          errEl.style.display = 'block';
+          return;
+        }
       }
 
       if (password.length < 6) {
@@ -3517,6 +3813,7 @@
         name,
         business,
         email,
+        phone,
         password,
         plan: selectedPlanForAuth,
         planStatus: 'PENDING_PAYMENT',
@@ -3531,6 +3828,7 @@
       const session = {
         merchantId: id,
         email,
+        phone,
         name,
         business,
         plan: selectedPlanForAuth,
@@ -3622,108 +3920,181 @@
     renderPricing();
     fetchFeed();
     updateNavUserState();
+    syncGoogleAuthSession();
     setInterval(fetchFeed, 3000);
   </script>
 
   <!-- Plan Authentication Modal -->
   <div id="plan-auth-modal" class="plan-auth-overlay" onclick="handleModalBackdropClick(event)">
     <div class="plan-auth-card">
-      <button type="button" class="plan-auth-close" onclick="closePlanAuthModal()" title="Close">&times;</button>
       
-      <!-- Selected Plan Banner -->
-      <div class="plan-banner-highlight">
-        <div class="plan-banner-top">
-          <div class="plan-badge-pill">
-            <span class="pill-dot"></span>
-            <span id="modal-plan-badge">Selected Plan</span>
+      <!-- LEFT HERO PANEL (UddoktaPay Aesthetic) -->
+      <div class="plan-modal-left">
+        <div>
+          <!-- Brand Logo -->
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#ffffff"/>
+              <path d="M17 6L9 18H16L15 26L23 14H16L17 6Z" fill="#0045d8"/>
+            </svg>
+            <span style="font-size:20px; font-weight:800; color:#fff; letter-spacing:-0.02em;">SyncPay<span style="color:#38bdf8;">BD</span></span>
           </div>
-          <div class="plan-banner-price">
-            <span id="modal-plan-price">৳200</span><span id="modal-plan-dur">/mo</span>
-          </div>
-        </div>
-        <div id="modal-plan-title" style="font-weight: 800; font-size: 16px; color: #0f172a; margin-bottom: 2px;">Business 3</div>
-        <div id="modal-plan-desc" class="plan-banner-desc">3 Website Integrations • 1 Landing Page Bonus • Unlimited Transactions</div>
-      </div>
 
-      <!-- ALREADY LOGGED IN VIEW -->
-      <div id="modal-already-logged" style="display:none;">
-        <div class="modal-logged-box">
-          <div class="modal-logged-avatar" id="modal-user-avatar">RA</div>
-          <div class="modal-logged-title" id="modal-user-name">Rahim Ahmed</div>
-          <div class="modal-logged-email" id="modal-user-email">rahim@myshop.com</div>
-          <div class="modal-logged-chips">
-            <div class="modal-logged-chip" id="modal-current-plan">Current: Starter 1</div>
-            <div style="align-self:center; color:#94a3b8;">→</div>
-            <div class="modal-logged-chip new" id="modal-target-plan">New: Business 3</div>
-          </div>
-          <button type="button" class="btn-modal-submit" onclick="confirmLoggedPlanUpgrade()">
-            <span>💳 Proceed to Official Checkout</span>
-            <span>→</span>
-          </button>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:12px;">
-          <a href="/dashboard" style="color:var(--primary); font-weight:700; text-decoration:none;">Go to Dashboard →</a>
-          <button type="button" onclick="handleModalLogout()" style="background:none; border:none; color:#ef4444; font-weight:700; cursor:pointer; font-family:inherit;">Switch Account / Logout</button>
-        </div>
-      </div>
+          <!-- What's new & Notice -->
+          <div style="font-size:11px; color:rgba(255,255,255,0.7); font-weight:700; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.04em;">What's new</div>
+          <div style="font-size:20px; font-weight:800; color:#fff; margin-bottom:12px; line-height:1.25;">⚠️ Important Notice</div>
+          <p style="font-size:12px; line-height:1.6; color:rgba(255,255,255,0.85); margin-bottom:16px;">
+            To ensure compliance with Bangladesh telecom regulations, automated MFS verification operates with encrypted telephony pairing and instant webhook dispatch.
+          </p>
 
-      <!-- LOGIN & REGISTER FORMS (Step 1) -->
-      <div id="modal-auth-forms">
-        <div class="modal-auth-tabs">
-          <button type="button" class="modal-tab-btn active" id="modal-tab-btn-login" onclick="switchModalAuthTab('login')">Login</button>
-          <button type="button" class="modal-tab-btn" id="modal-tab-btn-reg" onclick="switchModalAuthTab('register')">Register</button>
-        </div>
-
-        <!-- LOGIN FORM -->
-        <form id="modal-login-form" onsubmit="handleModalLogin(event)">
-          <div class="modal-form-group">
-            <label>Your Email</label>
-            <input type="email" id="modal-login-email" class="modal-input" placeholder="demo@syncpaybd.site" required autocomplete="email">
-          </div>
-          <div class="modal-form-group">
-            <label>Password</label>
-            <input type="password" id="modal-login-password" class="modal-input" placeholder="••••••••" required autocomplete="current-password">
-          </div>
-          <div id="modal-login-error" class="modal-error-box"></div>
-          <button type="submit" class="btn-modal-submit" id="modal-login-submit-btn">
-            <span>Proceed to Official Checkout</span>
-            <span>→</span>
-          </button>
-          
-          <div class="modal-demo-bar">
-            <span>Quick Test Demo Accounts:</span>
-            <div class="modal-demo-btns">
-              <button type="button" class="modal-demo-btn" onclick="fillModalDemo('demo@syncpaybd.site','demo1234')">⚡ Demo Merchant</button>
-              <button type="button" class="modal-demo-btn" onclick="fillModalDemo('starter@test.com','test1234')">Starter User</button>
-              <button type="button" class="modal-demo-btn" onclick="fillModalDemo('enterprise@test.com','ent1234')">Enterprise Corp</button>
+          <!-- Selected Plan Banner -->
+          <div class="plan-banner-highlight">
+            <div class="plan-banner-top">
+              <div class="plan-badge-pill">
+                <span class="pill-dot"></span>
+                <span id="modal-plan-badge">Selected Plan</span>
+              </div>
+              <div class="plan-banner-price">
+                <span id="modal-plan-price">৳200</span><span id="modal-plan-dur">/mo</span>
+              </div>
             </div>
+            <div id="modal-plan-title" style="font-weight: 800; font-size: 15px; color: #ffffff; margin-bottom: 2px;">Business 3</div>
+            <div id="modal-plan-desc" class="plan-banner-desc">3 Website Integrations • 1 Landing Page Bonus • Unlimited Transactions</div>
           </div>
-        </form>
+        </div>
 
-        <!-- REGISTER FORM -->
-        <form id="modal-reg-form" onsubmit="handleModalRegister(event)" style="display:none;">
-          <div class="modal-form-group">
-            <label>Your Name</label>
-            <input type="text" id="modal-reg-name" class="modal-input" placeholder="e.g., John Doe" required autocomplete="name">
+        <!-- Dots -->
+        <div style="display:flex; gap:6px; margin-top:20px;">
+          <div style="width:20px; height:6px; background:#fff; border-radius:10px;"></div>
+          <div style="width:6px; height:6px; background:rgba(255,255,255,0.4); border-radius:50%;"></div>
+          <div style="width:6px; height:6px; background:rgba(255,255,255,0.4); border-radius:50%;"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT FORM PANEL -->
+      <div class="plan-modal-right">
+        <button type="button" class="plan-auth-close" onclick="closePlanAuthModal()" title="Close">&times;</button>
+        
+        <div style="text-align:center; margin-bottom:18px;">
+          <div style="font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em;">Welcome Back</div>
+          <div style="font-size:20px; font-weight:800; color:#0f172a;" id="modal-main-heading">Secure Client Login</div>
+        </div>
+
+        <!-- ALREADY LOGGED IN VIEW -->
+        <div id="modal-already-logged" style="display:none;">
+          <div class="modal-logged-box">
+            <div class="modal-logged-avatar" id="modal-user-avatar">RA</div>
+            <div class="modal-logged-title" id="modal-user-name">Rahim Ahmed</div>
+            <div class="modal-logged-email" id="modal-user-email">rahim@myshop.com</div>
+            <div class="modal-logged-chips">
+              <div class="modal-logged-chip" id="modal-current-plan">Current: Starter 1</div>
+              <div style="align-self:center; color:#94a3b8;">→</div>
+              <div class="modal-logged-chip new" id="modal-target-plan">New: Business 3</div>
+            </div>
+            <button type="button" class="btn-modal-submit" onclick="confirmLoggedPlanUpgrade()">
+              <span>💳 Proceed to Official Checkout</span>
+              <span>→</span>
+            </button>
           </div>
-          <div class="modal-form-group">
-            <label>Business / Website Name</label>
-            <input type="text" id="modal-reg-business" class="modal-input" placeholder="e.g., My Online Store" required>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:12px;">
+            <a href="/dashboard" style="color:var(--primary); font-weight:700; text-decoration:none;">Go to Dashboard →</a>
+            <button type="button" onclick="handleModalLogout()" style="background:none; border:none; color:#ef4444; font-weight:700; cursor:pointer; font-family:inherit;">Switch Account / Logout</button>
           </div>
-          <div class="modal-form-group">
-            <label>Email Address</label>
-            <input type="email" id="modal-reg-email" class="modal-input" placeholder="merchant@gmail.com" required autocomplete="email">
+        </div>
+
+        <!-- LOGIN & REGISTER FORMS (Step 1) -->
+        <div id="modal-auth-forms">
+          <div class="modal-auth-tabs">
+            <button type="button" class="modal-tab-btn active" id="modal-tab-btn-login" onclick="switchModalAuthTab('login')">Login</button>
+            <button type="button" class="modal-tab-btn" id="modal-tab-btn-reg" onclick="switchModalAuthTab('register')">Register</button>
           </div>
-          <div class="modal-form-group">
-            <label>Password</label>
-            <input type="password" id="modal-reg-password" class="modal-input" placeholder="At least 6 characters" required autocomplete="new-password">
-          </div>
-          <div id="modal-reg-error" class="modal-error-box"></div>
-          <button type="submit" class="btn-modal-submit" id="modal-reg-submit-btn">
-            <span>Create Account & Proceed to Checkout</span>
-            <span>→</span>
-          </button>
-        </form>
+
+          <!-- LOGIN FORM -->
+          <form id="modal-login-form" onsubmit="handleModalLogin(event)">
+            <!-- Google Sign In Button -->
+            <button type="button" class="btn-google-auth" id="btn-google-login" onclick="handleGoogleSignIn()">
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+
+            <div class="modal-divider">
+              <span>or continue with credentials</span>
+            </div>
+
+            <div class="modal-form-group">
+              <label>Email or Phone Number</label>
+              <input type="text" id="modal-login-email" class="modal-input" placeholder="demo@syncpaybd.site or 017xxxxxxxx" required autocomplete="username">
+            </div>
+            <div class="modal-form-group">
+              <label>Password</label>
+              <input type="password" id="modal-login-password" class="modal-input" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <div id="modal-login-error" class="modal-error-box"></div>
+            <button type="submit" class="btn-modal-submit" id="modal-login-submit-btn">
+              <span>Proceed to Official Checkout</span>
+              <span>→</span>
+            </button>
+            
+            <div class="modal-demo-bar">
+              <span>Quick Test Demo Accounts:</span>
+              <div class="modal-demo-btns">
+                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('demo@syncpaybd.site','demo1234')">⚡ Demo Merchant</button>
+                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('01711000000','demo1234')">📱 01711-000000</button>
+                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('starter@test.com','test1234')">Starter User</button>
+                <button type="button" class="modal-demo-btn" onclick="fillModalDemo('enterprise@test.com','ent1234')">Enterprise Corp</button>
+              </div>
+            </div>
+          </form>
+
+          <!-- REGISTER FORM -->
+          <form id="modal-reg-form" onsubmit="handleModalRegister(event)" style="display:none;">
+            <!-- Google Sign Up Button -->
+            <button type="button" class="btn-google-auth" id="btn-google-reg" onclick="handleGoogleSignIn()">
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+              </svg>
+              <span>Sign up with Google</span>
+            </button>
+
+            <div class="modal-divider">
+              <span>or register with email & phone</span>
+            </div>
+
+            <div class="modal-form-group">
+              <label>Your Name</label>
+              <input type="text" id="modal-reg-name" class="modal-input" placeholder="e.g., John Doe" required autocomplete="name">
+            </div>
+            <div class="modal-form-group">
+              <label>Business / Website Name</label>
+              <input type="text" id="modal-reg-business" class="modal-input" placeholder="e.g., My Online Store" required>
+            </div>
+            <div class="modal-form-group">
+              <label>Email Address</label>
+              <input type="email" id="modal-reg-email" class="modal-input" placeholder="merchant@gmail.com" required autocomplete="email">
+            </div>
+            <div class="modal-form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="modal-reg-phone" class="modal-input" placeholder="017xxxxxxxx" required autocomplete="tel">
+            </div>
+            <div class="modal-form-group">
+              <label>Password</label>
+              <input type="password" id="modal-reg-password" class="modal-input" placeholder="At least 6 characters" required autocomplete="new-password">
+            </div>
+            <div id="modal-reg-error" class="modal-error-box"></div>
+            <button type="submit" class="btn-modal-submit" id="modal-reg-submit-btn">
+              <span>Create Account & Proceed to Checkout</span>
+              <span>→</span>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </div>

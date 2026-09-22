@@ -1239,6 +1239,34 @@
         }
       }
 
+      // Enrich with Branded Store info if accessed via /pay/:slug or custom domain
+      try {
+        const pathMatch = window.location.pathname.match(/\/(?:pay|checkout)\/([a-zA-Z0-9-_]+)/);
+        const storeParam = urlParams.get('store');
+        const detectedSlug = pathMatch ? pathMatch[1] : storeParam;
+        const currentHost = window.location.hostname;
+        const isCustomHost = currentHost && currentHost !== 'localhost' && !currentHost.includes('syncpaybd.site');
+
+        let brandUrl = null;
+        if (detectedSlug && !['checkout', 'pay'].includes(detectedSlug.toLowerCase())) {
+          brandUrl = `/api/v1/merchant/brand-info?slug=${encodeURIComponent(detectedSlug)}`;
+        } else if (isCustomHost) {
+          brandUrl = `/api/v1/merchant/brand-info?domain=${encodeURIComponent(currentHost)}`;
+        }
+
+        if (brandUrl) {
+          const bRes = await fetch(brandUrl);
+          const bData = await bRes.json();
+          if (bData.success && bData.data) {
+            invoiceData = invoiceData || {};
+            invoiceData.merchant_name = bData.data.business_name || invoiceData.merchant_name;
+            if (bData.data.brand_logo_url) {
+              invoiceData.merchant_logo_url = bData.data.brand_logo_url;
+            }
+          }
+        }
+      } catch (err) {}
+
       hydrateInvoice();
       renderProviderBar();
 

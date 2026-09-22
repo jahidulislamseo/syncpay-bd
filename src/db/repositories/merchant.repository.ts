@@ -13,6 +13,10 @@ export interface MerchantEntity {
   webhook_url?: string | null;
   redirect_url?: string | null;
   password_hash?: string | null;
+  brand_slug?: string | null;
+  custom_domain?: string | null;
+  has_custom_domain?: boolean | number;
+  brand_logo_url?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -28,7 +32,14 @@ export class MerchantRepository {
         .single();
 
       if (!error && data) {
-        return data as MerchantEntity;
+        const local = dbService.getMerchantById(id);
+        return {
+          ...data,
+          brand_slug: (data as any).brand_slug || (local as any)?.brand_slug || null,
+          custom_domain: (data as any).custom_domain || (local as any)?.custom_domain || null,
+          has_custom_domain: (data as any).has_custom_domain !== undefined ? (data as any).has_custom_domain : ((local as any)?.has_custom_domain || 0),
+          brand_logo_url: (data as any).brand_logo_url || (local as any)?.brand_logo_url || null,
+        } as MerchantEntity;
       }
     }
 
@@ -46,6 +57,10 @@ export class MerchantRepository {
         payment_note: (local as any).payment_note || null,
         webhook_url: local.webhook_url,
         password_hash: (local as any).password_hash || null,
+        brand_slug: (local as any).brand_slug || null,
+        custom_domain: (local as any).custom_domain || null,
+        has_custom_domain: (local as any).has_custom_domain || 0,
+        brand_logo_url: (local as any).brand_logo_url || null,
       };
     }
     return null;
@@ -145,5 +160,111 @@ export class MerchantRepository {
       redirect_url: params.redirect_url || null,
     };
     return merchant;
+  }
+
+  public static async findBySlug(slug: string): Promise<MerchantEntity | null> {
+    if (!slug) return null;
+    const cleanSlug = slug.toLowerCase().trim();
+
+    const supabase = getSupabaseClient();
+    if (supabase && isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('merchants')
+        .select('*')
+        .eq('brand_slug', cleanSlug)
+        .maybeSingle();
+
+      if (!error && data) {
+        return data as MerchantEntity;
+      }
+    }
+
+    const local = dbService.getMerchantBySlug(cleanSlug);
+    if (local) {
+      return {
+        id: local.id,
+        business_name: local.name,
+        email: (local as any).email || 'merchant@example.com',
+        phone: (local as any).phone || null,
+        status: ((local as any).status as any) || 'ACTIVE',
+        plan: (local as any).plan || 'FREE',
+        payment_status: (local as any).payment_status || 'FREE',
+        payment_note: (local as any).payment_note || null,
+        webhook_url: local.webhook_url,
+        password_hash: (local as any).password_hash || null,
+        brand_slug: (local as any).brand_slug || null,
+        custom_domain: (local as any).custom_domain || null,
+        has_custom_domain: (local as any).has_custom_domain || 0,
+        brand_logo_url: (local as any).brand_logo_url || null,
+      };
+    }
+    return null;
+  }
+
+  public static async findByDomain(domain: string): Promise<MerchantEntity | null> {
+    if (!domain) return null;
+    const cleanDomain = domain.toLowerCase().trim().replace(/:\d+$/, '');
+
+    const supabase = getSupabaseClient();
+    if (supabase && isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('merchants')
+        .select('*')
+        .eq('custom_domain', cleanDomain)
+        .maybeSingle();
+
+      if (!error && data) {
+        return data as MerchantEntity;
+      }
+    }
+
+    const local = dbService.getMerchantByDomain(cleanDomain);
+    if (local) {
+      return {
+        id: local.id,
+        business_name: local.name,
+        email: (local as any).email || 'merchant@example.com',
+        phone: (local as any).phone || null,
+        status: ((local as any).status as any) || 'ACTIVE',
+        plan: (local as any).plan || 'FREE',
+        payment_status: (local as any).payment_status || 'FREE',
+        payment_note: (local as any).payment_note || null,
+        webhook_url: local.webhook_url,
+        password_hash: (local as any).password_hash || null,
+        brand_slug: (local as any).brand_slug || null,
+        custom_domain: (local as any).custom_domain || null,
+        has_custom_domain: (local as any).has_custom_domain || 0,
+        brand_logo_url: (local as any).brand_logo_url || null,
+      };
+    }
+    return null;
+  }
+
+  public static async updateBranding(
+    id: string,
+    params: {
+      brand_slug?: string;
+      custom_domain?: string;
+      has_custom_domain?: number;
+      brand_logo_url?: string;
+    }
+  ): Promise<boolean> {
+    const supabase = getSupabaseClient();
+    if (supabase && isSupabaseConfigured()) {
+      const payload: any = { updated_at: new Date().toISOString() };
+      if (params.brand_slug !== undefined) payload.brand_slug = params.brand_slug ? params.brand_slug.toLowerCase().trim() : null;
+      if (params.custom_domain !== undefined) payload.custom_domain = params.custom_domain ? params.custom_domain.toLowerCase().trim() : null;
+      if (params.has_custom_domain !== undefined) payload.has_custom_domain = Boolean(params.has_custom_domain);
+      if (params.brand_logo_url !== undefined) payload.brand_logo_url = params.brand_logo_url ? params.brand_logo_url.trim() : null;
+
+      const { error } = await supabase.from('merchants').update(payload).eq('id', id);
+      if (error) {
+        console.error('Failed to update Supabase merchant branding:', error);
+      }
+    }
+
+    // Update local SQLite store
+    dbService.updateMerchantBranding(id, params);
+    return true;
   }
 }

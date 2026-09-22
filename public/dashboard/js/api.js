@@ -250,6 +250,23 @@ export class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // 17. Merchant Branding & Custom Domain
+  async getBranding() {
+    const token = localStorage.getItem('payflow_token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    return await this.request('/api/v1/merchant/branding', { headers });
+  }
+
+  async updateBranding(payload) {
+    const token = localStorage.getItem('payflow_token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    return await this.request('/api/v1/merchant/branding', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+  }
 }
 
 export const api = new ApiClient();

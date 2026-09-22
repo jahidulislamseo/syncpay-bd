@@ -24,6 +24,9 @@ class PayFlowDashboardApp {
     document.documentElement.setAttribute('data-theme', savedTheme);
     this.updateThemeButton();
 
+    // 1.5 Sync Google OAuth session if returning from OAuth redirect
+    await this.checkOAuthCallback();
+
     // 2. Auth Gate — show login overlay if not logged in
     if (!auth.isLoggedIn()) {
       this.showAuthOverlay();
@@ -1719,8 +1722,164 @@ class PayFlowDashboardApp {
             </div>
           </div>
         </div>
+
+        <!-- Card 4: Custom Branded URL & White-Label Domain -->
+        <div class="card-panel" style="grid-column: 1 / -1; border-color: rgba(99, 102, 241, 0.35); background: linear-gradient(180deg, rgba(99, 102, 241, 0.04) 0%, var(--bg-card) 100%);">
+          <div class="card-panel-header" style="margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg, #6366F1, #8B5CF6); display:flex; align-items:center; justify-content:center; color:#fff; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <div>
+                <h4 class="card-panel-title" style="margin:0; font-size:16px; display:flex; align-items:center; gap:8px;">
+                  <span>Custom URL & White-Label Branding</span>
+                  <span class="badge badge-completed" style="font-size:10px;">FEATURE ACTIVE</span>
+                </h4>
+                <p style="font-size:12px; color:var(--text-muted); margin:2px 0 0 0;">মার্চেন্ট স্টোরের নামে কাস্টম পেমেন্ট ইউআরএল ও হোয়াইট-লেবেল ডোমেন কনফিগারেশন</p>
+              </div>
+            </div>
+            <span class="badge" id="branding-plan-badge" style="background:rgba(99, 102, 241, 0.15); color:#6366F1; font-weight:700;">PRO & ENTERPRISE</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-bottom:20px;">
+            <!-- Option 1: Store Brand Slug -->
+            <div style="padding:16px; background:var(--bg-subtle); border-radius:10px; border:1px solid var(--border);">
+              <label class="form-label" style="font-weight:700; display:flex; align-items:center; justify-content:space-between;">
+                <span>1. Store Name / Brand Slug</span>
+                <span class="badge" style="font-size:10px; background:rgba(16, 185, 129, 0.15); color:#10b981;">Active on All Paid Plans</span>
+              </label>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <span style="font-size:13px; color:var(--text-muted); font-family:var(--font-mono); font-weight:600; white-space:nowrap;">syncpaybd.site/pay/</span>
+                <input type="text" id="settings-brand-slug" class="form-control" placeholder="gadgetbd" style="font-weight:700; font-family:var(--font-mono);" oninput="window.payflowApp.updateSlugPreview(this.value)">
+              </div>
+              <div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.15); border-radius:6px; border:1px dashed var(--border);">
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Live Generated Customer Checkout URL:</div>
+                <div id="slug-preview-url" class="mono" style="font-size:12px; font-weight:700; color:var(--primary); word-break:break-all;">
+                  https://syncpaybd.site/pay/your-store?invoice_id=PF...
+                </div>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:6px;">কাস্টমার পেমেন্ট করার সময় ব্রাউজারে এই লিঙ্ক দেখতে পাবে।</span>
+            </div>
+
+            <!-- Option 2: White-Label Custom Domain (CNAME) -->
+            <div style="padding:16px; background:var(--bg-subtle); border-radius:10px; border:1px solid var(--border);">
+              <label class="form-label" style="font-weight:700; display:flex; align-items:center; justify-content:space-between;">
+                <span>2. White-Label Custom Domain</span>
+                <span class="badge" id="custom-domain-status-badge" style="font-size:10px; background:rgba(245, 158, 11, 0.2); color:#f59e0b;">ENTERPRISE / ADD-ON</span>
+              </label>
+              <div style="margin-top:8px;">
+                <input type="text" id="settings-custom-domain" class="form-control" placeholder="pay.yourstore.com" style="font-weight:700; font-family:var(--font-mono);">
+              </div>
+              <div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.15); border-radius:6px; font-size:11px; color:var(--text-muted);">
+                <div style="font-weight:700; color:var(--text); margin-bottom:4px;">DNS CNAME Configuration:</div>
+                <div>আপনার ডোমেনে একটি CNAME রেকর্ড যোগ করুন:</div>
+                <div style="margin-top:4px;"><strong style="color:var(--text);">Host:</strong> <span class="mono" style="color:var(--primary); font-weight:700;">pay</span> &bull; <strong style="color:var(--text);">Points to:</strong> <span class="mono" style="color:var(--primary); font-weight:700;">cname.syncpaybd.site</span></div>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:6px;">আপনার নিজস্ব ডোমেনের সাবডোমেন দিয়ে গেটওয়ে হোয়াইট-লেবেল করুন।</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding-top:14px; border-top:1px solid var(--border);">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary-action" onclick="window.payflowApp.saveBrandingSettings()" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>Save Branding Settings</span>
+              </button>
+              <button class="btn btn-secondary-action" onclick="window.payflowApp.testBrandedUrl()" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                <span>Test & Preview Checkout</span>
+              </button>
+            </div>
+            <button class="btn btn-secondary-action" onclick="window.payflowApp.copyBrandedUrl()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copy Branded URL</span>
+            </button>
+          </div>
+        </div>
       </div>
     `;
+
+    // Load persisted branding from API or session
+    this.loadBrandingSettingsIntoUI();
+  }
+
+  async loadBrandingSettingsIntoUI() {
+    try {
+      const res = await api.getBranding();
+      if (res.success && res.data) {
+        const slugInput = document.getElementById('settings-brand-slug');
+        const domainInput = document.getElementById('settings-custom-domain');
+        if (slugInput && res.data.brand_slug) {
+          slugInput.value = res.data.brand_slug;
+          this.updateSlugPreview(res.data.brand_slug);
+        }
+        if (domainInput && res.data.custom_domain) {
+          domainInput.value = res.data.custom_domain;
+        }
+        const badge = document.getElementById('custom-domain-status-badge');
+        if (badge && res.data.can_use_custom_domain) {
+          badge.innerText = 'ENTERPRISE UNLOCKED';
+          badge.style.background = 'rgba(16, 185, 129, 0.15)';
+          badge.style.color = '#10b981';
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load branding info:', e);
+    }
+  }
+
+  updateSlugPreview(val) {
+    const previewEl = document.getElementById('slug-preview-url');
+    if (!previewEl) return;
+    const clean = (val || '').trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+    const origin = window.location.origin;
+    if (clean) {
+      previewEl.innerText = `${origin}/pay/${clean}?invoice_id=PFM8K3X9A1`;
+    } else {
+      previewEl.innerText = `${origin}/checkout?invoice_id=PFM8K3X9A1`;
+    }
+  }
+
+  async saveBrandingSettings() {
+    const slugInput = document.getElementById('settings-brand-slug')?.value.trim();
+    const domainInput = document.getElementById('settings-custom-domain')?.value.trim();
+
+    try {
+      const res = await api.updateBranding({
+        brand_slug: slugInput || '',
+        custom_domain: domainInput || '',
+      });
+
+      if (res.success) {
+        this.showToast(res.message || 'Branding settings saved successfully!', 'success');
+        this.updateSlugPreview(slugInput);
+      }
+    } catch (e) {
+      this.showToast(e.message || 'Failed to save branding settings', 'error');
+    }
+  }
+
+  testBrandedUrl() {
+    const slug = document.getElementById('settings-brand-slug')?.value.trim();
+    const domain = document.getElementById('settings-custom-domain')?.value.trim();
+    const origin = window.location.origin;
+
+    let targetUrl = `${origin}/checkout?demo=1`;
+    if (domain) {
+      targetUrl = `https://${domain}/checkout?demo=1`;
+    } else if (slug) {
+      targetUrl = `${origin}/pay/${slug}?demo=1`;
+    }
+
+    window.open(targetUrl, '_blank');
+  }
+
+  copyBrandedUrl() {
+    const slug = document.getElementById('settings-brand-slug')?.value.trim();
+    const origin = window.location.origin;
+    const url = slug ? `${origin}/pay/${slug}` : `${origin}/checkout`;
+    this.copyText(url);
+    this.showToast(`Branded URL copied: ${url}`, 'success');
   }
 
   saveMerchantProfile() {
@@ -2587,9 +2746,25 @@ class PayFlowDashboardApp {
 
         <!-- LOGIN FORM -->
         <div id="auth-login-form">
+          <button type="button" class="btn-google-auth" style="width:100%; height:44px; border-radius:8px; background:#fff; color:#1e293b; border:1px solid #cbd5e1; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; font-size:13.5px;" onclick="window.payflowApp.doGoogleLogin()">
+            <svg width="18" height="18" viewBox="0 0 18 18">
+              <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+              <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+              <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+              <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+          
+          <div style="display:flex; align-items:center; text-align:center; margin:10px 0 14px; color:#94a3b8; font-size:11px; font-weight:700; text-transform:uppercase;">
+            <div style="flex:1; border-bottom:1px solid #e2e8f0;"></div>
+            <span style="padding:0 10px;">or credentials</span>
+            <div style="flex:1; border-bottom:1px solid #e2e8f0;"></div>
+          </div>
+
           <div class="auth-field">
-            <label>Email</label>
-            <input type="email" id="auth-email" class="form-control" placeholder="demo@syncpaybd.site" autocomplete="email">
+            <label>Email or Phone Number</label>
+            <input type="text" id="auth-email" class="form-control" placeholder="demo@syncpaybd.site or 017xxxxxxxx" autocomplete="username">
           </div>
           <div class="auth-field">
             <label>Password</label>
@@ -2601,7 +2776,7 @@ class PayFlowDashboardApp {
           </button>
           <div class="auth-demo-hint">
             <span>Demo Accounts:</span>
-            <button onclick="window.payflowApp.fillDemo('growth')">Growth Demo</button>
+            <button onclick="window.payflowApp.fillDemo('growth')">⚡ Growth Demo</button>
             <button onclick="window.payflowApp.fillDemo('starter')">Starter Demo</button>
             <button onclick="window.payflowApp.fillDemo('enterprise')">Enterprise Demo</button>
           </div>
@@ -2808,6 +2983,89 @@ class PayFlowDashboardApp {
     await this.refreshAllData();
     setInterval(() => this.pollLiveUpdates(), 4000);
     this.showToast(`Welcome back, ${this.session.name}! 👋`, 'success');
+  }
+
+  async doGoogleLogin() {
+    try {
+      const SUPABASE_PROJECT_URL = 'https://qytfwngstqhqrhymuupk.supabase.co';
+      const SUPABASE_ANON_PUBLIC_KEY = 'sb_publishable_ZjppJLWHpfb4Z3oGhMOrXg_4tAccGBn';
+      const client = (window.supabase && typeof window.supabase.createClient === 'function')
+        ? window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY)
+        : null;
+      if (!client) {
+        alert('Google authentication service is initializing. Please refresh and try again.');
+        return;
+      }
+      const { error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
+      });
+      if (error) {
+        const errEl = document.getElementById('auth-error');
+        if (errEl) {
+          errEl.textContent = 'Google sign-in error: ' + error.message;
+          errEl.style.display = 'block';
+        }
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  async checkOAuthCallback() {
+    try {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        const SUPABASE_PROJECT_URL = 'https://qytfwngstqhqrhymuupk.supabase.co';
+        const SUPABASE_ANON_PUBLIC_KEY = 'sb_publishable_ZjppJLWHpfb4Z3oGhMOrXg_4tAccGBn';
+        const client = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY);
+        const { data: { session } } = await client.auth.getSession();
+        if (session && session.user) {
+          const user = session.user;
+          const email = user.email || 'merchant@syncpaybd.site';
+          const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || email.split('@')[0];
+          
+          let currentSession = auth.getSession();
+          if (!currentSession || currentSession.email !== email) {
+            currentSession = {
+              merchantId: 'm_g_' + (user.id || Math.random().toString(36).slice(2, 8)).slice(0, 10),
+              email: email,
+              phone: user.phone || '',
+              name: name,
+              business: name + ' Store',
+              plan: 'starter',
+              planStatus: 'ACTIVE',
+              billingCycle: 'monthly',
+              apiKey: 'live_sk_' + Math.random().toString(36).substring(2, 14),
+            };
+            localStorage.setItem(auth.SESSION_KEY, JSON.stringify(currentSession));
+
+            // Sync to database so Admin sees Google registered merchants immediately
+            try {
+              fetch('/api/v1/merchant/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  name: name,
+                  email: email,
+                  business_name: name + ' Store',
+                  password: 'oauth_google_' + (user.id || 'verified').slice(0, 8),
+                  phone: user.phone || '',
+                }),
+              }).catch(() => {});
+            } catch(e) {}
+          }
+
+          // Clean url hash if returning from OAuth
+          if (window.location.hash.includes('access_token')) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('OAuth callback verification notice:', err);
+    }
   }
 
   async doRegister() {

@@ -81,6 +81,9 @@ if (!process.env.VERCEL) {
         }
     });
     // Dashboard & App clean routes (serve HTML directly without extension in URL)
+    server.get('/login', async (_req, reply) => {
+        return reply.type('text/html').sendFile('login.html');
+    });
     server.get('/dashboard', async (_req, reply) => {
         return reply.type('text/html').sendFile('dashboard.html');
     });
@@ -88,6 +91,12 @@ if (!process.env.VERCEL) {
         return reply.type('text/html').sendFile('admin.html');
     });
     server.get('/checkout', async (_req, reply) => {
+        return reply.type('text/html').sendFile('checkout.html');
+    });
+    server.get('/checkout/:slug', async (_req, reply) => {
+        return reply.type('text/html').sendFile('checkout.html');
+    });
+    server.get('/pay/:slug', async (_req, reply) => {
         return reply.type('text/html').sendFile('checkout.html');
     });
     server.get('/download', async (_req, reply) => {

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { PaymentService } from '../services/payment.service.js';
 import { MerchantService } from '../services/merchant.service.js';
 import { InvoiceRepository } from '../db/repositories/invoice.repository.js';
+import { MerchantRepository } from '../db/repositories/merchant.repository.js';
 // API Key extractor supporting SyncPay / PayFlow headers, query params, or body
 function extractApiKey(request) {
     const headerKey = request.headers['syncpay-api-key'] || request.headers['payflow-api-key'] || request.headers['x-api-key'] || request.headers['zini-api-key'];
@@ -91,7 +92,17 @@ export async function paymentRoutes(fastify) {
         });
         const host = request.headers.host || 'localhost:4000';
         const protocol = request.headers['x-forwarded-proto'] || request.protocol || 'http';
-        const payment_url = `${protocol}://${host}/checkout?invoice_id=${invoice.invoice_id}`;
+        let payment_url = `${protocol}://${host}/checkout?invoice_id=${invoice.invoice_id}`;
+        try {
+            const fullMerchant = await MerchantRepository.findById(authResult.merchant.id);
+            if (fullMerchant?.custom_domain && fullMerchant.has_custom_domain) {
+                payment_url = `https://${fullMerchant.custom_domain}/checkout?invoice_id=${invoice.invoice_id}`;
+            }
+            else if (fullMerchant?.brand_slug) {
+                payment_url = `${protocol}://${host}/pay/${fullMerchant.brand_slug}?invoice_id=${invoice.invoice_id}`;
+            }
+        }
+        catch { }
         return reply.status(201).send({
             status: true,
             message: 'Invoice created successfully.',
@@ -234,13 +245,24 @@ export async function paymentRoutes(fastify) {
         });
         const host = request.headers.host || 'localhost:4000';
         const protocol = request.headers['x-forwarded-proto'] || request.protocol || 'http';
+        let checkout_url = `${protocol}://${host}/checkout?invoice_id=${invoice.invoice_id}`;
+        try {
+            const fullMerchant = await MerchantRepository.findById(auth.merchant.id);
+            if (fullMerchant?.custom_domain && fullMerchant.has_custom_domain) {
+                checkout_url = `https://${fullMerchant.custom_domain}/checkout?invoice_id=${invoice.invoice_id}`;
+            }
+            else if (fullMerchant?.brand_slug) {
+                checkout_url = `${protocol}://${host}/pay/${fullMerchant.brand_slug}?invoice_id=${invoice.invoice_id}`;
+            }
+        }
+        catch { }
         return reply.status(201).send({
             success: true,
             invoice_id: invoice.invoice_id,
             expected_amount: invoice.amount,
             provider: provider || 'bKash',
             expires_at: invoice.expires_at,
-            checkout_url: `${protocol}://${host}/checkout?invoice_id=${invoice.invoice_id}`,
+            checkout_url,
         });
     });
     // ==========================================

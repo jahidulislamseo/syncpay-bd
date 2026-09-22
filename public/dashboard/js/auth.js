@@ -100,6 +100,7 @@ const DEMO_ACCOUNTS = [
   {
     id: 'm_demo_101',
     email: 'demo@syncpaybd.site',
+    phone: '01711000000',
     password: 'demo1234',
     name: 'Demo Merchant',
     business: 'Demo Store BD',
@@ -110,6 +111,7 @@ const DEMO_ACCOUNTS = [
   {
     id: 'm_starter_001',
     email: 'starter@test.com',
+    phone: '01811000000',
     password: 'test1234',
     name: 'Starter User',
     business: 'My Small Shop',
@@ -120,6 +122,7 @@ const DEMO_ACCOUNTS = [
   {
     id: 'm_ent_001',
     email: 'enterprise@test.com',
+    phone: '01911000000',
     password: 'ent1234',
     name: 'Enterprise Corp',
     business: 'BigCorp BD Ltd',
@@ -139,14 +142,23 @@ export const auth = {
     return [...DEMO_ACCOUNTS.filter(d => !storedEmails.includes(d.email)), ...stored];
   },
 
-  login(email, password) {
+  login(identifier, password) {
     const accounts = this.getAccounts();
-    const merchant = accounts.find(a => a.email === email.trim().toLowerCase());
-    if (!merchant) return { ok: false, error: 'Email address not found.' };
+    const cleanId = (identifier || '').trim().toLowerCase();
+    const cleanPhone = (identifier || '').replace(/[\s\-\(\)\+]/g, '');
+    const merchant = accounts.find(a => {
+      const aEmail = (a.email || '').toLowerCase();
+      const aPhone = (a.phone || '').replace(/[\s\-\(\)\+]/g, '');
+      if (aEmail && aEmail === cleanId) return true;
+      if (cleanPhone.length >= 6 && aPhone && (aPhone === cleanPhone || aPhone.endsWith(cleanPhone.slice(-10)))) return true;
+      return false;
+    });
+    if (!merchant) return { ok: false, error: 'Account not found with this email or phone number.' };
     if (merchant.password !== password) return { ok: false, error: 'Invalid password.' };
     const session = {
       merchantId: merchant.id,
       email: merchant.email,
+      phone: merchant.phone || (cleanPhone.length >= 6 ? cleanPhone : ''),
       name: merchant.name,
       business: merchant.business,
       plan: merchant.plan,

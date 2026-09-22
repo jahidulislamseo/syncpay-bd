@@ -526,4 +526,173 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       merchant: merchant || null,
     });
   });
+
+  // ==========================================
+  // Merchant Branding & Custom Domain Endpoints
+  // ==========================================
+
+  // 1. Get current merchant branding configuration
+  fastify.get('/api/v1/merchant/branding', async (request: FastifyRequest, reply: FastifyReply) => {
+    let merchantId = DEMO_MERCHANT_ID;
+    const authHeader = request.headers.authorization;
+    const apiKey = (request.headers['syncpay-api-key'] || request.headers['x-api-key'] || request.headers['payflow-api-key']) as string | undefined;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const { valid, payload } = CryptoUtil.verifyJwt(token);
+      if (valid && payload?.id) {
+        merchantId = payload.id;
+      }
+    } else if (apiKey) {
+      const authResult = await MerchantService.authenticateApiKey(apiKey);
+      if (authResult.authenticated && authResult.merchant) {
+        merchantId = authResult.merchant.id;
+      }
+    }
+
+    const merchant = await MerchantRepository.findById(merchantId);
+    if (!merchant) {
+      return reply.status(404).send({ success: false, error: 'Merchant account not found' });
+    }
+
+    const currentPlan = (merchant.plan || 'starter').toLowerCase();
+    const canUseCustomDomain = ['enterprise', 'ultra', 'growth', 'scale', 'mega'].includes(currentPlan) || Boolean(merchant.has_custom_domain);
+    const canUseBrandSlug = ['standard', 'pro', 'business', 'agency', 'elite', 'enterprise', 'ultra', 'growth', 'scale', 'mega'].includes(currentPlan) || Boolean(merchant.has_custom_domain);
+
+    const host = request.headers.host || 'localhost:4000';
+    const protocol = (request.headers['x-forwarded-proto'] as string) || request.protocol || 'http';
+
+    return reply.send({
+      success: true,
+      data: {
+        merchant_id: merchant.id,
+        business_name: merchant.business_name,
+        brand_slug: merchant.brand_slug || '',
+        custom_domain: merchant.custom_domain || '',
+        has_custom_domain: Boolean(merchant.has_custom_domain),
+        brand_logo_url: merchant.brand_logo_url || '',
+        plan: merchant.plan || 'starter',
+        can_use_slug: canUseBrandSlug,
+        can_use_custom_domain: canUseCustomDomain,
+        branded_checkout_url: merchant.brand_slug ? `${protocol}://${host}/pay/${merchant.brand_slug}` : `${protocol}://${host}/checkout`,
+        custom_domain_checkout_url: merchant.custom_domain ? `https://${merchant.custom_domain}/checkout` : null,
+        dns_cname_target: 'cname.syncpaybd.site',
+      },
+    });
+  });
+
+  // 2. Save or update merchant branding configuration
+  fastify.post('/api/v1/merchant/branding', async (request: FastifyRequest, reply: FastifyReply) => {
+    let merchantId = DEMO_MERCHANT_ID;
+    const authHeader = request.headers.authorization;
+    const apiKey = (request.headers['syncpay-api-key'] || request.headers['x-api-key'] || request.headers['payflow-api-key']) as string | undefined;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const { valid, payload } = CryptoUtil.verifyJwt(token);
+      if (valid && payload?.id) {
+        merchantId = payload.id;
+      }
+    } else if (apiKey) {
+      const authResult = await MerchantService.authenticateApiKey(apiKey);
+      if (authResult.authenticated && authResult.merchant) {
+        merchantId = authResult.merchant.id;
+      }
+    }
+
+    const merchant = await MerchantRepository.findById(merchantId);
+    if (!merchant) {
+      return reply.status(404).send({ success: false, error: 'Merchant not found' });
+    }
+
+    const body = request.body as {
+      brand_slug?: string;
+      custom_domain?: string;
+      brand_logo_url?: string;
+    };
+
+    let cleanSlug = body.brand_slug !== undefined ? body.brand_slug.toLowerCase().trim() : undefined;
+    if (cleanSlug) {
+      cleanSlug = cleanSlug.replace(/[^a-z0-9-_]/g, '');
+      if (cleanSlug.length < 3) {
+        return reply.status(400).send({ success: false, error: 'Store Slug must be at least 3 characters long (letters, numbers, hyphens).' });
+      }
+
+      // Check for reserved words
+      const reserved = ['checkout', 'pay', 'api', 'admin', 'dashboard', 'login', 'docs', 'app', 'download', 'v1'];
+      if (reserved.includes(cleanSlug)) {
+        return reply.status(400).send({ success: false, error: `Slug "${cleanSlug}" is reserved. Please choose another name.` });
+      }
+
+      // Check uniqueness
+      const existing = await MerchantRepository.findBySlug(cleanSlug);
+      if (existing && existing.id !== merchant.id) {
+        return reply.status(409).send({ success: false, error: `The store slug "${cleanSlug}" is already taken by another merchant.` });
+      }
+    }
+
+    let cleanDomain = body.custom_domain !== undefined ? body.custom_domain.toLowerCase().trim().replace(/https?:\/\//, '').replace(/\/.*$/, '') : undefined;
+    if (cleanDomain) {
+      const domainRegex = /^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,10}(:[0-9]{1,5})?$/;
+      if (!domainRegex.test(cleanDomain)) {
+        return reply.status(400).send({ success: false, error: 'Invalid domain format. Example: pay.yourstore.com' });
+      }
+
+      const existingDomain = await MerchantRepository.findByDomain(cleanDomain);
+      if (existingDomain && existingDomain.id !== merchant.id) {
+        return reply.status(409).send({ success: false, error: `The custom domain "${cleanDomain}" is already registered.` });
+      }
+    }
+
+    const currentPlan = (merchant.plan || 'starter').toLowerCase();
+    const canUseCustomDomain = ['enterprise', 'ultra', 'growth', 'scale', 'mega'].includes(currentPlan) || Boolean(merchant.has_custom_domain);
+
+    await MerchantRepository.updateBranding(merchant.id, {
+      brand_slug: cleanSlug,
+      custom_domain: cleanDomain,
+      brand_logo_url: body.brand_logo_url,
+      has_custom_domain: canUseCustomDomain ? 1 : 0,
+    });
+
+    const host = request.headers.host || 'localhost:4000';
+    const protocol = (request.headers['x-forwarded-proto'] as string) || request.protocol || 'http';
+
+    return reply.send({
+      success: true,
+      message: 'Branding & custom domain configuration saved successfully!',
+      data: {
+        brand_slug: cleanSlug || '',
+        custom_domain: cleanDomain || '',
+        branded_checkout_url: cleanSlug ? `${protocol}://${host}/pay/${cleanSlug}` : `${protocol}://${host}/checkout`,
+        custom_domain_checkout_url: cleanDomain ? `https://${cleanDomain}/checkout` : null,
+      },
+    });
+  });
+
+  // 3. Public Lookup for Checkout Branding (by slug or domain)
+  fastify.get('/api/v1/merchant/brand-info', async (request: FastifyRequest, reply: FastifyReply) => {
+    const query = request.query as { slug?: string; domain?: string };
+    let merchant: any = null;
+
+    if (query.slug) {
+      merchant = await MerchantRepository.findBySlug(query.slug);
+    } else if (query.domain) {
+      merchant = await MerchantRepository.findByDomain(query.domain);
+    }
+
+    if (!merchant) {
+      return reply.status(404).send({ success: false, error: 'Branded store not found' });
+    }
+
+    return reply.send({
+      success: true,
+      data: {
+        merchant_id: merchant.id,
+        business_name: merchant.business_name,
+        brand_slug: merchant.brand_slug,
+        brand_logo_url: merchant.brand_logo_url || null,
+        support_phone: merchant.phone || null,
+      },
+    });
+  });
 }

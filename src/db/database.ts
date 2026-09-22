@@ -315,6 +315,10 @@ export class DatabaseService {
       { name: 'payment_status', type: 'TEXT DEFAULT "FREE"' },
       { name: 'payment_note', type: 'TEXT' },
       { name: 'password_hash', type: 'TEXT' },
+      { name: 'brand_slug', type: 'TEXT' },
+      { name: 'custom_domain', type: 'TEXT' },
+      { name: 'has_custom_domain', type: 'INTEGER DEFAULT 0' },
+      { name: 'brand_logo_url', type: 'TEXT' },
     ];
     for (const col of mColsToAdd) {
       if (!existingMCols.has(col.name)) {
@@ -687,8 +691,53 @@ export class DatabaseService {
   }
 
   public getMerchantById(id: string) {
-    const stmt = this.db.prepare('SELECT * FROM merchants WHERE id = ?');
-    return stmt.get(id) as { id: string; name: string; api_key: string; webhook_url: string } | undefined;
+    const stmt = this.db.prepare("SELECT * FROM merchants WHERE id = ? OR (id = 'm_demo_101' AND ? = '00000000-0000-0000-0000-000000000101')");
+    return stmt.get(id, id) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
+  }
+
+  public getMerchantBySlug(slug: string) {
+    const stmt = this.db.prepare('SELECT * FROM merchants WHERE LOWER(brand_slug) = LOWER(?)');
+    return stmt.get(slug) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
+  }
+
+  public getMerchantByDomain(domain: string) {
+    const cleanDomain = domain.toLowerCase().replace(/:\d+$/, '');
+    const stmt = this.db.prepare('SELECT * FROM merchants WHERE LOWER(custom_domain) = ?');
+    return stmt.get(cleanDomain) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
+  }
+
+  public updateMerchantBranding(id: string, params: {
+    brand_slug?: string;
+    custom_domain?: string;
+    has_custom_domain?: number;
+    brand_logo_url?: string;
+  }) {
+    const fields: string[] = [];
+    const values: any[] = [];
+
+    if (params.brand_slug !== undefined) {
+      fields.push('brand_slug = ?');
+      values.push(params.brand_slug ? params.brand_slug.toLowerCase().trim() : null);
+    }
+    if (params.custom_domain !== undefined) {
+      fields.push('custom_domain = ?');
+      values.push(params.custom_domain ? params.custom_domain.toLowerCase().trim() : null);
+    }
+    if (params.has_custom_domain !== undefined) {
+      fields.push('has_custom_domain = ?');
+      values.push(params.has_custom_domain);
+    }
+    if (params.brand_logo_url !== undefined) {
+      fields.push('brand_logo_url = ?');
+      values.push(params.brand_logo_url ? params.brand_logo_url.trim() : null);
+    }
+
+    if (fields.length === 0) return;
+
+    values.push(id);
+    values.push(id);
+    const sql = `UPDATE merchants SET ${fields.join(', ')} WHERE id = ? OR (id = 'm_demo_101' AND ? = '00000000-0000-0000-0000-000000000101')`;
+    return this.db.prepare(sql).run(...values);
   }
 
   public insertMerchant(params: {

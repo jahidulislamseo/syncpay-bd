@@ -10,6 +10,7 @@
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/api", "dest": "/api/index.js" },
     { "src": "/app", "dest": "/public/download.html" },
+    { "src": "/login", "dest": "/public/login.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
