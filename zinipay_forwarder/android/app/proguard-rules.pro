@@ -17,7 +17,3 @@
 # Play Core deferred components suppression
 -dontwarn com.google.android.play.core.**
 
-# Aggressive bytecode optimization
--repackageclasses ''
--allowaccessmodification
--optimizationpasses 5

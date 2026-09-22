@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.zinipay.payflow_agent"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -16,26 +16,27 @@ android {
 
     defaultConfig {
         applicationId = "com.zinipay.payflow_agent"
-        minSdk = flutter.minSdkVersion // Android 5.0 Lollipop (Supports 99.8% of all devices)
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = flutter.minSdkVersion // Android 5.0 Lollipop
+        targetSdk = 34 // Android 14 (Universal Production Compatibility)
+        versionCode = 4
+        versionName = "1.2.0"
 
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }
     }
 
+    signingConfigs {
+        getByName("debug") {
+            enableV1Signing = true
+            enableV2Signing = true
+        }
+    }
+
     buildTypes {
         release {
-            // Enable R8 ProGuard code & dead-code stripping
-            isMinifyEnabled = true
-            // Enable automatic resource shrinking
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
         }
     }
