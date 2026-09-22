@@ -7,10 +7,23 @@
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    {
+      "src": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.syncpaybd.site"
+        }
+      ],
+      "status": 308,
+      "headers": {
+        "Location": "https://syncpaybd.site/$1"
+      }
+    },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/api", "dest": "/api/index.js" },
-    { "src": "/app", "dest": "/public/download.html" },
-    { "src": "/login", "dest": "/public/login.html" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+    { "src": "/app", "dest": "/download.html" },
+    { "src": "/login", "dest": "/login.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
