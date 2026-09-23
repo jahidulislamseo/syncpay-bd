@@ -62,23 +62,29 @@ export class DeviceRepository {
     const tokenHash = CryptoUtil.hashToken(params.rawToken);
     const supabase = getSupabaseClient();
 
-    if (supabase && isSupabaseConfigured()) {
-      const { data, error } = await supabase
-        .from('devices')
-        .insert({
-          merchant_id: params.merchantId,
-          device_name: params.deviceName,
-          device_token_hash: tokenHash,
-          device_model: params.deviceModel || null,
-          android_version: params.androidVersion || null,
-          mfs_provider: params.mfsProvider || 'ALL',
-          status: 'ONLINE',
-        })
-        .select()
-        .single();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.merchantId);
+    if (supabase && isSupabaseConfigured() && isUuid) {
+      try {
+        const { data, error } = await supabase
+          .from('devices')
+          .insert({
+            merchant_id: params.merchantId,
+            device_name: params.deviceName,
+            device_token_hash: tokenHash,
+            device_model: params.deviceModel || null,
+            android_version: params.androidVersion || null,
+            mfs_provider: params.mfsProvider || 'ALL',
+            status: 'ONLINE',
+          })
+          .select()
+          .single();
 
-      if (error) throw new Error(error.message);
-      return { entity: data as DeviceEntity, rawToken: params.rawToken };
+        if (!error && data) {
+          return { entity: data as DeviceEntity, rawToken: params.rawToken };
+        }
+      } catch (err) {
+        // Fall back to local SQLite store
+      }
     }
 
     // Local fallback

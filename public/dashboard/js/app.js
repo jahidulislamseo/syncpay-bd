@@ -2291,11 +2291,71 @@ class PayFlowDashboardApp {
       if (btnForm) btnForm.classList.remove('active');
       if (contentQr) contentQr.style.display = 'block';
       if (contentForm) contentForm.style.display = 'none';
+      this.loadAddDeviceQr();
     } else {
       if (btnForm) btnForm.classList.add('active');
       if (btnQr) btnQr.classList.remove('active');
       if (contentForm) contentForm.style.display = 'block';
       if (contentQr) contentQr.style.display = 'none';
+    }
+  }
+
+  async loadAddDeviceQr() {
+    const qrSlot = document.getElementById('add-device-qr-image-slot');
+    const sUrl = document.getElementById('add-qr-server-url');
+    const dToken = document.getElementById('add-qr-device-token');
+    const mId = document.getElementById('add-qr-merchant-id');
+
+    if (sUrl) sUrl.innerText = window.location.origin;
+    if (qrSlot) {
+      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+        <div style="width:24px; height:24px; border:3px solid rgba(16,185,129,0.2); border-top-color:#10b981; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+        <span>Generating QR Code...</span>
+      </div>`;
+    }
+
+    try {
+      let primaryDeviceId = (this.devices && this.devices.length > 0) ? this.devices[0].id : null;
+      if (!primaryDeviceId) {
+        try {
+          const freshDevices = await api.getDevices();
+          if (Array.isArray(freshDevices) && freshDevices.length > 0) {
+            this.devices = freshDevices;
+            primaryDeviceId = this.devices[0].id;
+          }
+        } catch (_) {}
+      }
+
+      // If still no device in memory, use 'primary' to auto-provision on server
+      const targetId = primaryDeviceId || 'primary';
+      const res = await api.getDeviceQr(targetId);
+
+      if (res && res.success) {
+        if (qrSlot) {
+          qrSlot.innerHTML = `<img src="${res.qr_code}" alt="Pairing QR Code" style="width:200px; height:200px; display:block; margin:0 auto; border-radius:8px;" />`;
+        }
+        if (sUrl && res.payload?.backend_url) sUrl.innerText = res.payload.backend_url;
+        if (dToken && res.payload?.device_token) dToken.innerText = res.payload.device_token;
+        if (mId && res.payload?.merchant_id) mId.innerText = res.payload.merchant_id;
+
+        const activeDeviceId = res.payload?.device_id || primaryDeviceId;
+        if (activeDeviceId) {
+          this.startPairingPolling(activeDeviceId);
+        }
+      } else {
+        throw new Error(res?.error || 'QR কোড লোড হতে ব্যর্থ হয়েছে');
+      }
+    } catch (e) {
+      console.error('[loadAddDeviceQr] error:', e);
+      if (qrSlot) {
+        qrSlot.innerHTML = `
+          <div style="color:var(--danger); padding:24px; text-align:center;">
+            <p style="margin:0 0 12px 0; font-size:13px; font-weight:600;">⚠️ ${e.message || 'QR কোড লোড করা যায়নি'}</p>
+            <button class="btn btn-secondary-action" style="font-size:12px; padding:6px 14px; margin:0 auto;" onclick="window.payflowApp.loadAddDeviceQr()">
+              🔄 Retry (আবার চেষ্টা করুন)
+            </button>
+          </div>`;
+      }
     }
   }
 
@@ -2311,44 +2371,10 @@ class PayFlowDashboardApp {
 
     const modal = document.getElementById('modal-add-device');
     if (!modal) return;
-    if (!this.devices || this.devices.length === 0) {
-      this.switchDeviceModalTab('form');
-      modal.classList.add('active');
-      return;
-    }
 
     this.switchDeviceModalTab('qr');
     modal.classList.add('active');
-
-    const primaryDeviceId = this.devices[0].id;
-    const qrSlot = document.getElementById('add-device-qr-image-slot');
-    if (qrSlot) {
-      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">Generating QR Code...</div>`;
-    }
-
-    const sUrl = document.getElementById('add-qr-server-url');
-    if (sUrl) sUrl.innerText = window.location.origin;
-
-    try {
-      const res = await api.getDeviceQr(primaryDeviceId);
-      if (res.success) {
-        if (qrSlot) {
-          qrSlot.innerHTML = `<img src="${res.qr_code}" alt="Pairing QR Code" style="width:200px; height:200px; display:block;" />`;
-        }
-        const dToken = document.getElementById('add-qr-device-token');
-        const mId = document.getElementById('add-qr-merchant-id');
-        if (sUrl) sUrl.innerText = res.payload.backend_url;
-        if (dToken) dToken.innerText = res.payload.device_token;
-        if (mId) mId.innerText = res.payload.merchant_id;
-
-        // Auto-poll to detect when device scans and connects
-        this.startPairingPolling(primaryDeviceId);
-      }
-    } catch (e) {
-      if (qrSlot) {
-        qrSlot.innerHTML = `<div style="color:var(--danger); padding:20px;">Failed to load QR code: ${e.message}</div>`;
-      }
-    }
+    await this.loadAddDeviceQr();
   }
 
   async submitAddDevice() {

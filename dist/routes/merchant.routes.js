@@ -201,12 +201,34 @@ export async function merchantRoutes(fastify) {
     });
     // Device Pairing QR Code Generation
     fastify.get('/api/v1/merchant/devices/:id/qr', async (request, reply) => {
-        const deviceId = request.params.id;
+        let deviceId = request.params.id;
         const merchantId = resolveMerchantId(request);
         let dev = null;
         try {
             const devices = (await DeviceService.listMerchantDevices(merchantId)) || [];
-            dev = devices.find(d => d.id === deviceId);
+            if (deviceId === 'primary' || deviceId === 'auto' || deviceId === 'default') {
+                dev = devices[0];
+            }
+            else {
+                dev = devices.find(d => d.id === deviceId);
+            }
+            // If no device exists yet for this merchant, auto-provision one on the fly
+            if (!dev && (deviceId === 'primary' || deviceId === 'auto' || deviceId === 'default' || devices.length === 0)) {
+                try {
+                    const reg = await DeviceService.registerDevice({
+                        merchantId,
+                        deviceName: 'SyncPay Phone 1',
+                    });
+                    dev = reg.device;
+                    if (reg.token) {
+                        dev.device_token = reg.token;
+                    }
+                    deviceId = dev.id;
+                }
+                catch (regErr) {
+                    fastify.log.warn(`Auto-provisioning device notice: ${regErr.message}`);
+                }
+            }
         }
         catch (e) {
             fastify.log.warn(`DeviceService.listMerchantDevices error: ${e.message}`);
@@ -214,7 +236,7 @@ export async function merchantRoutes(fastify) {
         if (!dev && (merchantId === DEMO_MERCHANT_ID || merchantId === FALLBACK_MERCHANT_ID)) {
             try {
                 const fallback = dbService.getAllDevices(FALLBACK_MERCHANT_ID);
-                dev = fallback.find((d) => d.id === deviceId);
+                dev = fallback.find((d) => d.id === deviceId) || fallback[0];
             }
             catch (e) {
                 fastify.log.warn(`dbService.getAllDevices error: ${e.message}`);
@@ -232,7 +254,7 @@ export async function merchantRoutes(fastify) {
         const pairingPayload = {
             backend_url: serverUrl,
             merchant_id: payloadMerchantId,
-            device_id: deviceId,
+            device_id: dev?.id || deviceId,
             device_token: token,
             device_name: dev?.device_name || 'SyncPay Device',
         };
