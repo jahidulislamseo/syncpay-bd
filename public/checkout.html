@@ -1002,11 +1002,11 @@
         <!-- QR Code & Steps Sub-Tab Switcher -->
         <div class="qr-steps-card">
           <div class="sub-tabs-bar">
-            <button class="sub-tab-btn active" id="sub-tab-qr" onclick="switchSubTab('qr')">
+            <button type="button" class="sub-tab-btn active" id="sub-tab-qr" onclick="switchSubTab('qr')" style="cursor:pointer;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
               <span>Scan QR</span>
             </button>
-            <button class="sub-tab-btn" id="sub-tab-steps" onclick="switchSubTab('steps')">
+            <button type="button" class="sub-tab-btn" id="sub-tab-steps" onclick="switchSubTab('steps')" style="cursor:pointer;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               <span>Payment Steps</span>
             </button>
@@ -1152,6 +1152,34 @@
   </div>
 
   <script>
+    // Tab switching for QR and Payment Steps (defined globally immediately)
+    function switchSubTab(tab) {
+      const qrBtn = document.getElementById('sub-tab-qr');
+      const stepsBtn = document.getElementById('sub-tab-steps');
+      const qrContent = document.getElementById('content-qr');
+      const stepsContent = document.getElementById('content-steps');
+
+      if (tab === 'qr') {
+        if (qrBtn) qrBtn.classList.add('active');
+        if (stepsBtn) stepsBtn.classList.remove('active');
+        if (qrContent) qrContent.style.setProperty('display', 'flex', 'important');
+        if (stepsContent) stepsContent.style.setProperty('display', 'none', 'important');
+      } else {
+        if (stepsBtn) stepsBtn.classList.add('active');
+        if (qrBtn) qrBtn.classList.remove('active');
+        if (qrContent) qrContent.style.setProperty('display', 'none', 'important');
+        if (stepsContent) stepsContent.style.setProperty('display', 'flex', 'important');
+      }
+    }
+    window.switchSubTab = switchSubTab;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const qrBtn = document.getElementById('sub-tab-qr');
+      const stepsBtn = document.getElementById('sub-tab-steps');
+      if (qrBtn) qrBtn.addEventListener('click', (e) => { e.preventDefault(); switchSubTab('qr'); });
+      if (stepsBtn) stepsBtn.addEventListener('click', (e) => { e.preventDefault(); switchSubTab('steps'); });
+    });
+
     let paymentMethods = [];
     let activeMethodId = null;
     let activeMethod = null;
@@ -1730,25 +1758,6 @@
         trxLabelEl.innerText = `${shortName} TrxID *`;
         senderInput.placeholder = '017XXXXXXXX';
         trxInput.placeholder = 'e.g. BAX892K1L';
-      }
-    }
-
-    function switchSubTab(tab) {
-      const qrBtn = document.getElementById('sub-tab-qr');
-      const stepsBtn = document.getElementById('sub-tab-steps');
-      const qrContent = document.getElementById('content-qr');
-      const stepsContent = document.getElementById('content-steps');
-
-      if (tab === 'qr') {
-        qrBtn.classList.add('active');
-        stepsBtn.classList.remove('active');
-        qrContent.style.display = 'flex';
-        stepsContent.style.display = 'none';
-      } else {
-        stepsBtn.classList.add('active');
-        qrBtn.classList.remove('active');
-        qrContent.style.display = 'none';
-        stepsContent.style.display = 'flex';
       }
     }
 
