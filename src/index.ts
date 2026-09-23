@@ -100,34 +100,11 @@ await server.register(fastifyStatic, {
 const indexHtmlPath = path.join(publicDir, 'index.html');
 const indexHtmlContent = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf8') : '';
 
-// Canonical Non-WWW & Clean URL Hook: Redirect any www.* or *.html request (301 Permanent Redirect)
-server.addHook('onRequest', async (req, reply) => {
-  // 1. Enforce Non-WWW Canonical Domain (e.g. www.syncpaybd.site -> syncpaybd.site)
-  const host = req.headers.host;
-  if (host && /^www\./i.test(host)) {
-    const nonWwwHost = host.replace(/^www\./i, '');
-    const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
-    return reply.code(301).redirect(`${proto}://${nonWwwHost}${req.raw.url || req.url}`);
-  }
-
-  // 2. Enforce Extensionless Clean URLs (e.g. /dashboard.html -> /dashboard)
-  const rawUrl = req.raw.url || req.url || '';
-  const [pathname, search] = rawUrl.split('?');
-  if (pathname && pathname.endsWith('.html')) {
-    let cleanPath = pathname.slice(0, -5);
-    if (cleanPath === '/index') {
-      cleanPath = '/';
-    }
-    const target = cleanPath + (search ? `?${search}` : '');
-    return reply.code(301).redirect(target);
-  }
-});
-
-server.get('/test-hello', async () => {
-  return 'hello world';
-});
-
 server.get('/home', async (_req, reply) => {
+  return reply.type('text/html').sendFile('index.html');
+});
+
+server.get('/index.html', async (_req, reply) => {
   return reply.type('text/html').sendFile('index.html');
 });
 
