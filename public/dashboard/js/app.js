@@ -41,7 +41,7 @@ class PayFlowDashboardApp {
     this.updateSidebarUser();
 
     // Check and show Demo Mode Strip if explicitly exploring demo merchant
-    const isDemoMode = (this.session && (this.session.isDemo === true || this.session.merchantId === 'm_demo_101')) || window.location.search.includes('demo=true');
+    const isDemoMode = (this.session && (this.session.isDemo === true || this.session.merchantId === 'm_demo_101' || this.session.merchantId === '01711000000260923' || this.session.email === 'demo@syncpaybd.site')) || window.location.search.includes('demo=true');
     this.isDemoMode = isDemoMode;
     const demoStrip = document.getElementById('demo-mode-strip');
     if (demoStrip && isDemoMode) {

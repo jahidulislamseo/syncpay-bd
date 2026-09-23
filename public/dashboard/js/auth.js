@@ -116,7 +116,7 @@ const PLANS = {
 
 const DEMO_ACCOUNTS = [
   {
-    id: 'm_demo_101',
+    id: '01711000000260923',
     email: 'demo@syncpaybd.site',
     phone: '01711000000',
     password: 'demo1234',
@@ -127,7 +127,7 @@ const DEMO_ACCOUNTS = [
     apiKey: 'live_sk_demo_99410abc',
   },
   {
-    id: 'm_starter_001',
+    id: '01811000000260923',
     email: 'starter@test.com',
     phone: '01811000000',
     password: 'test1234',
@@ -138,7 +138,7 @@ const DEMO_ACCOUNTS = [
     apiKey: 'live_sk_starter_11111',
   },
   {
-    id: 'm_ent_001',
+    id: '01911000000260923',
     email: 'enterprise@test.com',
     phone: '01911000000',
     password: 'ent1234',
@@ -201,7 +201,10 @@ export const auth = {
     if (password.length < 6) {
       return { ok: false, error: 'Password must be at least 6 characters.' };
     }
-    const id = 'm_' + Math.random().toString(36).slice(2, 9);
+    const cleanDigits = (phone || '01700000000').replace(/\D/g, '').slice(-11).padStart(11, '0');
+    const d = new Date();
+    const dateStr = String(d.getFullYear()).slice(-2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    const id = cleanDigits + dateStr; // Exactly 17 digits: 11 phone + 6 date
     const apiKey = 'live_sk_' + Math.random().toString(36).slice(2, 18);
     const newMerchant = {
       id, name, business,

@@ -9,20 +9,26 @@ import { CryptoUtil } from '../utils/crypto.js';
 import { MerchantRepository } from '../db/repositories/merchant.repository.js';
 
 export async function merchantRoutes(fastify: FastifyInstance) {
-  const DEMO_MERCHANT_ID = '00000000-0000-0000-0000-000000000101';
+  const DEMO_17DIGIT_MERCHANT_ID = '01711000000260923';
+  const DEMO_MERCHANT_ID = '01711000000260923';
+  const LEGACY_UUID_MERCHANT_ID = '00000000-0000-0000-0000-000000000101';
   const FALLBACK_MERCHANT_ID = 'm_demo_101';
 
   function resolveMerchantId(request: FastifyRequest): string {
     const headerMerchantId = (request.headers['x-merchant-id'] || request.headers['merchant-id']) as string | undefined;
     if (headerMerchantId && typeof headerMerchantId === 'string' && headerMerchantId.trim() && headerMerchantId !== 'null' && headerMerchantId !== 'undefined') {
-      return headerMerchantId.trim();
+      const trimmed = headerMerchantId.trim();
+      if (trimmed === LEGACY_UUID_MERCHANT_ID || trimmed === FALLBACK_MERCHANT_ID) {
+        return DEMO_17DIGIT_MERCHANT_ID;
+      }
+      return trimmed;
     }
     const apiKey = (request.headers['syncpay-api-key'] || request.headers['x-api-key'] || request.headers['payflow-api-key']) as string | undefined;
     if (apiKey && typeof apiKey === 'string' && apiKey.trim() && !apiKey.startsWith('sandbox_test_')) {
       const merchant = dbService.getMerchantByApiKey(apiKey.trim());
       if (merchant) return merchant.id;
     }
-    return DEMO_MERCHANT_ID;
+    return DEMO_17DIGIT_MERCHANT_ID;
   }
 
   // Get merchant dashboard stats
@@ -243,9 +249,14 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     const protocol = request.headers['x-forwarded-proto'] || (isLocal ? 'http' : 'https');
     const serverUrl = isLocal ? 'http://10.10.26.121:4000' : `${protocol}://${host}`;
 
+    let payloadMerchantId = dev?.merchant_id || merchantId || DEMO_MERCHANT_ID;
+    if (payloadMerchantId === LEGACY_UUID_MERCHANT_ID || payloadMerchantId === FALLBACK_MERCHANT_ID) {
+      payloadMerchantId = DEMO_17DIGIT_MERCHANT_ID;
+    }
+
     const pairingPayload = {
       backend_url: serverUrl,
-      merchant_id: dev?.merchant_id || DEMO_MERCHANT_ID,
+      merchant_id: payloadMerchantId,
       device_id: deviceId,
       device_token: token,
       device_name: dev?.device_name || 'TECNO KM5 (SyncPay Forwarder)',
@@ -437,7 +448,10 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     }
 
     const passwordHash = CryptoUtil.hashPassword(body.password);
-    const id = '00000000-0000-4' + Math.random().toString(16).substring(2, 5) + '-a' + Math.random().toString(16).substring(2, 5) + '-' + Math.random().toString(16).substring(2, 14);
+    const cleanPhone = (body.phone || '01700000000').replace(/\D/g, '').slice(-11).padStart(11, '0');
+    const d = new Date();
+    const dateStr = String(d.getFullYear()).slice(-2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    const id = cleanPhone + dateStr; // Exactly 17 digits: 11 phone + 6 date (YYMMDD)
     const apiKey = 'live_sk_' + Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14);
     const businessName = body.business_name || body.name + ' Store';
 

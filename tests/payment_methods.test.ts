@@ -109,4 +109,33 @@ describe('Payment Methods Suite: Zero-Prefill & Dynamic Merchant Control', () =>
       db.deletePaymentMethod(m.id, merchantId);
     }
   });
+
+  it('should generate and support deterministic 17-digit merchant identifiers (11 digits phone + 6 digits YYMMDD)', () => {
+    const phone = '01755123456';
+    const cleanPhone = phone.replace(/\D/g, '').slice(-11).padStart(11, '0');
+    const d = new Date();
+    const dateStr = String(d.getFullYear()).slice(-2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    const id17 = cleanPhone + dateStr;
+
+    assert.equal(id17.length, 17, 'Identifier must be strictly 17 digits');
+    assert.match(id17, /^\d{17}$/, 'Identifier must be strictly numeric digits');
+
+    // Test inserting and querying channels with 17-digit ID
+    db.upsertPaymentMethod({
+      merchant_id: id17,
+      provider_type: 'nagad',
+      title: 'Nagad 17D',
+      account_number: phone,
+      is_active: 1,
+    });
+
+    const methods = db.getPaymentMethods(id17, false) as any[];
+    assert.equal(methods.length, 1, 'Should find channel for 17-digit merchant ID');
+    assert.equal(methods[0].merchant_id, id17, 'Channel merchant_id must match 17-digit ID');
+
+    // Clean up
+    db.deletePaymentMethod(methods[0].id, id17);
+    const afterDelete = db.getPaymentMethods(id17, false) as any[];
+    assert.equal(afterDelete.length, 0, 'Should delete channel for 17-digit merchant ID');
+  });
 });

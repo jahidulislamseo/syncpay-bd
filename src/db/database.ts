@@ -382,7 +382,13 @@ export class DatabaseService {
       `).run();
     }
 
-    // Seed UUID merchant & device aliases for Supabase schema tests
+    // Seed 17-digit merchant & legacy aliases
+    if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('01711000000260923')) {
+      this.db.prepare(`
+        INSERT OR IGNORE INTO merchants (id, name, api_key, webhook_url)
+        VALUES ('01711000000260923', 'Demo Merchant Store', 'live_demo_sec_99410_17d', 'http://localhost:3000/webhook')
+      `).run();
+    }
     if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('00000000-0000-0000-0000-000000000101')) {
       this.db.prepare(`
         INSERT OR IGNORE INTO merchants (id, name, api_key, webhook_url)
@@ -403,7 +409,7 @@ export class DatabaseService {
     }
 
     // Purge legacy pre-seeded mock payment channels so merchants start with a 100% clean slate
-    this.db.prepare("DELETE FROM payment_methods WHERE id LIKE 'pm_%_m_demo_101' OR id LIKE 'pm_%_00000000-0000-0000-0000-000000000101'").run();
+    this.db.prepare("DELETE FROM payment_methods WHERE id LIKE 'pm_%_m_demo_101' OR id LIKE 'pm_%_00000000-0000-0000-0000-000000000101' OR id LIKE 'pm_%_01711000000260923'").run();
   }
 
   private seedPaymentMethods() {
@@ -416,8 +422,8 @@ export class DatabaseService {
   }
 
   public getMerchantById(id: string) {
-    const stmt = this.db.prepare("SELECT * FROM merchants WHERE id = ? OR (id = 'm_demo_101' AND ? = '00000000-0000-0000-0000-000000000101')");
-    return stmt.get(id, id) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
+    const stmt = this.db.prepare("SELECT * FROM merchants WHERE id = ? OR (id = 'm_demo_101' AND (? = '00000000-0000-0000-0000-000000000101' OR ? = '01711000000260923'))");
+    return stmt.get(id, id, id) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
   }
 
   public getMerchantBySlug(slug: string) {
@@ -1275,7 +1281,7 @@ export class DatabaseService {
     query += ' ORDER BY sort_order ASC, created_at ASC';
 
     let res = this.db.prepare(query).all(merchantId);
-    if ((!res || res.length === 0) && (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101')) {
+    if ((!res || res.length === 0) && (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === '01711000000260923')) {
       const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
       res = this.db.prepare(query).all(fallbackId);
     }
@@ -1286,7 +1292,7 @@ export class DatabaseService {
     if (merchantId) {
       const row = this.db.prepare('SELECT * FROM payment_methods WHERE id = ? AND merchant_id = ?').get(id, merchantId);
       if (row) return row;
-      if (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101') {
+      if (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === '01711000000260923') {
         const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
         return this.db.prepare('SELECT * FROM payment_methods WHERE id = ? AND merchant_id = ?').get(id, fallbackId);
       }
@@ -1402,13 +1408,13 @@ export class DatabaseService {
   }
 
   public togglePaymentMethod(id: string, merchantId: string, isActive: boolean) {
-    const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101';
+    const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101' || merchantId === '01711000000260923';
     if (isDemo) {
       const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
       this.db.prepare(`
         UPDATE payment_methods 
         SET is_active = ?, updated_at = datetime('now')
-        WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
+        WHERE id = ? AND (merchant_id = ? OR merchant_id = ? OR merchant_id = '01711000000260923')
       `).run(isActive ? 1 : 0, id, merchantId, fallbackId);
     } else {
       this.db.prepare(`
@@ -1421,12 +1427,12 @@ export class DatabaseService {
   }
 
   public deletePaymentMethod(id: string, merchantId: string) {
-    const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101';
+    const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101' || merchantId === '01711000000260923';
     if (isDemo) {
       const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
       this.db.prepare(`
         DELETE FROM payment_methods 
-        WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
+        WHERE id = ? AND (merchant_id = ? OR merchant_id = ? OR merchant_id = '01711000000260923')
       `).run(id, merchantId, fallbackId);
     } else {
       this.db.prepare(`

@@ -338,7 +338,13 @@ export class DatabaseService {
         VALUES ('dev_phone_1', 'm_demo_101', 'token_phone_primary', 'TECNO KM5 (SyncPay Forwarder)', '017•••••••')
       `).run();
         }
-        // Seed UUID merchant & device aliases for Supabase schema tests
+        // Seed 17-digit merchant & legacy aliases
+        if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('01711000000260923')) {
+            this.db.prepare(`
+        INSERT OR IGNORE INTO merchants (id, name, api_key, webhook_url)
+        VALUES ('01711000000260923', 'Demo Merchant Store', 'live_demo_sec_99410_17d', 'http://localhost:3000/webhook')
+      `).run();
+        }
         if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('00000000-0000-0000-0000-000000000101')) {
             this.db.prepare(`
         INSERT OR IGNORE INTO merchants (id, name, api_key, webhook_url)
@@ -358,7 +364,7 @@ export class DatabaseService {
       `).run();
         }
         // Purge legacy pre-seeded mock payment channels so merchants start with a 100% clean slate
-        this.db.prepare("DELETE FROM payment_methods WHERE id LIKE 'pm_%_m_demo_101' OR id LIKE 'pm_%_00000000-0000-0000-0000-000000000101'").run();
+        this.db.prepare("DELETE FROM payment_methods WHERE id LIKE 'pm_%_m_demo_101' OR id LIKE 'pm_%_00000000-0000-0000-0000-000000000101' OR id LIKE 'pm_%_01711000000260923'").run();
     }
     seedPaymentMethods() {
         // Disabled: merchants start with 0 payment channels until explicitly added
@@ -368,8 +374,8 @@ export class DatabaseService {
         return stmt.get(apiKey);
     }
     getMerchantById(id) {
-        const stmt = this.db.prepare("SELECT * FROM merchants WHERE id = ? OR (id = 'm_demo_101' AND ? = '00000000-0000-0000-0000-000000000101')");
-        return stmt.get(id, id);
+        const stmt = this.db.prepare("SELECT * FROM merchants WHERE id = ? OR (id = 'm_demo_101' AND (? = '00000000-0000-0000-0000-000000000101' OR ? = '01711000000260923'))");
+        return stmt.get(id, id, id);
     }
     getMerchantBySlug(slug) {
         const stmt = this.db.prepare('SELECT * FROM merchants WHERE LOWER(brand_slug) = LOWER(?)');
@@ -1023,7 +1029,7 @@ export class DatabaseService {
         }
         query += ' ORDER BY sort_order ASC, created_at ASC';
         let res = this.db.prepare(query).all(merchantId);
-        if ((!res || res.length === 0) && (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101')) {
+        if ((!res || res.length === 0) && (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === '01711000000260923')) {
             const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
             res = this.db.prepare(query).all(fallbackId);
         }
@@ -1034,7 +1040,7 @@ export class DatabaseService {
             const row = this.db.prepare('SELECT * FROM payment_methods WHERE id = ? AND merchant_id = ?').get(id, merchantId);
             if (row)
                 return row;
-            if (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101') {
+            if (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === '01711000000260923') {
                 const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
                 return this.db.prepare('SELECT * FROM payment_methods WHERE id = ? AND merchant_id = ?').get(id, fallbackId);
             }
@@ -1086,13 +1092,13 @@ export class DatabaseService {
         }
     }
     togglePaymentMethod(id, merchantId, isActive) {
-        const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101';
+        const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101' || merchantId === '01711000000260923';
         if (isDemo) {
             const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
             this.db.prepare(`
         UPDATE payment_methods 
         SET is_active = ?, updated_at = datetime('now')
-        WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
+        WHERE id = ? AND (merchant_id = ? OR merchant_id = ? OR merchant_id = '01711000000260923')
       `).run(isActive ? 1 : 0, id, merchantId, fallbackId);
         }
         else {
@@ -1105,12 +1111,12 @@ export class DatabaseService {
         return { success: true, id, is_active: isActive };
     }
     deletePaymentMethod(id, merchantId) {
-        const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101';
+        const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101' || merchantId === '01711000000260923';
         if (isDemo) {
             const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
             this.db.prepare(`
         DELETE FROM payment_methods 
-        WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
+        WHERE id = ? AND (merchant_id = ? OR merchant_id = ? OR merchant_id = '01711000000260923')
       `).run(id, merchantId, fallbackId);
         }
         else {
