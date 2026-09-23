@@ -2436,15 +2436,15 @@ class PayFlowDashboardApp {
         const devices = await api.getDevices();
         if (Array.isArray(devices) && devices.length > 0) {
           const matched = devices.find(d => {
-            const matchesId = !deviceId || d.id === deviceId || d.device_token === deviceId;
+            const matchesId = d.id === deviceId || d.device_token === deviceId;
             if (!matchesId) return false;
-            if (d.status === 'ONLINE') {
-              if (d.last_seen || d.last_seen_at) {
-                const ts = new Date(d.last_seen || d.last_seen_at).getTime();
-                if (!isNaN(ts) && (ts >= modalStartTime - 5000 || Date.now() - ts < 25000)) {
-                  return true;
-                }
-              }
+
+            const lastSeenStr = d.last_seen || d.last_seen_at;
+            if (!lastSeenStr) return false;
+
+            const ts = new Date(typeof lastSeenStr === 'string' ? lastSeenStr.replace(' ', 'T') : lastSeenStr).getTime();
+            // ONLY match if a genuine heartbeat was received strictly AFTER the modal was opened
+            if (!isNaN(ts) && ts > modalStartTime + 1000) {
               return true;
             }
             return false;
@@ -2456,7 +2456,7 @@ class PayFlowDashboardApp {
           }
         }
       } catch (_) {}
-    }, 1500);
+    }, 2500);
   }
 
   onDevicePairSuccess(device) {
@@ -2468,23 +2468,20 @@ class PayFlowDashboardApp {
     slots.forEach(slot => {
       slot.innerHTML = `
         <div style="padding: 24px; text-align: center; animation: fadeIn 0.3s ease-in-out;">
-          <div style="width: 68px; height: 68px; border-radius: 50%; background: #10b981; color: white; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 14px auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);">
-            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: #10b981; color: white; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <h3 style="font-size: 17px; font-weight: 800; color: #10b981; margin: 0 0 6px 0;">🎉 Device Connected!</h3>
-          <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">${device.device_name || 'ফোন'} সফলভাবে কানেক্ট হয়েছে।</p>
-          <div style="margin-top: 12px; font-size: 12px; font-weight: 700; color: var(--primary);">ড্যাশবোর্ড পেজ ওপেন হচ্ছে...</div>
+          <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 16px 0;">${device.device_name || 'ফোন'} সফলভাবে কানেক্ট হয়েছে।</p>
+          <button class="btn btn-primary-action" style="padding: 8px 20px; font-size: 13px; font-weight: 700; background: #10b981;" onclick="window.payflowApp.closeAllModals(); window.payflowApp.refreshAllData();">
+            Done (সম্পন্ন)
+          </button>
         </div>
       `;
     });
 
-    this.showToast(`🎉 ${device.device_name || 'Device'} কানেক্ট হয়েছে! ড্যাশবোর্ড রিলোড হচ্ছে...`, 'success');
-
-    setTimeout(() => {
-      this.closeAllModals();
-      window.location.hash = '#devices';
-      window.location.reload();
-    }, 1800);
+    this.showToast(`🎉 ${device.device_name || 'Device'} কানেক্ট হয়েছে!`, 'success');
+    this.refreshAllData().catch(() => {});
   }
 
   async showDeviceQrModal(deviceId, deviceName) {

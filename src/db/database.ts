@@ -732,7 +732,7 @@ export class DatabaseService {
     );
     const stmt = this.db.prepare(`
       INSERT INTO devices (id, merchant_id, device_name, sim_number, device_token, status)
-      VALUES (?, ?, ?, ?, ?, 'ONLINE')
+      VALUES (?, ?, ?, ?, ?, 'OFFLINE')
     `);
     stmt.run(params.id, params.merchantId, params.deviceName, params.simNumber, params.deviceToken);
     return this.getDeviceByToken(params.deviceToken);
