@@ -92,6 +92,9 @@ server.addHook('onRequest', async (req, reply) => {
     }
 });
 // Dashboard & App clean routes (serve HTML directly without extension in URL)
+server.get('/', async (_req, reply) => {
+    return reply.type('text/html').sendFile('index.html');
+});
 server.get('/login', async (_req, reply) => {
     return reply.type('text/html').sendFile('login.html');
 });
