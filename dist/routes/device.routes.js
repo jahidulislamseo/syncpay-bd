@@ -27,6 +27,10 @@ const heartbeatSchema = z.object({
     charger_type: z.string().optional(),
     free_ram_mb: z.number().optional(),
     sim_slots: z.any().optional(),
+    device_name: z.string().optional(),
+    device_model: z.string().optional(),
+    android_version: z.string().optional(),
+    sim_number: z.string().optional(),
 });
 export async function deviceRoutes(fastify) {
     /**
@@ -159,6 +163,10 @@ export async function deviceRoutes(fastify) {
             charger_type: data.charger_type,
             free_ram_mb: data.free_ram_mb,
             sim_slots: data.sim_slots,
+            device_name: data.device_name,
+            device_model: data.device_model,
+            android_version: data.android_version,
+            sim_number: data.sim_number,
         });
         return reply.send({
             success: true,

@@ -130,7 +130,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
 
   // Get merchant devices
   fastify.get('/api/v1/merchant/devices', async (request: FastifyRequest, reply: FastifyReply) => {
-    const merchantId = resolveMerchantId(request);
+    const merchantId = resolveAuthMerchantId(request);
     const devices = await DeviceService.listMerchantDevices(merchantId);
     return reply.send({ success: true, data: devices || [] });
   });

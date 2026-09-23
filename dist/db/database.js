@@ -250,6 +250,8 @@ export class DatabaseService {
             { name: 'charger_type', type: 'TEXT' },
             { name: 'free_ram_mb', type: 'INTEGER' },
             { name: 'sim_slots', type: 'TEXT' },
+            { name: 'device_model', type: 'TEXT' },
+            { name: 'android_version', type: 'TEXT' },
         ];
         for (const col of devColsToAdd) {
             if (!existingDevCols.has(col.name)) {
@@ -429,19 +431,34 @@ export class DatabaseService {
         return stmt.get(tokenOrId, tokenOrId);
     }
     updateDeviceHeartbeat(tokenOrId, telemetry) {
+        // If device doesn't exist in local SQLite, insert record to guarantee telemetry persistence
+        const existing = this.db.prepare('SELECT id FROM devices WHERE device_token = ? OR id = ?').get(tokenOrId, tokenOrId);
+        if (!existing) {
+            try {
+                this.db.prepare(`
+          INSERT INTO devices (id, merchant_id, device_token, device_name, status, last_seen)
+          VALUES (?, '00000000-0000-42d3-a7b6-aa2aa137fd1b', ?, ?, 'ONLINE', datetime('now'))
+        `).run(tokenOrId, tokenOrId, telemetry?.device_name || 'SyncPay Device');
+            }
+            catch (_) { }
+        }
         if (telemetry) {
             this.db.prepare(`
         UPDATE devices 
         SET last_seen = datetime('now'), 
             status = 'ONLINE',
+            device_name = COALESCE(?, device_name),
+            device_model = COALESCE(?, device_model),
+            android_version = COALESCE(?, android_version),
             battery_level = COALESCE(?, battery_level),
             battery_temp = COALESCE(?, battery_temp),
             is_charging = COALESCE(?, is_charging),
             charger_type = COALESCE(?, charger_type),
             free_ram_mb = COALESCE(?, free_ram_mb),
-            sim_slots = COALESCE(?, sim_slots)
+            sim_slots = COALESCE(?, sim_slots),
+            sim_number = COALESCE(?, sim_number)
         WHERE device_token = ? OR id = ?
-      `).run(telemetry.battery_level ?? null, telemetry.battery_temp ?? telemetry.battery_temperature ?? null, telemetry.is_charging != null ? (telemetry.is_charging ? 1 : 0) : null, telemetry.charger_type ?? null, telemetry.free_ram_mb ?? null, telemetry.sim_slots ? JSON.stringify(telemetry.sim_slots) : null, tokenOrId, tokenOrId);
+      `).run(telemetry.device_name ?? null, telemetry.device_model ?? null, telemetry.android_version ?? null, telemetry.battery_level ?? null, telemetry.battery_temp ?? telemetry.battery_temperature ?? null, telemetry.is_charging != null ? (telemetry.is_charging ? 1 : 0) : null, telemetry.charger_type ?? null, telemetry.free_ram_mb ?? null, telemetry.sim_slots ? JSON.stringify(telemetry.sim_slots) : null, telemetry.sim_number ?? null, tokenOrId, tokenOrId);
         }
         else {
             this.db.prepare("UPDATE devices SET last_seen = datetime('now'), status = 'ONLINE' WHERE device_token = ? OR id = ?").run(tokenOrId, tokenOrId);

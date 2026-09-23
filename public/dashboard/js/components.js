@@ -325,28 +325,62 @@ export const components = {
           <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px auto; line-height: 1.5;">
             আপনার ফোনে <strong>SyncPay Forwarder APK</strong> ইনস্টল করুন এবং নিচের বাটনে ক্লিক করে QR কোড স্ক্যান করে ডিভাইস যুক্ত করুন।
           </p>
-          <button class="btn btn-primary-action" onclick="window.payflowApp.showAddDeviceModal()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            <span>📱 Connect Device / QR Code</span>
-          </button>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button class="btn btn-primary-action" onclick="window.payflowApp.openAddDeviceModal()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>📱 Connect Device / QR Code</span>
+            </button>
+            <button class="btn btn-secondary-action" onclick="window.payflowApp.refreshDevices(true)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+              <span>🔄 Refresh Devices</span>
+            </button>
+          </div>
         </div>
       ` : `
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:20px;">
         ${devices.map(d => {
           const isOnline = d.status === 'ONLINE';
-          const batt = d.battery_level != null ? d.battery_level : (isOnline ? 88 : null);
-          const isCharging = d.is_charging ?? (isOnline ? true : false);
-          const model = d.device_model || (d.device_name && d.device_name !== 'Android Forwarder' ? d.device_name : 'Android Telephony Agent');
-          const osVer = d.android_version ? `Android ${d.android_version}` : 'Android 14';
+          const batt = d.battery_level != null ? d.battery_level : null;
+          const isCharging = d.is_charging === true || d.is_charging === 1;
+          const model = d.device_model || (d.device_name && d.device_name !== 'Android Forwarder' ? d.device_name : 'Telephony Device');
+          const osVer = d.android_version ? (d.android_version.startsWith('Android') ? d.android_version : `Android ${d.android_version}`) : 'Awaiting sync';
 
           let battColor = '#10b981';
+          let battDisplay = 'Standby';
           if (batt !== null) {
+            battDisplay = `${batt}%`;
             if (batt < 20) battColor = '#ef4444';
             else if (batt < 35) battColor = '#f59e0b';
+          } else if (!isOnline) {
+            battDisplay = 'Offline';
           }
 
-          const sim1Number = d.sim_number || (d.sim_slots && d.sim_slots[0]?.number) || '017•••••••';
-          const sim2 = (d.sim_slots && d.sim_slots[1]) ? d.sim_slots[1] : null;
+          let simDisplayHtml = 'Awaiting SIM Telemetry';
+          if (d.sim_slots && Array.isArray(d.sim_slots) && d.sim_slots.length > 0) {
+            simDisplayHtml = d.sim_slots.map((s, idx) => {
+              const carrier = s.carrier || s.displayName || 'Active';
+              const slotNum = s.slot_index !== undefined ? s.slot_index + 1 : idx + 1;
+              return `SIM ${slotNum}: <strong style="color:var(--text-primary);">${carrier}</strong>`;
+            }).join(' • ');
+          } else if (d.sim_number) {
+            simDisplayHtml = `SIM 1: <strong style="color:var(--text-primary);">${d.sim_number}</strong>`;
+          }
+
+          const activeMethods = (window.payflowApp?.paymentMethods || []).filter(m => m.is_active);
+          let walletsHtml = '';
+          if (activeMethods.length > 0) {
+            walletsHtml = activeMethods.map(m => {
+              const type = (m.channel_type || '').toLowerCase();
+              let color = '#6366f1';
+              let bg = 'rgba(99,102,241,0.1)';
+              if (type.includes('bkash')) { color = '#e2136e'; bg = 'rgba(226,19,110,0.1)'; }
+              else if (type.includes('nagad')) { color = '#f7941d'; bg = 'rgba(247,148,29,0.1)'; }
+              else if (type.includes('rocket')) { color = '#8c2b8d'; bg = 'rgba(140,43,141,0.1)'; }
+              else if (type.includes('upay')) { color = '#00a859'; bg = 'rgba(0,168,89,0.1)'; }
+              return `<span style="display:inline-flex; align-items:center; gap:3px; background:${bg}; color:${color}; padding:2px 6px; border-radius:4px; font-weight:700;">● ${m.channel_name || m.channel_type}</span>`;
+            }).join(' ');
+          } else {
+            walletsHtml = `<span style="color:var(--text-secondary); font-size:12px;">Universal Ingest (bKash / Nagad / Rocket / Upay)</span>`;
+          }
 
           return `
           <div class="card-panel" style="display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;">
@@ -377,7 +411,7 @@ export const components = {
                   <span style="font-size:11px; color:var(--text-muted); font-weight:600;">Power</span>
                   <div style="display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; color:${battColor};">
                     <span>${isCharging ? '⚡' : '🔋'}</span>
-                    <span>${batt !== null ? `${batt}%` : 'Standby'}</span>
+                    <span>${battDisplay}</span>
                   </div>
                 </div>
 
@@ -386,7 +420,7 @@ export const components = {
                   <span style="font-size:11px; color:var(--text-muted); font-weight:600;">Network</span>
                   <div style="display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; color:var(--primary);">
                     <span>📶</span>
-                    <span>${isOnline ? '4G/Wi-Fi • 32ms' : 'Disconnected'}</span>
+                    <span>${isOnline ? 'Active (Heartbeat OK)' : 'Disconnected'}</span>
                   </div>
                 </div>
 
@@ -395,7 +429,7 @@ export const components = {
                   <span style="font-size:11px; color:var(--text-muted); font-weight:600;">System</span>
                   <div style="display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; color:var(--text-secondary);">
                     <span>⚙️</span>
-                    <span>v1.1.0 (${osVer})</span>
+                    <span>${osVer}</span>
                   </div>
                 </div>
               </div>
@@ -405,17 +439,14 @@ export const components = {
                 <div class="detail-item">
                   <span class="detail-key">📶 SIM Configuration</span>
                   <span class="detail-val mono" style="font-size:12px; font-weight:600;">
-                    SIM 1: <strong style="color:var(--text-primary);">${sim1Number}</strong>
-                    ${sim2 ? ` • SIM 2: ${sim2.number || 'Active'}` : ''}
+                    ${simDisplayHtml}
                   </span>
                 </div>
 
                 <div class="detail-item">
                   <span class="detail-key">💳 Active Wallets</span>
                   <span class="detail-val" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; flex-wrap:wrap;">
-                    <span style="display:inline-flex; align-items:center; gap:3px; background:rgba(226,19,110,0.1); color:#e2136e; padding:2px 6px; border-radius:4px; font-weight:700;">● bKash</span>
-                    <span style="display:inline-flex; align-items:center; gap:3px; background:rgba(247,148,29,0.1); color:#f7941d; padding:2px 6px; border-radius:4px; font-weight:700;">● Nagad</span>
-                    <span style="display:inline-flex; align-items:center; gap:3px; background:rgba(140,43,141,0.1); color:#8c2b8d; padding:2px 6px; border-radius:4px; font-weight:700;">● Rocket</span>
+                    ${walletsHtml}
                   </span>
                 </div>
 

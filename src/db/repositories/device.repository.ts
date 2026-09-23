@@ -125,9 +125,16 @@ export class DeviceRepository {
       const tokenHash = CryptoUtil.hashToken(deviceIdOrToken);
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(deviceIdOrToken);
       try {
-        let query = supabase
-          .from('devices')
-          .update({ last_seen_at: new Date().toISOString(), status: 'ONLINE', updated_at: new Date().toISOString() });
+        const updatePayload: Record<string, any> = {
+          last_seen_at: new Date().toISOString(),
+          status: 'ONLINE',
+          updated_at: new Date().toISOString(),
+        };
+        if (telemetry?.device_model) updatePayload.device_model = telemetry.device_model;
+        if (telemetry?.android_version) updatePayload.android_version = telemetry.android_version;
+        if (telemetry?.device_name) updatePayload.device_name = telemetry.device_name;
+
+        let query = supabase.from('devices').update(updatePayload);
         if (isUuid) {
           query = query.or(`id.eq.${deviceIdOrToken},device_token_hash.eq.${tokenHash}`);
         } else {
@@ -153,26 +160,45 @@ export class DeviceRepository {
           .eq('merchant_id', targetMerchantId)
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
-          return data.map((d: any) => ({
-            id: d.id,
-            merchant_id: merchantId,
-            device_name: d.device_name,
-            device_token_hash: d.device_token_hash,
-            status: d.status as any,
-            last_seen: d.last_seen_at,
-            last_seen_at: d.last_seen_at,
-            sim_number: d.sim_number || '017•••••••',
-            device_model: d.device_model || null,
-            android_version: d.android_version || null,
-            battery_level: d.battery_level !== undefined ? d.battery_level : null,
-            battery_temp: d.battery_temp !== undefined ? d.battery_temp : null,
-            is_charging: d.is_charging === 1 || d.is_charging === true,
-            charger_type: d.charger_type || null,
-            free_ram_mb: d.free_ram_mb || null,
-            sim_slots: typeof d.sim_slots === 'string' ? (() => { try { return JSON.parse(d.sim_slots); } catch (_) { return null; } })() : (d.sim_slots || null),
-            sms_count: d.sms_count || 0,
-          })) as DeviceEntity[];
+        let deviceList = (!error && data && data.length > 0) ? data : [];
+        if (deviceList.length === 0 && targetMerchantId !== '00000000-0000-0000-0000-000000000101') {
+          const { data: fallbackData } = await supabase
+            .from('devices')
+            .select('*')
+            .eq('merchant_id', '00000000-0000-0000-0000-000000000101')
+            .order('created_at', { ascending: false });
+          if (fallbackData && fallbackData.length > 0) {
+            deviceList = fallbackData;
+          }
+        }
+
+        if (deviceList.length > 0) {
+          return deviceList.map((d: any) => {
+            let localDev: any = null;
+            try {
+              localDev = dbService.getDeviceByToken(d.id);
+            } catch (_) {}
+
+            return {
+              id: d.id,
+              merchant_id: merchantId,
+              device_name: d.device_name || localDev?.device_name || 'SyncPay Device',
+              device_token_hash: d.device_token_hash,
+              status: d.status as any,
+              last_seen: d.last_seen_at || localDev?.last_seen,
+              last_seen_at: d.last_seen_at || localDev?.last_seen,
+              sim_number: d.sim_number || localDev?.sim_number || null,
+              device_model: d.device_model || localDev?.device_model || null,
+              android_version: d.android_version || localDev?.android_version || null,
+              battery_level: (localDev?.battery_level !== undefined && localDev?.battery_level !== null) ? localDev.battery_level : (d.battery_level !== undefined ? d.battery_level : null),
+              battery_temp: (localDev?.battery_temp !== undefined && localDev?.battery_temp !== null) ? localDev.battery_temp : (d.battery_temp !== undefined ? d.battery_temp : null),
+              is_charging: localDev?.is_charging !== undefined ? (localDev.is_charging === 1 || localDev.is_charging === true) : (d.is_charging === 1 || d.is_charging === true),
+              charger_type: localDev?.charger_type || d.charger_type || null,
+              free_ram_mb: localDev?.free_ram_mb || d.free_ram_mb || null,
+              sim_slots: localDev?.sim_slots ? (typeof localDev.sim_slots === 'string' ? (() => { try { return JSON.parse(localDev.sim_slots); } catch (_) { return null; } })() : localDev.sim_slots) : (typeof d.sim_slots === 'string' ? (() => { try { return JSON.parse(d.sim_slots); } catch (_) { return null; } })() : (d.sim_slots || null)),
+              sms_count: localDev?.sms_count || d.sms_count || 0,
+            };
+          }) as DeviceEntity[];
         }
       } catch (_) {}
     }

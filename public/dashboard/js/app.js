@@ -1,7 +1,7 @@
 // SyncPay BD — Production Dashboard Master Application Controller
 import { i18n } from './i18n.js?v=1.1.0';
 import { api } from './api.js?v=1.1.0';
-import { components } from './components.js?v=1.1.0';
+import { components } from './components.js?v=1.2.0';
 import { auth } from './auth.js';
 
 class PayFlowDashboardApp {
@@ -165,9 +165,10 @@ class PayFlowDashboardApp {
     const activePanel = document.getElementById(`view-${viewName}`);
     if (activePanel) {
       activePanel.classList.add('active');
-    }
-
     this.renderCurrentView();
+    if (viewName === 'devices') {
+      this.refreshDevices();
+    }
   }
 
   showLockedView(viewName, planKey) {
@@ -503,7 +504,14 @@ class PayFlowDashboardApp {
         this.renderHomeTransactions();
       } else if (this.currentView === 'transactions') {
         this.renderTransactionsView();
+      } else if (this.currentView === 'devices') {
+        const freshDevices = await api.getDevices();
+        if (freshDevices) {
+          this.devices = freshDevices;
+          this.renderDevicesView();
+        }
       }
+      this.updateSidebarDeviceBadge();
     } catch (e) {
       // Non-blocking poll
     }
@@ -688,6 +696,53 @@ class PayFlowDashboardApp {
     const slot = document.getElementById('devices-view-slot');
     if (slot) {
       slot.innerHTML = components.renderDevicesList(this.devices);
+    }
+    this.updateSidebarDeviceBadge();
+  }
+
+  showAddDeviceModal() {
+    return this.openAddDeviceModal();
+  }
+
+  async refreshDevices(showToast = false) {
+    try {
+      const freshDevices = await api.getDevices();
+      if (freshDevices) {
+        this.devices = freshDevices;
+        this.renderDevicesView();
+        this.updateSidebarDeviceBadge();
+        if (showToast) {
+          const count = this.devices.length;
+          const onlineCount = this.devices.filter(d => d.status === 'ONLINE').length;
+          this.showToast(`ডিভাইস লিস্ট আপডেট হয়েছে (${onlineCount}/${count} অনলাইন)`, 'success');
+        }
+      }
+    } catch (e) {
+      if (showToast) this.showToast('ডিভাইস রিফ্রেশ ব্যর্থ হয়েছে', 'error');
+    }
+  }
+
+  updateSidebarDeviceBadge() {
+    const badge = document.getElementById('sidebar-device-badge');
+    if (!badge) return;
+    const devs = this.devices || [];
+    const isOnline = devs.some(d => d.status === 'ONLINE');
+    if (devs.length === 0) {
+      badge.style.display = 'none';
+      badge.textContent = '';
+    } else {
+      badge.style.display = 'inline-flex';
+      if (isOnline) {
+        badge.textContent = 'ONLINE';
+        badge.className = 'nav-badge badge-online';
+        badge.style.background = '#10b981';
+        badge.style.color = '#ffffff';
+      } else {
+        badge.textContent = 'OFFLINE';
+        badge.className = 'nav-badge badge-offline';
+        badge.style.background = '#64748b';
+        badge.style.color = '#ffffff';
+      }
     }
   }
 

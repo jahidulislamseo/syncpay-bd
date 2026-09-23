@@ -114,7 +114,7 @@ export async function merchantRoutes(fastify) {
     });
     // Get merchant devices
     fastify.get('/api/v1/merchant/devices', async (request, reply) => {
-        const merchantId = resolveMerchantId(request);
+        const merchantId = resolveAuthMerchantId(request);
         const devices = await DeviceService.listMerchantDevices(merchantId);
         return reply.send({ success: true, data: devices || [] });
     });
