@@ -731,6 +731,11 @@ export class DatabaseService {
     simNumber: string;
     deviceToken: string;
   }) {
+    this.db.prepare('INSERT OR IGNORE INTO merchants (id, name, api_key) VALUES (?, ?, ?)').run(
+      params.merchantId,
+      'Merchant Store',
+      'key_' + params.merchantId
+    );
     const stmt = this.db.prepare(`
       INSERT INTO devices (id, merchant_id, device_name, sim_number, device_token, status)
       VALUES (?, ?, ?, ?, ?, 'ONLINE')
@@ -1311,6 +1316,13 @@ export class DatabaseService {
   }) {
     const id = params.id || ('pm_' + Math.random().toString(36).substring(2, 9));
     const now = new Date().toISOString();
+
+    // Ensure parent merchant row exists to satisfy foreign key constraint
+    this.db.prepare('INSERT OR IGNORE INTO merchants (id, name, api_key) VALUES (?, ?, ?)').run(
+      params.merchant_id,
+      'Merchant Store',
+      'key_' + params.merchant_id
+    );
 
     const existing = this.db.prepare('SELECT id, qr_code_url FROM payment_methods WHERE id = ?').get(id) as any;
     const finalQrCodeUrl = params.qr_code_url !== undefined
