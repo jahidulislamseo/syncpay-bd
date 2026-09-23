@@ -7,27 +7,22 @@
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "has": [{ "type": "host", "value": "www.syncpaybd.site" }],
-      "status": 308,
-      "headers": { "Location": "https://syncpaybd.site/$1" }
-    },
-    { "src": "/api/(.*)",             "dest": "/api/index.js" },
-    { "src": "/api",                  "dest": "/api/index.js" },
-    { "src": "/login",                "dest": "/public/login.html" },
-    { "src": "/dashboard",            "dest": "/public/dashboard.html" },
-    { "src": "/admin",                "dest": "/public/admin.html" },
-    { "src": "/checkout",             "dest": "/public/checkout.html" },
-    { "src": "/checkout/(.*)",        "dest": "/public/checkout.html" },
-    { "src": "/pay/(.*)",             "dest": "/public/checkout.html" },
-    { "src": "/app",                  "dest": "/public/download.html" },
-    { "src": "/download",             "dest": "/public/download.html" },
-    { "src": "/docs/api",             "dest": "/public/docs/api.html" },
-    { "src": "/docs/trx-verification","dest": "/public/docs/trx-verification.html" },
-    { "src": "/docs/webhook",         "dest": "/public/docs/webhook.html" },
-    { "src": "/(.*)",                 "dest": "/public/$1" }
+    { "src": "/api/(.*)",              "dest": "/api/index.js" },
+    { "src": "/api",                   "dest": "/api/index.js" },
+    { "src": "/login",                 "dest": "/login.html" },
+    { "src": "/dashboard",             "dest": "/dashboard.html" },
+    { "src": "/admin",                 "dest": "/admin.html" },
+    { "src": "/checkout",              "dest": "/checkout.html" },
+    { "src": "/checkout/(.*)",         "dest": "/checkout.html" },
+    { "src": "/pay/(.*)",              "dest": "/checkout.html" },
+    { "src": "/app",                   "dest": "/download.html" },
+    { "src": "/download",              "dest": "/download.html" },
+    { "src": "/docs/api",              "dest": "/docs/api.html" },
+    { "src": "/docs/trx-verification", "dest": "/docs/trx-verification.html" },
+    { "src": "/docs/webhook",          "dest": "/docs/webhook.html" },
+    { "src": "/(.*)",                  "dest": "/$1" }
   ]
 }
+
 
 
