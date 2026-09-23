@@ -66,12 +66,19 @@ await server.register(adminRoutes);
 
 // Health check
 server.get('/health', async (req) => {
+  const indexHtmlPath = path.join(publicDir, 'index.html');
+  let publicFiles: string[] = [];
+  try {
+    publicFiles = fs.readdirSync(publicDir);
+  } catch (e: any) {
+    publicFiles = [e.message];
+  }
   return {
     status: 'OK',
-    reqUrl: req.url,
-    rawUrl: req.raw.url,
-    matchedPath: req.headers['x-matched-path'],
-    forwardedUri: req.headers['x-forwarded-uri'],
+    publicDir,
+    publicFiles,
+    indexExists: fs.existsSync(indexHtmlPath),
+    indexLength: indexHtmlContent ? indexHtmlContent.length : 0,
     system: 'SyncPay BD Gateway',
   };
 });
