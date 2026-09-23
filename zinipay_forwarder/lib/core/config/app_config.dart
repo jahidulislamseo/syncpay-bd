@@ -1,7 +1,7 @@
 class AppConfig {
   static const String appName = 'SyncPay Agent';
   static const String appTagline = 'Secure Payment Forwarder';
-  static const String appVersion = '1.1.0';
+  static const String appVersion = '1.2.0';
   static const String developerName = 'Jahidul Islam';
   static const String developerWebsite = 'https://jahidulislam.dev';
   static const String privacyPolicyUrl = 'https://syncpaybd.site/privacy';

@@ -135,7 +135,7 @@ class ConnectionScreen extends ConsumerWidget {
                           ? agentState.androidVersion
                           : 'Android OS',
                     ),
-                    const _InfoRow(label: 'App Version', value: '1.1.0 (Build 2)'),
+                    const _InfoRow(label: 'App Version', value: '1.2.0 (Build 3)'),
                     _InfoRow(label: loc.tr('mfs_providers'), value: 'bKash, Nagad, Rocket, Upay'),
                     _InfoRow(
                       label: loc.tr('last_synced'),

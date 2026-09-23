@@ -210,7 +210,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       package_name: 'dev.jahidulislam.syncpay',
       developer: 'Jahidul Islam',
       developer_url: 'https://jahidulislam.dev',
-      latest_version: '1.1.0',
+      latest_version: '1.2.0',
       version_code: 2,
       min_supported_version: '1.0.0',
       force_update: false,

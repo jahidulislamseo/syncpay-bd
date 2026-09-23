@@ -1,6 +1,6 @@
 // SyncPay BD — Production Dashboard Master Application Controller
-import { i18n } from './i18n.js?v=1.1.0';
-import { api } from './api.js?v=1.1.0';
+import { i18n } from './i18n.js?v=1.2.0';
+import { api } from './api.js?v=1.2.0';
 import { components } from './components.js?v=1.2.0';
 import { auth } from './auth.js';
 
@@ -57,7 +57,7 @@ class PayFlowDashboardApp {
         this.session.plan = requestedPlan;
         this.updateSidebarUser();
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // Check flash toast message from homepage plan activation
     try {
@@ -66,7 +66,7 @@ class PayFlowDashboardApp {
         setTimeout(() => this.showToast(flash.message, flash.type || 'success'), 400);
         localStorage.removeItem('syncpay_toast');
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // 4. Initialize Language
     i18n.applyTranslations();
@@ -165,42 +165,42 @@ class PayFlowDashboardApp {
     const activePanel = document.getElementById(`view-${viewName}`);
     if (activePanel) {
       activePanel.classList.add('active');
-    this.renderCurrentView();
-    if (viewName === 'devices') {
-      this.refreshDevices();
-    }
-  }
-
-  showLockedView(viewName, planKey) {
-    const planInfo = auth.getPlan(planKey);
-    const allPlans = auth.getAllPlans();
-    const nextPlan = planKey === 'starter' ? 'growth' : 'enterprise';
-    const nextPlanInfo = allPlans[nextPlan];
-
-    // Show locked panel
-    document.querySelectorAll('.nav-item').forEach(el => {
-      const target = el.getAttribute('href')?.replace('#', '');
-      el.classList.toggle('active', target === viewName);
-    });
-    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-
-    let lockedPanel = document.getElementById('view-locked');
-    if (!lockedPanel) {
-      lockedPanel = document.createElement('section');
-      lockedPanel.id = 'view-locked';
-      lockedPanel.className = 'view-panel active';
-      document.querySelector('.content-body').appendChild(lockedPanel);
-    } else {
-      lockedPanel.classList.add('active');
+      this.renderCurrentView();
+      if (viewName === 'devices') {
+        this.refreshDevices();
+      }
     }
 
-    const featureLabels = {
-      'api-keys': 'API Keys', 'webhooks': 'Webhooks', 'docs': 'API Documentation',
-      'plugins': 'Plugins & SDKs', 'reports': 'Reports & Audit',
-    };
-    const label = featureLabels[viewName] || viewName;
+    showLockedView(viewName, planKey) {
+      const planInfo = auth.getPlan(planKey);
+      const allPlans = auth.getAllPlans();
+      const nextPlan = planKey === 'starter' ? 'growth' : 'enterprise';
+      const nextPlanInfo = allPlans[nextPlan];
 
-    lockedPanel.innerHTML = `
+      // Show locked panel
+      document.querySelectorAll('.nav-item').forEach(el => {
+        const target = el.getAttribute('href')?.replace('#', '');
+        el.classList.toggle('active', target === viewName);
+      });
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+
+      let lockedPanel = document.getElementById('view-locked');
+      if (!lockedPanel) {
+        lockedPanel = document.createElement('section');
+        lockedPanel.id = 'view-locked';
+        lockedPanel.className = 'view-panel active';
+        document.querySelector('.content-body').appendChild(lockedPanel);
+      } else {
+        lockedPanel.classList.add('active');
+      }
+
+      const featureLabels = {
+        'api-keys': 'API Keys', 'webhooks': 'Webhooks', 'docs': 'API Documentation',
+        'plugins': 'Plugins & SDKs', 'reports': 'Reports & Audit',
+      };
+      const label = featureLabels[viewName] || viewName;
+
+      lockedPanel.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; text-align:center; padding:40px 20px;">
         <div style="width:72px; height:72px; background:var(--warning-bg); border:2px solid var(--warning-border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:20px;">🔒</div>
         <h2 style="font-size:22px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">${label} — Upgrade Required</h2>
@@ -219,86 +219,57 @@ class PayFlowDashboardApp {
           <div style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px;">Plan Comparison</div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; font-size:12px;">
             ${Object.entries(allPlans).map(([key, p]) => `
-              <div style="padding:10px; border-radius:8px; border:2px solid ${key===planKey?p.color:'var(--border)'}; background:${key===planKey?'var(--primary-subtle)':'var(--bg-surface)'}">
+              <div style="padding:10px; border-radius:8px; border:2px solid ${key === planKey ? p.color : 'var(--border)'}; background:${key === planKey ? 'var(--primary-subtle)' : 'var(--bg-surface)'}">
                 <div style="font-weight:800; color:${p.color}; margin-bottom:4px;">${p.label}</div>
-                <div style="color:var(--text-muted);">${p.txLimit===Infinity?'∞':p.txLimit} Tx/mo</div>
-                <div style="color:var(--text-muted);">${p.deviceLimit===Infinity?'∞':p.deviceLimit} Devices</div>
-                ${key===planKey?'<div style="font-size:10px; margin-top:4px; color:'+p.color+';">✓ Current</div>':''}
+                <div style="color:var(--text-muted);">${p.txLimit === Infinity ? '∞' : p.txLimit} Tx/mo</div>
+                <div style="color:var(--text-muted);">${p.deviceLimit === Infinity ? '∞' : p.deviceLimit} Devices</div>
+                ${key === planKey ? '<div style="font-size:10px; margin-top:4px; color:' + p.color + ';">✓ Current</div>' : ''}
               </div>
             `).join('')}
           </div>
         </div>
       </div>
     `;
-  }
-
-  openUpgradeModal(targetPlan) {
-    const plans = auth.getAllPlans();
-    const p = plans[targetPlan];
-    if (!p) return;
-    const prices = {
-      starter: '৳100/mo',
-      pro: '৳150/mo',
-      business: '৳200/mo',
-      enterprise: '৳300/mo',
-      agency: '৳250/mo',
-      elite: '৳350/mo',
-      growth: '৳700/mo',
-      scale: '৳1000/mo',
-      mega: '৳2000/mo'
-    };
-    const confirmed = confirm(`Upgrade to ${p.label} plan? (${prices[targetPlan] || p.price || ''})\n\nApply plan upgrade?`);
-    if (confirmed) {
-      auth.upgradePlan(targetPlan);
-      this.session = auth.getSession();
-      this.updateSidebarUser();
-      this.showToast(`Upgraded to ${p.label} plan successfully! 🎉`, 'success');
-      setTimeout(() => { window.location.hash = '#home'; window.location.reload(); }, 1500);
     }
-  }
+
+    openUpgradeModal(targetPlan) {
+      const plans = auth.getAllPlans();
+      const p = plans[targetPlan];
+      if (!p) return;
+      const prices = {
+        starter: '৳100/mo',
+        pro: '৳150/mo',
+        business: '৳200/mo',
+        enterprise: '৳300/mo',
+        agency: '৳250/mo',
+        elite: '৳350/mo',
+        growth: '৳700/mo',
+        scale: '৳1000/mo',
+        mega: '৳2000/mo'
+      };
+      const confirmed = confirm(`Upgrade to ${p.label} plan? (${prices[targetPlan] || p.price || ''})\n\nApply plan upgrade?`);
+      if (confirmed) {
+        auth.upgradePlan(targetPlan);
+        this.session = auth.getSession();
+        this.updateSidebarUser();
+        this.showToast(`Upgraded to ${p.label} plan successfully! 🎉`, 'success');
+        setTimeout(() => { window.location.hash = '#home'; window.location.reload(); }, 1500);
+      }
+    }
 
   async refreshAllData() {
-    try {
-      const [stats, txs, invs, devs, keys, chart, methods] = await Promise.all([
-        api.getStats(),
-        api.getTransactions(50),
-        api.getInvoices(),
-        api.getDevices(),
-        api.getApiKeys(),
-        api.getChartData(7),
-        api.getPaymentMethods().catch(() => []),
-      ]);
+      try {
+        const [stats, txs, invs, devs, keys, chart, methods] = await Promise.all([
+          api.getStats(),
+          api.getTransactions(50),
+          api.getInvoices(),
+          api.getDevices(),
+          api.getApiKeys(),
+          api.getChartData(7),
+          api.getPaymentMethods().catch(() => []),
+        ]);
 
-      this.stats = stats || {
-        todayRevenue: 0,
-        todayCount: 0,
-        totalVerified: 0,
-        pendingCount: 0,
-        failedCount: 0,
-        deviceCount: 0,
-        isDemo: false,
-        isLive: true,
-      };
-      this.transactions = txs || [];
-      this.invoices = invs || [];
-      this.devices = devs || [];
-      this.apiKeys = keys || [];
-      this.chartData = chart || [];
-      this.paymentMethods = methods || [];
-
-      // If user is exploring in Demo Mode and server returned 0 records, inject rich realistic demo data
-      if (this.isDemoMode && (!this.transactions || this.transactions.length === 0)) {
-        this.populateDemoData();
-      }
-
-      this.renderCurrentView();
-    } catch (e) {
-      console.error('Failed to load dashboard data:', e);
-      if (this.isDemoMode) {
-        this.populateDemoData();
-        this.renderCurrentView();
-      } else {
-        this.stats = {
+        this.stats = stats || {
           todayRevenue: 0,
           todayCount: 0,
           totalVerified: 0,
@@ -308,284 +279,313 @@ class PayFlowDashboardApp {
           isDemo: false,
           isLive: true,
         };
-        this.transactions = [];
-        this.invoices = [];
-        this.devices = [];
-        this.apiKeys = [];
-        this.chartData = [];
-        this.paymentMethods = [];
+        this.transactions = txs || [];
+        this.invoices = invs || [];
+        this.devices = devs || [];
+        this.apiKeys = keys || [];
+        this.chartData = chart || [];
+        this.paymentMethods = methods || [];
+
+        // If user is exploring in Demo Mode and server returned 0 records, inject rich realistic demo data
+        if (this.isDemoMode && (!this.transactions || this.transactions.length === 0)) {
+          this.populateDemoData();
+        }
+
         this.renderCurrentView();
-        this.showToast(i18n.t('toast.error'), 'error');
+      } catch (e) {
+        console.error('Failed to load dashboard data:', e);
+        if (this.isDemoMode) {
+          this.populateDemoData();
+          this.renderCurrentView();
+        } else {
+          this.stats = {
+            todayRevenue: 0,
+            todayCount: 0,
+            totalVerified: 0,
+            pendingCount: 0,
+            failedCount: 0,
+            deviceCount: 0,
+            isDemo: false,
+            isLive: true,
+          };
+          this.transactions = [];
+          this.invoices = [];
+          this.devices = [];
+          this.apiKeys = [];
+          this.chartData = [];
+          this.paymentMethods = [];
+          this.renderCurrentView();
+          this.showToast(i18n.t('toast.error'), 'error');
+        }
       }
     }
-  }
 
-  populateDemoData() {
-    const now = new Date();
-    const ago = (mins) => new Date(now.getTime() - mins * 60000).toISOString();
+    populateDemoData() {
+      const now = new Date();
+      const ago = (mins) => new Date(now.getTime() - mins * 60000).toISOString();
 
-    this.stats = {
-      todayRevenue: 28450,
-      todayCount: 14,
-      totalVerified: 128,
-      pendingCount: 2,
-      failedCount: 1,
-      deviceCount: 1,
-      isDemo: true,
-      isLive: true,
-    };
+      this.stats = {
+        todayRevenue: 28450,
+        todayCount: 14,
+        totalVerified: 128,
+        pendingCount: 2,
+        failedCount: 1,
+        deviceCount: 1,
+        isDemo: true,
+        isLive: true,
+      };
 
-    this.transactions = [
-      {
-        id: 'tx_demo_01',
-        trx_id: 'BL78A4982J',
-        invoice_id: 'INV-9024',
-        customer_phone: '01712-345678',
-        customer_name: 'Tanvir Ahmed',
-        provider: 'bKash',
-        amount: 1500,
-        is_verified: 1,
-        created_at: ago(4),
-      },
-      {
-        id: 'tx_demo_02',
-        trx_id: 'NG92X0117K',
-        invoice_id: 'INV-9023',
-        customer_phone: '01823-998811',
-        customer_name: 'Sadia Rahman',
-        provider: 'Nagad',
-        amount: 2850,
-        is_verified: 1,
-        created_at: ago(18),
-      },
-      {
-        id: 'tx_demo_03',
-        trx_id: 'BK9912048A',
-        invoice_id: 'INV-9022',
-        customer_phone: '01911-223344',
-        customer_name: 'Mahmudul Hasan',
-        provider: 'bKash',
-        amount: 3400,
-        is_verified: 1,
-        created_at: ago(42),
-      },
-      {
-        id: 'tx_demo_04',
-        trx_id: 'RK45M9810P',
-        invoice_id: 'INV-9021',
-        customer_phone: '01678-554433',
-        customer_name: 'Anika Tabassum',
-        provider: 'Rocket',
-        amount: 850,
-        is_verified: 1,
-        created_at: ago(65),
-      },
-      {
-        id: 'tx_demo_05',
-        trx_id: 'NG1188429M',
-        invoice_id: 'INV-9020',
-        customer_phone: '01755-667788',
-        customer_name: 'Kazi Farhan',
-        provider: 'Nagad',
-        amount: 5200,
-        is_verified: 1,
-        created_at: ago(110),
-      },
-      {
-        id: 'tx_demo_06',
-        trx_id: 'UP12Z8834Q',
-        invoice_id: 'INV-9019',
-        customer_phone: '01300-112233',
-        customer_name: 'Mehedi Hasan',
-        provider: 'Upay',
-        amount: 1200,
-        is_verified: 0,
-        created_at: ago(150),
-      },
-      {
-        id: 'tx_demo_07',
-        trx_id: 'BL5567891W',
-        invoice_id: 'INV-9018',
-        customer_phone: '01811-990022',
-        customer_name: 'Sumaiya Akter',
-        provider: 'bKash',
-        amount: 4500,
-        is_verified: 1,
-        created_at: ago(210),
-      },
-      {
-        id: 'tx_demo_08',
-        trx_id: 'NG3344556P',
-        invoice_id: 'INV-9017',
-        customer_phone: '01799-881122',
-        customer_name: 'Rakib Chowdhury',
-        provider: 'Nagad',
-        amount: 3200,
-        is_verified: 1,
-        created_at: ago(280),
-      },
-      {
-        id: 'tx_demo_09',
-        trx_id: 'BL2211990K',
-        invoice_id: 'INV-9016',
-        customer_phone: '01611-334455',
-        customer_name: 'Nusrat Jahan',
-        provider: 'bKash',
-        amount: 900,
-        is_verified: 0,
-        created_at: ago(340),
-      },
-      {
-        id: 'tx_demo_10',
-        trx_id: 'RK7788990Z',
-        invoice_id: 'INV-9015',
-        customer_phone: '01922-445566',
-        customer_name: 'Fahim Shahriar',
-        provider: 'Rocket',
-        amount: 4850,
-        is_verified: 1,
-        created_at: ago(420),
-      }
-    ];
-
-    this.chartData = [
-      { date: 'Sep 16', revenue: 14200, total_txs: 11, successful_txs: 11, failed_txs: 0 },
-      { date: 'Sep 17', revenue: 18900, total_txs: 15, successful_txs: 14, failed_txs: 1 },
-      { date: 'Sep 18', revenue: 22400, total_txs: 18, successful_txs: 18, failed_txs: 0 },
-      { date: 'Sep 19', revenue: 16800, total_txs: 13, successful_txs: 12, failed_txs: 1 },
-      { date: 'Sep 20', revenue: 27500, total_txs: 21, successful_txs: 20, failed_txs: 1 },
-      { date: 'Sep 21', revenue: 24300, total_txs: 19, successful_txs: 19, failed_txs: 0 },
-      { date: 'Sep 22', revenue: 28450, total_txs: 22, successful_txs: 21, failed_txs: 1 },
-    ];
-
-    if (!this.invoices || this.invoices.length === 0) {
-      this.invoices = [
-        { id: 'INV-9024', order_id: 'ORD-8812', amount: 1500, customer_name: 'Tanvir Ahmed', customer_email: 'tanvir@gmail.com', status: 'PAID', created_at: ago(4) },
-        { id: 'INV-9023', order_id: 'ORD-8811', amount: 2850, customer_name: 'Sadia Rahman', customer_email: 'sadia@gmail.com', status: 'PAID', created_at: ago(18) },
-        { id: 'INV-9022', order_id: 'ORD-8810', amount: 3400, customer_name: 'Mahmudul Hasan', customer_email: 'mahmud@gmail.com', status: 'PAID', created_at: ago(42) },
-        { id: 'INV-9021', order_id: 'ORD-8809', amount: 850, customer_name: 'Anika Tabassum', customer_email: 'anika@gmail.com', status: 'PAID', created_at: ago(65) },
-        { id: 'INV-9020', order_id: 'ORD-8808', amount: 5200, customer_name: 'Kazi Farhan', customer_email: 'kazi@gmail.com', status: 'PAID', created_at: ago(110) },
-        { id: 'INV-9019', order_id: 'ORD-8807', amount: 1200, customer_name: 'Mehedi Hasan', customer_email: 'mehedi@gmail.com', status: 'PENDING', created_at: ago(150) },
-      ];
-    }
-
-    if (!this.devices || this.devices.length === 0) {
-      this.devices = [
+      this.transactions = [
         {
-          id: 'dev_demo_01',
-          device_name: 'TECNO KM5 (Demo Forwarder)',
-          sim_number: '01712-345678 (Dual SIM)',
-          status: 'ONLINE',
-          last_seen: now.toISOString(),
-          battery_level: '94%',
-          sms_count: 128,
+          id: 'tx_demo_01',
+          trx_id: 'BL78A4982J',
+          invoice_id: 'INV-9024',
+          customer_phone: '01712-345678',
+          customer_name: 'Tanvir Ahmed',
+          provider: 'bKash',
+          amount: 1500,
+          is_verified: 1,
+          created_at: ago(4),
+        },
+        {
+          id: 'tx_demo_02',
+          trx_id: 'NG92X0117K',
+          invoice_id: 'INV-9023',
+          customer_phone: '01823-998811',
+          customer_name: 'Sadia Rahman',
+          provider: 'Nagad',
+          amount: 2850,
+          is_verified: 1,
+          created_at: ago(18),
+        },
+        {
+          id: 'tx_demo_03',
+          trx_id: 'BK9912048A',
+          invoice_id: 'INV-9022',
+          customer_phone: '01911-223344',
+          customer_name: 'Mahmudul Hasan',
+          provider: 'bKash',
+          amount: 3400,
+          is_verified: 1,
+          created_at: ago(42),
+        },
+        {
+          id: 'tx_demo_04',
+          trx_id: 'RK45M9810P',
+          invoice_id: 'INV-9021',
+          customer_phone: '01678-554433',
+          customer_name: 'Anika Tabassum',
+          provider: 'Rocket',
+          amount: 850,
+          is_verified: 1,
+          created_at: ago(65),
+        },
+        {
+          id: 'tx_demo_05',
+          trx_id: 'NG1188429M',
+          invoice_id: 'INV-9020',
+          customer_phone: '01755-667788',
+          customer_name: 'Kazi Farhan',
+          provider: 'Nagad',
+          amount: 5200,
+          is_verified: 1,
+          created_at: ago(110),
+        },
+        {
+          id: 'tx_demo_06',
+          trx_id: 'UP12Z8834Q',
+          invoice_id: 'INV-9019',
+          customer_phone: '01300-112233',
+          customer_name: 'Mehedi Hasan',
+          provider: 'Upay',
+          amount: 1200,
+          is_verified: 0,
+          created_at: ago(150),
+        },
+        {
+          id: 'tx_demo_07',
+          trx_id: 'BL5567891W',
+          invoice_id: 'INV-9018',
+          customer_phone: '01811-990022',
+          customer_name: 'Sumaiya Akter',
+          provider: 'bKash',
+          amount: 4500,
+          is_verified: 1,
+          created_at: ago(210),
+        },
+        {
+          id: 'tx_demo_08',
+          trx_id: 'NG3344556P',
+          invoice_id: 'INV-9017',
+          customer_phone: '01799-881122',
+          customer_name: 'Rakib Chowdhury',
+          provider: 'Nagad',
+          amount: 3200,
+          is_verified: 1,
+          created_at: ago(280),
+        },
+        {
+          id: 'tx_demo_09',
+          trx_id: 'BL2211990K',
+          invoice_id: 'INV-9016',
+          customer_phone: '01611-334455',
+          customer_name: 'Nusrat Jahan',
+          provider: 'bKash',
+          amount: 900,
+          is_verified: 0,
+          created_at: ago(340),
+        },
+        {
+          id: 'tx_demo_10',
+          trx_id: 'RK7788990Z',
+          invoice_id: 'INV-9015',
+          customer_phone: '01922-445566',
+          customer_name: 'Fahim Shahriar',
+          provider: 'Rocket',
+          amount: 4850,
+          is_verified: 1,
+          created_at: ago(420),
         }
       ];
+
+      this.chartData = [
+        { date: 'Sep 16', revenue: 14200, total_txs: 11, successful_txs: 11, failed_txs: 0 },
+        { date: 'Sep 17', revenue: 18900, total_txs: 15, successful_txs: 14, failed_txs: 1 },
+        { date: 'Sep 18', revenue: 22400, total_txs: 18, successful_txs: 18, failed_txs: 0 },
+        { date: 'Sep 19', revenue: 16800, total_txs: 13, successful_txs: 12, failed_txs: 1 },
+        { date: 'Sep 20', revenue: 27500, total_txs: 21, successful_txs: 20, failed_txs: 1 },
+        { date: 'Sep 21', revenue: 24300, total_txs: 19, successful_txs: 19, failed_txs: 0 },
+        { date: 'Sep 22', revenue: 28450, total_txs: 22, successful_txs: 21, failed_txs: 1 },
+      ];
+
+      if (!this.invoices || this.invoices.length === 0) {
+        this.invoices = [
+          { id: 'INV-9024', order_id: 'ORD-8812', amount: 1500, customer_name: 'Tanvir Ahmed', customer_email: 'tanvir@gmail.com', status: 'PAID', created_at: ago(4) },
+          { id: 'INV-9023', order_id: 'ORD-8811', amount: 2850, customer_name: 'Sadia Rahman', customer_email: 'sadia@gmail.com', status: 'PAID', created_at: ago(18) },
+          { id: 'INV-9022', order_id: 'ORD-8810', amount: 3400, customer_name: 'Mahmudul Hasan', customer_email: 'mahmud@gmail.com', status: 'PAID', created_at: ago(42) },
+          { id: 'INV-9021', order_id: 'ORD-8809', amount: 850, customer_name: 'Anika Tabassum', customer_email: 'anika@gmail.com', status: 'PAID', created_at: ago(65) },
+          { id: 'INV-9020', order_id: 'ORD-8808', amount: 5200, customer_name: 'Kazi Farhan', customer_email: 'kazi@gmail.com', status: 'PAID', created_at: ago(110) },
+          { id: 'INV-9019', order_id: 'ORD-8807', amount: 1200, customer_name: 'Mehedi Hasan', customer_email: 'mehedi@gmail.com', status: 'PENDING', created_at: ago(150) },
+        ];
+      }
+
+      if (!this.devices || this.devices.length === 0) {
+        this.devices = [
+          {
+            id: 'dev_demo_01',
+            device_name: 'TECNO KM5 (Demo Forwarder)',
+            sim_number: '01712-345678 (Dual SIM)',
+            status: 'ONLINE',
+            last_seen: now.toISOString(),
+            battery_level: '94%',
+            sms_count: 128,
+          }
+        ];
+      }
     }
-  }
 
   async pollLiveUpdates() {
-    try {
-      const [stats, txs] = await Promise.all([
-        api.getStats(),
-        api.getTransactions(50),
-      ]);
-      
-      if (txs && txs.length > 0) {
-        this.stats = stats;
-        this.transactions = txs;
-      } else if (!this.isDemoMode) {
-        this.stats = stats;
-        this.transactions = txs;
-      }
+      try {
+        const [stats, txs] = await Promise.all([
+          api.getStats(),
+          api.getTransactions(50),
+        ]);
 
-      if (this.currentView === 'home') {
-        this.renderHomeKpis();
-        this.renderHomeTransactions();
-      } else if (this.currentView === 'transactions') {
-        this.renderTransactionsView();
-      } else if (this.currentView === 'devices') {
-        const freshDevices = await api.getDevices();
-        if (freshDevices) {
-          this.devices = freshDevices;
-          this.renderDevicesView();
+        if (txs && txs.length > 0) {
+          this.stats = stats;
+          this.transactions = txs;
+        } else if (!this.isDemoMode) {
+          this.stats = stats;
+          this.transactions = txs;
         }
+
+        if (this.currentView === 'home') {
+          this.renderHomeKpis();
+          this.renderHomeTransactions();
+        } else if (this.currentView === 'transactions') {
+          this.renderTransactionsView();
+        } else if (this.currentView === 'devices') {
+          const freshDevices = await api.getDevices();
+          if (freshDevices) {
+            this.devices = freshDevices;
+            this.renderDevicesView();
+          }
+        }
+        this.updateSidebarDeviceBadge();
+      } catch (e) {
+        // Non-blocking poll
       }
-      this.updateSidebarDeviceBadge();
-    } catch (e) {
-      // Non-blocking poll
     }
-  }
 
-  renderCurrentView() {
-    switch (this.currentView) {
-      case 'home':
-        this.renderHomeView();
-        break;
-      case 'transactions':
-        this.renderTransactionsView();
-        break;
-      case 'invoices':
-        this.renderInvoicesView();
-        break;
-      case 'payment-methods':
-        this.renderPaymentMethodsView();
-        break;
-      case 'quick-verify':
-        this.renderQuickVerifyView();
-        break;
-      case 'devices':
-        this.renderDevicesView();
-        break;
-      case 'sms-logs':
-        this.renderSmsLogsView();
-        break;
-      case 'api-keys':
-        this.renderApiKeysView();
-        break;
-      case 'webhooks':
-        this.renderWebhooksView();
-        break;
-      case 'docs':
-        this.renderDocsView();
-        break;
-      case 'plugins':
-        this.renderPluginsView();
-        break;
-      case 'reports':
-        this.renderReportsView();
-        break;
-      case 'settings':
-        this.renderSettingsView();
-        break;
-      default:
-        this.renderHomeView();
+    renderCurrentView() {
+      switch (this.currentView) {
+        case 'home':
+          this.renderHomeView();
+          break;
+        case 'transactions':
+          this.renderTransactionsView();
+          break;
+        case 'invoices':
+          this.renderInvoicesView();
+          break;
+        case 'payment-methods':
+          this.renderPaymentMethodsView();
+          break;
+        case 'quick-verify':
+          this.renderQuickVerifyView();
+          break;
+        case 'devices':
+          this.renderDevicesView();
+          break;
+        case 'sms-logs':
+          this.renderSmsLogsView();
+          break;
+        case 'api-keys':
+          this.renderApiKeysView();
+          break;
+        case 'webhooks':
+          this.renderWebhooksView();
+          break;
+        case 'docs':
+          this.renderDocsView();
+          break;
+        case 'plugins':
+          this.renderPluginsView();
+          break;
+        case 'reports':
+          this.renderReportsView();
+          break;
+        case 'settings':
+          this.renderSettingsView();
+          break;
+        default:
+          this.renderHomeView();
+      }
+      i18n.applyTranslations();
     }
-    i18n.applyTranslations();
-  }
 
-  // ==========================================
-  // VIEW RENDERERS
-  // ==========================================
+    // ==========================================
+    // VIEW RENDERERS
+    // ==========================================
 
-  renderHomeView() {
-    this.renderHomeKpis();
-    this.renderHomeChart();
-    this.renderHomeDonut();
-    this.renderHomeTransactions();
-  }
+    renderHomeView() {
+      this.renderHomeKpis();
+      this.renderHomeChart();
+      this.renderHomeDonut();
+      this.renderHomeTransactions();
+    }
 
-  renderHomeKpis() {
-    const kpiWrap = document.getElementById('home-kpi-cards');
-    if (!kpiWrap) return;
+    renderHomeKpis() {
+      const kpiWrap = document.getElementById('home-kpi-cards');
+      if (!kpiWrap) return;
 
-    const s = this.stats || {};
-    const rev = (s.todayRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
-    const success = (s.totalVerified || s.todayCount || 0).toLocaleString();
-    const pending = (s.pendingCount || 0);
-    const failed = (s.failedCount || 0);
+      const s = this.stats || {};
+      const rev = (s.todayRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
+      const success = (s.totalVerified || s.todayCount || 0).toLocaleString();
+      const pending = (s.pendingCount || 0);
+      const failed = (s.failedCount || 0);
 
-    kpiWrap.innerHTML = `
+      kpiWrap.innerHTML = `
       ${components.renderStatCard({
         id: 'kpi-rev',
         titleKey: 'home.kpi.totalRevenue',
@@ -623,154 +623,154 @@ class PayFlowDashboardApp {
         isDemo: s.isDemo,
       })}
     `;
-  }
+    }
 
-  renderHomeChart() {
-    const chartWrap = document.getElementById('revenue-chart-slot');
-    if (!chartWrap) return;
-    chartWrap.innerHTML = components.renderRevenueChart(this.chartData, this.chartMetric);
-    this.bindChartTooltips();
-  }
+    renderHomeChart() {
+      const chartWrap = document.getElementById('revenue-chart-slot');
+      if (!chartWrap) return;
+      chartWrap.innerHTML = components.renderRevenueChart(this.chartData, this.chartMetric);
+      this.bindChartTooltips();
+    }
 
-  setChartMetric(metric) {
-    this.chartMetric = metric;
-    document.querySelectorAll('.chart-pill-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-metric') === metric);
-    });
-    this.renderHomeChart();
-  }
+    setChartMetric(metric) {
+      this.chartMetric = metric;
+      document.querySelectorAll('.chart-pill-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-metric') === metric);
+      });
+      this.renderHomeChart();
+    }
 
-  bindChartTooltips() {
-    const tooltip = document.getElementById('chart-tooltip');
-    const points = document.querySelectorAll('.chart-point');
-    points.forEach(pt => {
-      pt.addEventListener('mouseenter', (e) => {
-        const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-        const item = this.chartData[idx];
-        if (!item || !tooltip) return;
+    bindChartTooltips() {
+      const tooltip = document.getElementById('chart-tooltip');
+      const points = document.querySelectorAll('.chart-point');
+      points.forEach(pt => {
+        pt.addEventListener('mouseenter', (e) => {
+          const idx = parseInt(e.target.getAttribute('data-idx'), 10);
+          const item = this.chartData[idx];
+          if (!item || !tooltip) return;
 
-        tooltip.innerHTML = `
+          tooltip.innerHTML = `
           <strong>${item.date}</strong><br/>
           <span style="color:#0284c7;">৳ ${Number(item.revenue || 0).toLocaleString()}</span><br/>
           <span style="color:var(--text-muted);">${item.total_txs} transactions</span>
         `;
-        tooltip.style.display = 'block';
-        tooltip.style.left = `${parseFloat(e.target.getAttribute('cx'))}px`;
-        tooltip.style.top = `${parseFloat(e.target.getAttribute('cy')) - 45}px`;
+          tooltip.style.display = 'block';
+          tooltip.style.left = `${parseFloat(e.target.getAttribute('cx'))}px`;
+          tooltip.style.top = `${parseFloat(e.target.getAttribute('cy')) - 45}px`;
+        });
+        pt.addEventListener('mouseleave', () => {
+          if (tooltip) tooltip.style.display = 'none';
+        });
       });
-      pt.addEventListener('mouseleave', () => {
-        if (tooltip) tooltip.style.display = 'none';
-      });
-    });
-  }
-
-  renderHomeDonut() {
-    const donutWrap = document.getElementById('payment-methods-slot');
-    if (donutWrap) {
-      donutWrap.innerHTML = components.renderPaymentMethodsDonut(this.transactions);
     }
-  }
 
-  renderHomeTransactions() {
-    const txWrap = document.getElementById('recent-transactions-slot');
-    if (txWrap) {
-      txWrap.innerHTML = components.renderTransactionsTable(this.transactions, 8);
+    renderHomeDonut() {
+      const donutWrap = document.getElementById('payment-methods-slot');
+      if (donutWrap) {
+        donutWrap.innerHTML = components.renderPaymentMethodsDonut(this.transactions);
+      }
     }
-  }
 
-  renderTransactionsView() {
-    const slot = document.getElementById('transactions-view-slot');
-    if (slot) {
-      slot.innerHTML = components.renderTransactionsTable(this.transactions, 50);
+    renderHomeTransactions() {
+      const txWrap = document.getElementById('recent-transactions-slot');
+      if (txWrap) {
+        txWrap.innerHTML = components.renderTransactionsTable(this.transactions, 8);
+      }
     }
-  }
 
-  renderInvoicesView() {
-    const slot = document.getElementById('invoices-view-slot');
-    if (slot) {
-      slot.innerHTML = components.renderInvoicesTable(this.invoices);
+    renderTransactionsView() {
+      const slot = document.getElementById('transactions-view-slot');
+      if (slot) {
+        slot.innerHTML = components.renderTransactionsTable(this.transactions, 50);
+      }
     }
-  }
 
-  renderDevicesView() {
-    const slot = document.getElementById('devices-view-slot');
-    if (slot) {
-      slot.innerHTML = components.renderDevicesList(this.devices);
+    renderInvoicesView() {
+      const slot = document.getElementById('invoices-view-slot');
+      if (slot) {
+        slot.innerHTML = components.renderInvoicesTable(this.invoices);
+      }
     }
-    this.updateSidebarDeviceBadge();
-  }
 
-  showAddDeviceModal() {
-    return this.openAddDeviceModal();
-  }
+    renderDevicesView() {
+      const slot = document.getElementById('devices-view-slot');
+      if (slot) {
+        slot.innerHTML = components.renderDevicesList(this.devices);
+      }
+      this.updateSidebarDeviceBadge();
+    }
+
+    showAddDeviceModal() {
+      return this.openAddDeviceModal();
+    }
 
   async refreshDevices(showToast = false) {
-    try {
-      const freshDevices = await api.getDevices();
-      if (freshDevices) {
-        this.devices = freshDevices;
-        this.renderDevicesView();
-        this.updateSidebarDeviceBadge();
-        if (showToast) {
-          const count = this.devices.length;
-          const onlineCount = this.devices.filter(d => d.status === 'ONLINE').length;
-          this.showToast(`ডিভাইস লিস্ট আপডেট হয়েছে (${onlineCount}/${count} অনলাইন)`, 'success');
+      try {
+        const freshDevices = await api.getDevices();
+        if (freshDevices) {
+          this.devices = freshDevices;
+          this.renderDevicesView();
+          this.updateSidebarDeviceBadge();
+          if (showToast) {
+            const count = this.devices.length;
+            const onlineCount = this.devices.filter(d => d.status === 'ONLINE').length;
+            this.showToast(`ডিভাইস লিস্ট আপডেট হয়েছে (${onlineCount}/${count} অনলাইন)`, 'success');
+          }
+        }
+      } catch (e) {
+        if (showToast) this.showToast('ডিভাইস রিফ্রেশ ব্যর্থ হয়েছে', 'error');
+      }
+    }
+
+    updateSidebarDeviceBadge() {
+      const badge = document.getElementById('sidebar-device-badge');
+      if (!badge) return;
+      const devs = this.devices || [];
+      const isOnline = devs.some(d => d.status === 'ONLINE');
+      if (devs.length === 0) {
+        badge.style.display = 'none';
+        badge.textContent = '';
+      } else {
+        badge.style.display = 'inline-flex';
+        if (isOnline) {
+          badge.textContent = 'ONLINE';
+          badge.className = 'nav-badge badge-online';
+          badge.style.background = '#10b981';
+          badge.style.color = '#ffffff';
+        } else {
+          badge.textContent = 'OFFLINE';
+          badge.className = 'nav-badge badge-offline';
+          badge.style.background = '#64748b';
+          badge.style.color = '#ffffff';
         }
       }
-    } catch (e) {
-      if (showToast) this.showToast('ডিভাইস রিফ্রেশ ব্যর্থ হয়েছে', 'error');
     }
-  }
 
-  updateSidebarDeviceBadge() {
-    const badge = document.getElementById('sidebar-device-badge');
-    if (!badge) return;
-    const devs = this.devices || [];
-    const isOnline = devs.some(d => d.status === 'ONLINE');
-    if (devs.length === 0) {
-      badge.style.display = 'none';
-      badge.textContent = '';
-    } else {
-      badge.style.display = 'inline-flex';
-      if (isOnline) {
-        badge.textContent = 'ONLINE';
-        badge.className = 'nav-badge badge-online';
-        badge.style.background = '#10b981';
-        badge.style.color = '#ffffff';
-      } else {
-        badge.textContent = 'OFFLINE';
-        badge.className = 'nav-badge badge-offline';
-        badge.style.background = '#64748b';
-        badge.style.color = '#ffffff';
+    renderApiKeysView() {
+      const slot = document.getElementById('apikeys-view-slot');
+      if (slot) {
+        slot.innerHTML = components.renderApiKeysList(this.apiKeys);
       }
     }
-  }
-
-  renderApiKeysView() {
-    const slot = document.getElementById('apikeys-view-slot');
-    if (slot) {
-      slot.innerHTML = components.renderApiKeysList(this.apiKeys);
-    }
-  }
 
   async renderWebhooksView() {
-    const slot = document.getElementById('webhooks-view-slot');
-    if (!slot) return;
-    try {
-      const res = await api.getSubscription();
-      slot.innerHTML = components.renderWebhooksView(res.data);
-    } catch (e) {
-      slot.innerHTML = components.renderWebhooksView();
+      const slot = document.getElementById('webhooks-view-slot');
+      if (!slot) return;
+      try {
+        const res = await api.getSubscription();
+        slot.innerHTML = components.renderWebhooksView(res.data);
+      } catch (e) {
+        slot.innerHTML = components.renderWebhooksView();
+      }
     }
-  }
 
-  renderDocsView() {
-    const slot = document.getElementById('docs-view-slot');
-    if (!slot) return;
+    renderDocsView() {
+      const slot = document.getElementById('docs-view-slot');
+      if (!slot) return;
 
-    const currentOrigin = window.location.origin;
+      const currentOrigin = window.location.origin;
 
-    slot.innerHTML = `
+      slot.innerHTML = `
       <div class="api-doc-wrap">
         <!-- 1. Authentication -->
         <div class="api-doc-card">
@@ -970,17 +970,17 @@ class PayFlowDashboardApp {
         </div>
       </div>
     `;
-  }
+    }
 
-  // ==========================================
-  // QUICK VERIFY VIEW
-  // ==========================================
+    // ==========================================
+    // QUICK VERIFY VIEW
+    // ==========================================
 
-  renderQuickVerifyView() {
-    const slot = document.getElementById('quick-verify-view-slot');
-    if (!slot) return;
+    renderQuickVerifyView() {
+      const slot = document.getElementById('quick-verify-view-slot');
+      if (!slot) return;
 
-    slot.innerHTML = `
+      slot.innerHTML = `
       <div style="display:grid; grid-template-columns: 1fr; gap: 20px;">
         <!-- Search & Verify Card -->
         <div class="card-panel">
@@ -1054,30 +1054,30 @@ class PayFlowDashboardApp {
       </div>
     `;
 
-    this.renderQuickVerifyHistory();
-  }
-
-  runQuickVerify() {
-    const input = document.getElementById('quick-verify-input');
-    const resultBox = document.getElementById('quick-verify-result-box');
-    if (!input || !resultBox) return;
-
-    const query = input.value.trim().toUpperCase();
-    if (!query) {
-      this.showToast('Please enter a TrxID', 'warning');
-      return;
+      this.renderQuickVerifyHistory();
     }
 
-    const tx = (this.transactions || []).find(t => 
-      (t.trx_id && t.trx_id.toUpperCase() === query) ||
-      (t.order_id && t.order_id.toUpperCase() === query)
-    );
+    runQuickVerify() {
+      const input = document.getElementById('quick-verify-input');
+      const resultBox = document.getElementById('quick-verify-result-box');
+      if (!input || !resultBox) return;
 
-    resultBox.style.display = 'block';
+      const query = input.value.trim().toUpperCase();
+      if (!query) {
+        this.showToast('Please enter a TrxID', 'warning');
+        return;
+      }
 
-    if (tx) {
-      const isVerified = tx.is_verified === 1;
-      resultBox.innerHTML = `
+      const tx = (this.transactions || []).find(t =>
+        (t.trx_id && t.trx_id.toUpperCase() === query) ||
+        (t.order_id && t.order_id.toUpperCase() === query)
+      );
+
+      resultBox.style.display = 'block';
+
+      if (tx) {
+        const isVerified = tx.is_verified === 1;
+        resultBox.innerHTML = `
         <div style="background:var(--bg-subtle); border:2px solid ${isVerified ? 'var(--success-border, #10b981)' : 'var(--warning-border, #f59e0b)'}; border-radius:12px; padding:20px;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
             <div style="display:flex; align-items:center; gap:10px;">
@@ -1133,9 +1133,9 @@ class PayFlowDashboardApp {
           </div>
         </div>
       `;
-      this.showToast(`TrxID ${tx.trx_id} successfully matched!`, 'success');
-    } else {
-      resultBox.innerHTML = `
+        this.showToast(`TrxID ${tx.trx_id} successfully matched!`, 'success');
+      } else {
+        resultBox.innerHTML = `
         <div style="background:var(--bg-subtle); border:2px dashed var(--warning-border, #f59e0b); border-radius:12px; padding:24px; text-align:center;">
           <div style="font-size:32px; margin-bottom:8px;">🔍</div>
           <h4 style="margin:0 0 6px 0; font-size:16px; font-weight:700; color:var(--text-primary);">No Matching Transaction Found</h4>
@@ -1147,48 +1147,48 @@ class PayFlowDashboardApp {
           </div>
         </div>
       `;
-      this.showToast('No transaction found', 'warning');
+        this.showToast('No transaction found', 'warning');
+      }
     }
-  }
 
-  fillAndVerify(trxId) {
-    const input = document.getElementById('quick-verify-input');
-    if (input) {
-      input.value = trxId;
+    fillAndVerify(trxId) {
+      const input = document.getElementById('quick-verify-input');
+      if (input) {
+        input.value = trxId;
+        this.runQuickVerify();
+      }
+    }
+
+    resetQuickVerify() {
+      const input = document.getElementById('quick-verify-input');
+      const resultBox = document.getElementById('quick-verify-result-box');
+      if (input) input.value = '';
+      if (resultBox) resultBox.style.display = 'none';
+    }
+
+    manualApproveTransaction(trxId) {
+      const tx = (this.transactions || []).find(t => t.trx_id === trxId);
+      if (!tx) return;
+      tx.is_verified = 1;
+      tx.verified_at = new Date().toISOString();
+      this.showToast(`TrxID ${trxId} manually approved!`, 'success');
       this.runQuickVerify();
-    }
-  }
-
-  resetQuickVerify() {
-    const input = document.getElementById('quick-verify-input');
-    const resultBox = document.getElementById('quick-verify-result-box');
-    if (input) input.value = '';
-    if (resultBox) resultBox.style.display = 'none';
-  }
-
-  manualApproveTransaction(trxId) {
-    const tx = (this.transactions || []).find(t => t.trx_id === trxId);
-    if (!tx) return;
-    tx.is_verified = 1;
-    tx.verified_at = new Date().toISOString();
-    this.showToast(`TrxID ${trxId} manually approved!`, 'success');
-    this.runQuickVerify();
-    this.renderQuickVerifyHistory();
-  }
-
-  renderQuickVerifyHistory() {
-    const tbody = document.getElementById('quick-verify-history-tbody');
-    if (!tbody) return;
-
-    const txs = this.transactions || [];
-    if (txs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No transactions found</td></tr>`;
-      return;
+      this.renderQuickVerifyHistory();
     }
 
-    tbody.innerHTML = txs.map(t => {
-      const isVerified = t.is_verified === 1;
-      return `
+    renderQuickVerifyHistory() {
+      const tbody = document.getElementById('quick-verify-history-tbody');
+      if (!tbody) return;
+
+      const txs = this.transactions || [];
+      if (txs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No transactions found</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = txs.map(t => {
+        const isVerified = t.is_verified === 1;
+        return `
         <tr>
           <td class="mono" style="font-weight:700; color:var(--primary);">${t.trx_id}</td>
           <td><strong>${t.provider}</strong></td>
@@ -1200,7 +1200,7 @@ class PayFlowDashboardApp {
               ${isVerified ? 'COMPLETED' : 'PENDING'}
             </span>
           </td>
-          <td style="font-size:11px; color:var(--text-muted);">${new Date(t.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>
+          <td style="font-size:11px; color:var(--text-muted);">${new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
           <td style="text-align:right;">
             <button class="btn-icon-sm" title="Verify Now" onclick="window.payflowApp.fillAndVerify('${t.trx_id}')" style="background:var(--bg-subtle); border:1px solid var(--border); padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer;">
               View Match
@@ -1208,21 +1208,21 @@ class PayFlowDashboardApp {
           </td>
         </tr>
       `;
-    }).join('');
-  }
+      }).join('');
+    }
 
-  // ==========================================
-  // SMS LOGS VIEW
-  // ==========================================
+    // ==========================================
+    // SMS LOGS VIEW
+    // ==========================================
 
-  renderSmsLogsView() {
-    const slot = document.getElementById('sms-logs-view-slot');
-    if (!slot) return;
+    renderSmsLogsView() {
+      const slot = document.getElementById('sms-logs-view-slot');
+      if (!slot) return;
 
-    const txs = this.transactions || [];
-    const devices = this.devices || [];
+      const txs = this.transactions || [];
+      const devices = this.devices || [];
 
-    slot.innerHTML = `
+      slot.innerHTML = `
       <div style="display:grid; grid-template-columns: 1fr; gap: 20px;">
         <!-- Top Stats Row -->
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
@@ -1294,41 +1294,41 @@ class PayFlowDashboardApp {
       </div>
     `;
 
-    this.renderSmsLogsTable();
-  }
-
-  renderSmsLogsTable(providerFilter = 'all', query = '') {
-    const tbody = document.getElementById('sms-logs-tbody');
-    if (!tbody) return;
-
-    let txs = this.transactions || [];
-
-    if (providerFilter && providerFilter !== 'all') {
-      txs = txs.filter(t => (t.provider || '').toLowerCase() === providerFilter.toLowerCase());
+      this.renderSmsLogsTable();
     }
 
-    if (query) {
-      const q = query.toLowerCase();
-      txs = txs.filter(t => 
-        (t.trx_id && t.trx_id.toLowerCase().includes(q)) ||
-        (t.raw_sms && t.raw_sms.toLowerCase().includes(q)) ||
-        (t.sender && t.sender.includes(q))
-      );
-    }
+    renderSmsLogsTable(providerFilter = 'all', query = '') {
+      const tbody = document.getElementById('sms-logs-tbody');
+      if (!tbody) return;
 
-    if (txs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No SMS logs found</td></tr>`;
-      return;
-    }
+      let txs = this.transactions || [];
 
-    tbody.innerHTML = txs.map(t => `
+      if (providerFilter && providerFilter !== 'all') {
+        txs = txs.filter(t => (t.provider || '').toLowerCase() === providerFilter.toLowerCase());
+      }
+
+      if (query) {
+        const q = query.toLowerCase();
+        txs = txs.filter(t =>
+          (t.trx_id && t.trx_id.toLowerCase().includes(q)) ||
+          (t.raw_sms && t.raw_sms.toLowerCase().includes(q)) ||
+          (t.sender && t.sender.includes(q))
+        );
+      }
+
+      if (txs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No SMS logs found</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = txs.map(t => `
       <tr>
         <td style="font-size:11px; white-space:nowrap; color:var(--text-muted);">
-          ${new Date(t.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}
+          ${new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </td>
         <td style="font-size:12px; font-weight:600;">SIM-1 (017...)</td>
         <td>
-          <span style="font-weight:700; color:${t.provider==='bKash'?'#e2136e':t.provider==='Nagad'?'#f7941d':'#8c3494'};">
+          <span style="font-weight:700; color:${t.provider === 'bKash' ? '#e2136e' : t.provider === 'Nagad' ? '#f7941d' : '#8c3494'};">
             ${t.provider}
           </span>
         </td>
@@ -1344,30 +1344,30 @@ class PayFlowDashboardApp {
         </td>
       </tr>
     `).join('');
-  }
-
-  filterSmsLogs() {
-    const prov = document.getElementById('sms-log-provider-filter')?.value || 'all';
-    const query = document.getElementById('sms-log-search-input')?.value || '';
-    this.renderSmsLogsTable(prov, query);
-  }
-
-  refreshSmsLogs() {
-    this.renderSmsLogsTable();
-    this.showToast('SMS stream refreshed successfully', 'success');
-  }
-
-  openSmsSimulatorModal() {
-    let modal = document.getElementById('sms-simulator-modal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'sms-simulator-modal';
-      modal.className = 'modal-backdrop';
-      modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:99999; backdrop-filter:blur(4px);';
-      document.body.appendChild(modal);
     }
 
-    modal.innerHTML = `
+    filterSmsLogs() {
+      const prov = document.getElementById('sms-log-provider-filter')?.value || 'all';
+      const query = document.getElementById('sms-log-search-input')?.value || '';
+      this.renderSmsLogsTable(prov, query);
+    }
+
+    refreshSmsLogs() {
+      this.renderSmsLogsTable();
+      this.showToast('SMS stream refreshed successfully', 'success');
+    }
+
+    openSmsSimulatorModal() {
+      let modal = document.getElementById('sms-simulator-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'sms-simulator-modal';
+        modal.className = 'modal-backdrop';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:99999; backdrop-filter:blur(4px);';
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = `
       <div style="background:var(--bg-surface, #fff); border:1px solid var(--border, #e2e8f0); border-radius:16px; width:95%; max-width:540px; padding:24px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <h3 style="margin:0; font-size:18px; font-weight:700; color:var(--text-primary);">📲 SMS Parsing Test Simulator</h3>
@@ -1394,40 +1394,40 @@ class PayFlowDashboardApp {
         </div>
       </div>
     `;
-    modal.style.display = 'flex';
-  }
-
-  closeSmsSimulatorModal() {
-    const modal = document.getElementById('sms-simulator-modal');
-    if (modal) modal.style.display = 'none';
-  }
-
-  testSimulateSms() {
-    const text = document.getElementById('sim-sms-text')?.value || '';
-    const resBox = document.getElementById('sim-parsed-result');
-    if (!text.trim() || !resBox) return;
-
-    let provider = 'bKash';
-    let amount = 0;
-    let trxId = '';
-    let sender = '';
-
-    if (/nagad/i.test(text) || /txnid:\s*([a-z0-9]+)/i.test(text)) {
-      provider = 'Nagad';
+      modal.style.display = 'flex';
     }
 
-    const amtMatch = text.match(/(?:Tk|৳)\s*([0-9,]+(?:\.[0-9]{2})?)/i);
-    if (amtMatch) amount = parseFloat(amtMatch[1].replace(/,/g, ''));
+    closeSmsSimulatorModal() {
+      const modal = document.getElementById('sms-simulator-modal');
+      if (modal) modal.style.display = 'none';
+    }
 
-    const trxMatch = text.match(/(?:TrxID|TxnID|Trx Id|Txn Id)[:\s]+([A-Z0-9]+)/i);
-    if (trxMatch) trxId = trxMatch[1];
-    else trxId = 'SIM_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    testSimulateSms() {
+      const text = document.getElementById('sim-sms-text')?.value || '';
+      const resBox = document.getElementById('sim-parsed-result');
+      if (!text.trim() || !resBox) return;
 
-    const senderMatch = text.match(/01[3-9]\d{8}/);
-    if (senderMatch) sender = senderMatch[0];
+      let provider = 'bKash';
+      let amount = 0;
+      let trxId = '';
+      let sender = '';
 
-    resBox.style.display = 'block';
-    resBox.innerHTML = `
+      if (/nagad/i.test(text) || /txnid:\s*([a-z0-9]+)/i.test(text)) {
+        provider = 'Nagad';
+      }
+
+      const amtMatch = text.match(/(?:Tk|৳)\s*([0-9,]+(?:\.[0-9]{2})?)/i);
+      if (amtMatch) amount = parseFloat(amtMatch[1].replace(/,/g, ''));
+
+      const trxMatch = text.match(/(?:TrxID|TxnID|Trx Id|Txn Id)[:\s]+([A-Z0-9]+)/i);
+      if (trxMatch) trxId = trxMatch[1];
+      else trxId = 'SIM_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      const senderMatch = text.match(/01[3-9]\d{8}/);
+      if (senderMatch) sender = senderMatch[0];
+
+      resBox.style.display = 'block';
+      resBox.innerHTML = `
       <div style="background:var(--bg-subtle); border:1px solid var(--primary); border-radius:8px; padding:12px; font-size:12px;">
         <div style="font-weight:700; color:var(--primary); margin-bottom:6px;">✓ Parsing Successful (Extracted Data):</div>
         <div>Provider: <strong>${provider}</strong></div>
@@ -1437,34 +1437,34 @@ class PayFlowDashboardApp {
       </div>
     `;
 
-    // Add to active transactions
-    const newTx = {
-      id: Date.now(),
-      trx_id: trxId,
-      merchant_id: 'm_demo_101',
-      provider,
-      amount,
-      sender: sender || '01700000000',
-      is_verified: 1,
-      order_id: 'ORD-SIM-' + Math.floor(1000 + Math.random() * 9000),
-      created_at: new Date().toISOString(),
-      verified_at: new Date().toISOString(),
-      raw_sms: text,
-      isDemo: true,
-    };
-    this.transactions.unshift(newTx);
-    this.showToast(`SMS parsed successfully! TrxID ${trxId} ingested`, 'success');
-  }
+      // Add to active transactions
+      const newTx = {
+        id: Date.now(),
+        trx_id: trxId,
+        merchant_id: 'm_demo_101',
+        provider,
+        amount,
+        sender: sender || '01700000000',
+        is_verified: 1,
+        order_id: 'ORD-SIM-' + Math.floor(1000 + Math.random() * 9000),
+        created_at: new Date().toISOString(),
+        verified_at: new Date().toISOString(),
+        raw_sms: text,
+        isDemo: true,
+      };
+      this.transactions.unshift(newTx);
+      this.showToast(`SMS parsed successfully! TrxID ${trxId} ingested`, 'success');
+    }
 
-  // ==========================================
-  // PLUGINS & SDKS VIEW
-  // ==========================================
+    // ==========================================
+    // PLUGINS & SDKS VIEW
+    // ==========================================
 
-  renderPluginsView() {
-    const slot = document.getElementById('plugins-view-slot');
-    if (!slot) return;
+    renderPluginsView() {
+      const slot = document.getElementById('plugins-view-slot');
+      if (!slot) return;
 
-    slot.innerHTML = `
+      slot.innerHTML = `
       <div style="display:grid; grid-template-columns: 1fr; gap: 24px;">
         <div class="card-panel" style="background:linear-gradient(135deg, rgba(2,132,199,0.08) 0%, rgba(99,102,241,0.05) 100%); border-color:rgba(2,132,199,0.25);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
@@ -1688,90 +1688,90 @@ class PayFlowDashboardApp {
         </div>
       </div>
     `;
-  }
-
-  downloadPlugin(pluginName) {
-    const fileMap = {
-      woocommerce: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-woocommerce-v2.4.2.zip', name: 'syncpay-woocommerce-v2.4.2.zip' },
-      whmcs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-whmcs-v1.8.0.zip', name: 'syncpay-whmcs-v1.8.0.zip' },
-      php: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-php-sdk.zip', name: 'syncpay-php-sdk.zip' },
-      nodejs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-node-sdk.zip', name: 'syncpay-node-sdk.zip' },
-      python: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-python-sdk.zip', name: 'syncpay-python-sdk.zip' },
-      apk: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.1.0/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
-    };
-
-    const target = fileMap[pluginName];
-    if (!target) {
-      this.showToast('Package not found', 'error');
-      return;
     }
 
-    this.showToast(`Starting download: ${target.name}...`, 'success');
-    const link = document.createElement('a');
-    link.href = target.url;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.setAttribute('download', target.name);
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      document.body.removeChild(link);
-    }, 500);
-  }
-
-  showPluginGuide(pluginName) {
-    const guides = {
-      woocommerce: 'WooCommerce Installation Guide:\n1. Go to WordPress Dashboard > Plugins > Add New > Upload Plugin.\n2. Upload the downloaded syncpay-woocommerce.zip file and activate it.\n3. Go to WooCommerce > Settings > Payments > SyncPay BD and paste your API Key.',
-      whmcs: 'WHMCS Module Setup Guide:\n1. Unzip the downloaded file into the /modules/gateways/ directory.\n2. Activate SyncPay in WHMCS Setup > Payments > Payment Gateways.\n3. Enter your Merchant Key and Webhook Secret, then click Save.',
-      php: 'PHP Integration Sample:\nuse SyncPay\\Client;\n$client = new Client(["api_key" => "YOUR_KEY"]);\n$invoice = $client->invoice->create(["amount" => 1000, "order_id" => "ORD-123"]);',
-      nodejs: 'Node.js Integration Sample:\nimport { SyncPayClient } from "@syncpaybd/sdk";\nconst pay = new SyncPayClient({ apiKey: "YOUR_KEY" });\nconst inv = await pay.createInvoice({ amount: 1000, orderId: "ORD-123" });',
-      python: 'Python Integration Sample:\nfrom syncpay import SyncPay\nclient = SyncPay(api_key="YOUR_KEY")\ninv = client.create_invoice(amount=1000, order_id="ORD-123")',
-    };
-    alert(guides[pluginName] || 'Please refer to documentation');
-  }
-
-  copySnippetText(text, btn) {
-    navigator.clipboard.writeText(text).then(() => {
-      this.showToast('Copied to clipboard!', 'success');
-      if (btn) {
-        const original = btn.innerText;
-        btn.innerText = '✓ Copied!';
-        setTimeout(() => btn.innerText = original, 1500);
-      }
-    });
-  }
-
-  // ==========================================
-  // REPORTS VIEW
-  // ==========================================
-
-  renderReportsView() {
-    const slot = document.getElementById('reports-view-slot');
-    if (!slot) return;
-
-    const s = this.stats || {};
-    const txs = this.transactions || [];
-    const totalVolume = txs.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
-    const verifiedTxs = txs.filter(t => t.is_verified === 1);
-    const verifiedVolume = verifiedTxs.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
-    const successRate = txs.length ? Math.round((verifiedTxs.length / txs.length) * 100) : 100;
-
-    const providers = ['bKash', 'Nagad', 'Rocket', 'Upay'];
-    const pStats = providers.map(p => {
-      const list = txs.filter(t => (t.provider || '').toLowerCase() === p.toLowerCase());
-      const vol = list.reduce((a, b) => a + (Number(b.amount) || 0), 0);
-      const verified = list.filter(t => t.is_verified === 1).length;
-      return {
-        name: p,
-        count: list.length,
-        volume: vol,
-        verified,
-        rate: list.length ? Math.round((verified / list.length) * 100) : 100,
-        share: totalVolume ? Math.round((vol / totalVolume) * 100) : 0,
+    downloadPlugin(pluginName) {
+      const fileMap = {
+        woocommerce: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-woocommerce-v2.4.2.zip', name: 'syncpay-woocommerce-v2.4.2.zip' },
+        whmcs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-whmcs-v1.8.0.zip', name: 'syncpay-whmcs-v1.8.0.zip' },
+        php: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-php-sdk.zip', name: 'syncpay-php-sdk.zip' },
+        nodejs: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-node-sdk.zip', name: 'syncpay-node-sdk.zip' },
+        python: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-python-sdk.zip', name: 'syncpay-python-sdk.zip' },
+        apk: { url: 'https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-forwarder.apk', name: 'syncpay-forwarder.apk' },
       };
-    });
 
-    slot.innerHTML = `
+      const target = fileMap[pluginName];
+      if (!target) {
+        this.showToast('Package not found', 'error');
+        return;
+      }
+
+      this.showToast(`Starting download: ${target.name}...`, 'success');
+      const link = document.createElement('a');
+      link.href = target.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.setAttribute('download', target.name);
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 500);
+    }
+
+    showPluginGuide(pluginName) {
+      const guides = {
+        woocommerce: 'WooCommerce Installation Guide:\n1. Go to WordPress Dashboard > Plugins > Add New > Upload Plugin.\n2. Upload the downloaded syncpay-woocommerce.zip file and activate it.\n3. Go to WooCommerce > Settings > Payments > SyncPay BD and paste your API Key.',
+        whmcs: 'WHMCS Module Setup Guide:\n1. Unzip the downloaded file into the /modules/gateways/ directory.\n2. Activate SyncPay in WHMCS Setup > Payments > Payment Gateways.\n3. Enter your Merchant Key and Webhook Secret, then click Save.',
+        php: 'PHP Integration Sample:\nuse SyncPay\\Client;\n$client = new Client(["api_key" => "YOUR_KEY"]);\n$invoice = $client->invoice->create(["amount" => 1000, "order_id" => "ORD-123"]);',
+        nodejs: 'Node.js Integration Sample:\nimport { SyncPayClient } from "@syncpaybd/sdk";\nconst pay = new SyncPayClient({ apiKey: "YOUR_KEY" });\nconst inv = await pay.createInvoice({ amount: 1000, orderId: "ORD-123" });',
+        python: 'Python Integration Sample:\nfrom syncpay import SyncPay\nclient = SyncPay(api_key="YOUR_KEY")\ninv = client.create_invoice(amount=1000, order_id="ORD-123")',
+      };
+      alert(guides[pluginName] || 'Please refer to documentation');
+    }
+
+    copySnippetText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showToast('Copied to clipboard!', 'success');
+        if (btn) {
+          const original = btn.innerText;
+          btn.innerText = '✓ Copied!';
+          setTimeout(() => btn.innerText = original, 1500);
+        }
+      });
+    }
+
+    // ==========================================
+    // REPORTS VIEW
+    // ==========================================
+
+    renderReportsView() {
+      const slot = document.getElementById('reports-view-slot');
+      if (!slot) return;
+
+      const s = this.stats || {};
+      const txs = this.transactions || [];
+      const totalVolume = txs.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+      const verifiedTxs = txs.filter(t => t.is_verified === 1);
+      const verifiedVolume = verifiedTxs.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+      const successRate = txs.length ? Math.round((verifiedTxs.length / txs.length) * 100) : 100;
+
+      const providers = ['bKash', 'Nagad', 'Rocket', 'Upay'];
+      const pStats = providers.map(p => {
+        const list = txs.filter(t => (t.provider || '').toLowerCase() === p.toLowerCase());
+        const vol = list.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+        const verified = list.filter(t => t.is_verified === 1).length;
+        return {
+          name: p,
+          count: list.length,
+          volume: vol,
+          verified,
+          rate: list.length ? Math.round((verified / list.length) * 100) : 100,
+          share: totalVolume ? Math.round((vol / totalVolume) * 100) : 0,
+        };
+      });
+
+      slot.innerHTML = `
       <div style="display:grid; grid-template-columns: 1fr; gap: 24px;">
         <!-- Top Stats Strip -->
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
@@ -1849,18 +1849,18 @@ class PayFlowDashboardApp {
                   <tr>
                     <td>
                       <div style="display:flex; align-items:center; gap:8px; font-weight:700;">
-                        <span style="width:10px; height:10px; border-radius:50%; background:${p.name==='bKash'?'#e2136e':(p.name==='Nagad'?'#f7941d':(p.name==='Rocket'?'#8c3494':'#00a1e9'))}; display:inline-block;"></span>
+                        <span style="width:10px; height:10px; border-radius:50%; background:${p.name === 'bKash' ? '#e2136e' : (p.name === 'Nagad' ? '#f7941d' : (p.name === 'Rocket' ? '#8c3494' : '#00a1e9'))}; display:inline-block;"></span>
                         <span>${p.name}</span>
                       </div>
                     </td>
-                    <td><strong>${p.count || (p.name==='bKash'?620:p.name==='Nagad'?410:140)}</strong> Txs</td>
-                    <td class="mono" style="font-weight:700;">৳ ${(p.volume || (p.name==='bKash'?65200:p.name==='Nagad'?38400:12500)).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+                    <td><strong>${p.count || (p.name === 'bKash' ? 620 : p.name === 'Nagad' ? 410 : 140)}</strong> Txs</td>
+                    <td class="mono" style="font-weight:700;">৳ ${(p.volume || (p.name === 'bKash' ? 65200 : p.name === 'Nagad' ? 38400 : 12500)).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
                     <td>
                       <div style="display:flex; align-items:center; gap:8px;">
                         <div style="flex:1; height:6px; background:var(--border); border-radius:3px; max-width:100px; overflow:hidden;">
-                          <div style="height:100%; width:${p.share || (p.name==='bKash'?55:p.name==='Nagad'?32:10)}%; background:var(--primary); border-radius:3px;"></div>
+                          <div style="height:100%; width:${p.share || (p.name === 'bKash' ? 55 : p.name === 'Nagad' ? 32 : 10)}%; background:var(--primary); border-radius:3px;"></div>
                         </div>
-                        <span style="font-size:12px; font-weight:600;">${p.share || (p.name==='bKash'?55:p.name==='Nagad'?32:10)}%</span>
+                        <span style="font-size:12px; font-weight:600;">${p.share || (p.name === 'bKash' ? 55 : p.name === 'Nagad' ? 32 : 10)}%</span>
                       </div>
                     </td>
                     <td>
@@ -1877,36 +1877,36 @@ class PayFlowDashboardApp {
         </div>
       </div>
     `;
-  }
+    }
 
-  exportExcelReport() {
-    this.exportTransactionsCSV();
-  }
+    exportExcelReport() {
+      this.exportTransactionsCSV();
+    }
 
-  renderPaymentMethodsView() {
-    const slot = document.getElementById('payment-methods-view-slot');
-    if (!slot) return;
-    slot.innerHTML = components.renderPaymentMethodsList(this.paymentMethods);
-  }
+    renderPaymentMethodsView() {
+      const slot = document.getElementById('payment-methods-view-slot');
+      if (!slot) return;
+      slot.innerHTML = components.renderPaymentMethodsList(this.paymentMethods);
+    }
 
-  // ==========================================
-  // SETTINGS VIEW
-  // ==========================================
+    // ==========================================
+    // SETTINGS VIEW
+    // ==========================================
 
-  renderSettingsView() {
-    const slot = document.getElementById('settings-view-slot');
-    if (!slot) return;
+    renderSettingsView() {
+      const slot = document.getElementById('settings-view-slot');
+      if (!slot) return;
 
-    const session = auth.getSession() || {
-      name: 'Merchant Account',
-      business: 'My Business Store',
-      email: '',
-      plan: 'starter',
-      apiKey: '',
-    };
-    const plan = auth.getPlan(session.plan);
+      const session = auth.getSession() || {
+        name: 'Merchant Account',
+        business: 'My Business Store',
+        email: '',
+        plan: 'starter',
+        apiKey: '',
+      };
+      const plan = auth.getPlan(session.plan);
 
-    slot.innerHTML = `
+      slot.innerHTML = `
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
         <!-- Card 1: Business Profile -->
         <div class="card-panel">
@@ -1981,7 +1981,7 @@ class PayFlowDashboardApp {
         <div class="card-panel" style="grid-column: 1 / -1;">
           <div class="card-panel-header" style="margin-bottom:16px;">
             <h4 class="card-panel-title">Subscription & Package Quotas</h4>
-            <button class="btn btn-secondary-action" onclick="window.payflowApp.openUpgradeModal('${session.plan==='starter'?'growth':'enterprise'}')">
+            <button class="btn btn-secondary-action" onclick="window.payflowApp.openUpgradeModal('${session.plan === 'starter' ? 'growth' : 'enterprise'}')">
               Change / Upgrade Plan
             </button>
           </div>
@@ -2092,144 +2092,144 @@ class PayFlowDashboardApp {
       </div>
     `;
 
-    // Load persisted branding from API or session
-    this.loadBrandingSettingsIntoUI();
-  }
+      // Load persisted branding from API or session
+      this.loadBrandingSettingsIntoUI();
+    }
 
   async loadBrandingSettingsIntoUI() {
-    try {
-      const res = await api.getBranding();
-      if (res.success && res.data) {
-        const slugInput = document.getElementById('settings-brand-slug');
-        const domainInput = document.getElementById('settings-custom-domain');
-        const purchaseBox = document.getElementById('custom-domain-purchase-box');
-        const badge = document.getElementById('custom-domain-status-badge');
+      try {
+        const res = await api.getBranding();
+        if (res.success && res.data) {
+          const slugInput = document.getElementById('settings-brand-slug');
+          const domainInput = document.getElementById('settings-custom-domain');
+          const purchaseBox = document.getElementById('custom-domain-purchase-box');
+          const badge = document.getElementById('custom-domain-status-badge');
 
-        if (slugInput && res.data.brand_slug) {
-          slugInput.value = res.data.brand_slug;
-          this.updateSlugPreview(res.data.brand_slug);
-        }
-        if (domainInput && res.data.custom_domain) {
-          domainInput.value = res.data.custom_domain;
-        }
+          if (slugInput && res.data.brand_slug) {
+            slugInput.value = res.data.brand_slug;
+            this.updateSlugPreview(res.data.brand_slug);
+          }
+          if (domainInput && res.data.custom_domain) {
+            domainInput.value = res.data.custom_domain;
+          }
 
-        if (res.data.can_use_custom_domain) {
-          if (badge) {
-            badge.innerText = 'ADD-ON ACTIVE';
-            badge.style.background = 'rgba(16, 185, 129, 0.15)';
-            badge.style.color = '#10b981';
+          if (res.data.can_use_custom_domain) {
+            if (badge) {
+              badge.innerText = 'ADD-ON ACTIVE';
+              badge.style.background = 'rgba(16, 185, 129, 0.15)';
+              badge.style.color = '#10b981';
+            }
+            if (purchaseBox) purchaseBox.style.display = 'none';
+            if (domainInput) domainInput.disabled = false;
+          } else {
+            if (badge) {
+              badge.innerText = 'OPTIONAL ADD-ON (৳২৯৯/মাস)';
+              badge.style.background = 'rgba(245, 158, 11, 0.15)';
+              badge.style.color = '#f59e0b';
+            }
+            if (purchaseBox) purchaseBox.style.display = 'block';
           }
-          if (purchaseBox) purchaseBox.style.display = 'none';
-          if (domainInput) domainInput.disabled = false;
-        } else {
-          if (badge) {
-            badge.innerText = 'OPTIONAL ADD-ON (৳২৯৯/মাস)';
-            badge.style.background = 'rgba(245, 158, 11, 0.15)';
-            badge.style.color = '#f59e0b';
-          }
-          if (purchaseBox) purchaseBox.style.display = 'block';
         }
+      } catch (e) {
+        console.warn('Failed to load branding info:', e);
       }
-    } catch (e) {
-      console.warn('Failed to load branding info:', e);
     }
-  }
 
-  buyCustomDomainAddon() {
-    const session = auth.getSession();
-    const origin = window.location.origin;
-    const checkoutUrl = `${origin}/checkout?plan=custom_domain&amount=299&billing=monthly&merchant=${encodeURIComponent(session?.email || '')}&name=${encodeURIComponent(session?.name || '')}`;
-    window.open(checkoutUrl, '_blank');
-  }
-
-  updateSlugPreview(val) {
-    const previewEl = document.getElementById('slug-preview-url');
-    if (!previewEl) return;
-    const clean = (val || '').trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
-    const origin = window.location.origin;
-    if (clean) {
-      previewEl.innerText = `${origin}/pay/${clean}?invoice_id=PFM8K3X9A1`;
-    } else {
-      previewEl.innerText = `${origin}/checkout?invoice_id=PFM8K3X9A1`;
+    buyCustomDomainAddon() {
+      const session = auth.getSession();
+      const origin = window.location.origin;
+      const checkoutUrl = `${origin}/checkout?plan=custom_domain&amount=299&billing=monthly&merchant=${encodeURIComponent(session?.email || '')}&name=${encodeURIComponent(session?.name || '')}`;
+      window.open(checkoutUrl, '_blank');
     }
-  }
+
+    updateSlugPreview(val) {
+      const previewEl = document.getElementById('slug-preview-url');
+      if (!previewEl) return;
+      const clean = (val || '').trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+      const origin = window.location.origin;
+      if (clean) {
+        previewEl.innerText = `${origin}/pay/${clean}?invoice_id=PFM8K3X9A1`;
+      } else {
+        previewEl.innerText = `${origin}/checkout?invoice_id=PFM8K3X9A1`;
+      }
+    }
 
   async saveBrandingSettings() {
-    const slugInput = document.getElementById('settings-brand-slug')?.value.trim();
-    const domainInput = document.getElementById('settings-custom-domain')?.value.trim();
+      const slugInput = document.getElementById('settings-brand-slug')?.value.trim();
+      const domainInput = document.getElementById('settings-custom-domain')?.value.trim();
 
-    try {
-      const res = await api.updateBranding({
-        brand_slug: slugInput || '',
-        custom_domain: domainInput || '',
-      });
+      try {
+        const res = await api.updateBranding({
+          brand_slug: slugInput || '',
+          custom_domain: domainInput || '',
+        });
 
-      if (res.success) {
-        this.showToast(res.message || 'Branding settings saved successfully!', 'success');
-        this.updateSlugPreview(slugInput);
+        if (res.success) {
+          this.showToast(res.message || 'Branding settings saved successfully!', 'success');
+          this.updateSlugPreview(slugInput);
+        }
+      } catch (e) {
+        this.showToast(e.message || 'Failed to save branding settings', 'error');
       }
-    } catch (e) {
-      this.showToast(e.message || 'Failed to save branding settings', 'error');
-    }
-  }
-
-  testBrandedUrl() {
-    const slug = document.getElementById('settings-brand-slug')?.value.trim();
-    const domain = document.getElementById('settings-custom-domain')?.value.trim();
-    const origin = window.location.origin;
-
-    let targetUrl = `${origin}/checkout?demo=1`;
-    if (domain) {
-      targetUrl = `https://${domain}/checkout?demo=1`;
-    } else if (slug) {
-      targetUrl = `${origin}/pay/${slug}?demo=1`;
     }
 
-    window.open(targetUrl, '_blank');
-  }
+    testBrandedUrl() {
+      const slug = document.getElementById('settings-brand-slug')?.value.trim();
+      const domain = document.getElementById('settings-custom-domain')?.value.trim();
+      const origin = window.location.origin;
 
-  copyBrandedUrl() {
-    const slug = document.getElementById('settings-brand-slug')?.value.trim();
-    const origin = window.location.origin;
-    const url = slug ? `${origin}/pay/${slug}` : `${origin}/checkout`;
-    this.copyText(url);
-    this.showToast(`Branded URL copied: ${url}`, 'success');
-  }
+      let targetUrl = `${origin}/checkout?demo=1`;
+      if (domain) {
+        targetUrl = `https://${domain}/checkout?demo=1`;
+      } else if (slug) {
+        targetUrl = `${origin}/pay/${slug}?demo=1`;
+      }
 
-  saveMerchantProfile() {
-    const name = document.getElementById('settings-name-input')?.value.trim();
-    const business = document.getElementById('settings-business-input')?.value.trim();
-    const email = document.getElementById('settings-email-input')?.value.trim();
-    const phone = document.getElementById('settings-phone-input')?.value.trim();
-    const website = document.getElementById('settings-website-input')?.value.trim();
-
-    if (!name || !business || !email) {
-      this.showToast('Please provide name, business, and email', 'warning');
-      return;
+      window.open(targetUrl, '_blank');
     }
 
-    auth.updateProfile({ name, business, email, phone, website });
-    this.updateSidebarUser();
-    this.showToast('Profile information saved successfully!', 'success');
-  }
+    copyBrandedUrl() {
+      const slug = document.getElementById('settings-brand-slug')?.value.trim();
+      const origin = window.location.origin;
+      const url = slug ? `${origin}/pay/${slug}` : `${origin}/checkout`;
+      this.copyText(url);
+      this.showToast(`Branded URL copied: ${url}`, 'success');
+    }
 
-  saveSecuritySettings() {
-    this.showToast('Security engine rules updated successfully!', 'success');
-  }
+    saveMerchantProfile() {
+      const name = document.getElementById('settings-name-input')?.value.trim();
+      const business = document.getElementById('settings-business-input')?.value.trim();
+      const email = document.getElementById('settings-email-input')?.value.trim();
+      const phone = document.getElementById('settings-phone-input')?.value.trim();
+      const website = document.getElementById('settings-website-input')?.value.trim();
 
-  // ==========================================
-  // MODALS, DRAWERS & ACTIONS
-  // ==========================================
+      if (!name || !business || !email) {
+        this.showToast('Please provide name, business, and email', 'warning');
+        return;
+      }
 
-  viewTransaction(trxId) {
-    const tx = this.transactions.find(t => t.trx_id === trxId);
-    if (!tx) return;
+      auth.updateProfile({ name, business, email, phone, website });
+      this.updateSidebarUser();
+      this.showToast('Profile information saved successfully!', 'success');
+    }
 
-    const drawer = document.getElementById('details-drawer');
-    const overlay = document.getElementById('drawer-overlay');
-    const body = document.getElementById('drawer-body-content');
+    saveSecuritySettings() {
+      this.showToast('Security engine rules updated successfully!', 'success');
+    }
 
-    body.innerHTML = `
+    // ==========================================
+    // MODALS, DRAWERS & ACTIONS
+    // ==========================================
+
+    viewTransaction(trxId) {
+      const tx = this.transactions.find(t => t.trx_id === trxId);
+      if (!tx) return;
+
+      const drawer = document.getElementById('details-drawer');
+      const overlay = document.getElementById('drawer-overlay');
+      const body = document.getElementById('drawer-body-content');
+
+      body.innerHTML = `
       <div class="details-list">
         <div class="detail-item">
           <span class="detail-key">Transaction ID</span>
@@ -2268,262 +2268,262 @@ class PayFlowDashboardApp {
       </div>
     `;
 
-    drawer.classList.add('active');
-    overlay.classList.add('active');
-  }
+      drawer.classList.add('active');
+      overlay.classList.add('active');
+    }
 
-  closeDrawer() {
-    const drawer = document.getElementById('details-drawer');
-    const overlay = document.getElementById('drawer-overlay');
-    if (drawer) drawer.classList.remove('active');
-    if (overlay) overlay.classList.remove('active');
-  }
+    closeDrawer() {
+      const drawer = document.getElementById('details-drawer');
+      const overlay = document.getElementById('drawer-overlay');
+      if (drawer) drawer.classList.remove('active');
+      if (overlay) overlay.classList.remove('active');
+    }
 
-  openCreateInvoiceModal() {
-    const modal = document.getElementById('modal-create-invoice');
-    if (modal) modal.classList.add('active');
-  }
+    openCreateInvoiceModal() {
+      const modal = document.getElementById('modal-create-invoice');
+      if (modal) modal.classList.add('active');
+    }
 
   async submitCreateInvoice() {
-    const cusName = document.getElementById('inv-cus-name').value.trim();
-    const amount = parseFloat(document.getElementById('inv-amount').value);
-    const redirectUrl = document.getElementById('inv-redirect').value.trim();
+      const cusName = document.getElementById('inv-cus-name').value.trim();
+      const amount = parseFloat(document.getElementById('inv-amount').value);
+      const redirectUrl = document.getElementById('inv-redirect').value.trim();
 
-    if (!amount || isNaN(amount)) {
-      this.showToast('Please enter a valid amount', 'error');
-      return;
-    }
-
-    try {
-      const res = await api.createInvoice({
-        cus_name: cusName || 'Valued Customer',
-        amount,
-        redirect_url: redirectUrl || `${window.location.origin}/success`,
-      });
-
-      if (res.status && res.payment_url) {
-        this.closeAllModals();
-        this.showToast(i18n.t('invoices.modal.success'), 'success');
-        await this.refreshAllData();
-        this.copyText(res.payment_url);
+      if (!amount || isNaN(amount)) {
+        this.showToast('Please enter a valid amount', 'error');
+        return;
       }
-    } catch (e) {
-      this.showToast(e.message, 'error');
-    }
-  }
 
-  openCreateApiKeyModal() {
-    const modal = document.getElementById('modal-create-apikey');
-    if (modal) modal.classList.add('active');
-  }
+      try {
+        const res = await api.createInvoice({
+          cus_name: cusName || 'Valued Customer',
+          amount,
+          redirect_url: redirectUrl || `${window.location.origin}/success`,
+        });
+
+        if (res.status && res.payment_url) {
+          this.closeAllModals();
+          this.showToast(i18n.t('invoices.modal.success'), 'success');
+          await this.refreshAllData();
+          this.copyText(res.payment_url);
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    }
+
+    openCreateApiKeyModal() {
+      const modal = document.getElementById('modal-create-apikey');
+      if (modal) modal.classList.add('active');
+    }
 
   async submitCreateApiKey() {
-    const name = document.getElementById('key-name-input').value.trim();
-    const env = document.getElementById('key-env-select').value;
+      const name = document.getElementById('key-name-input').value.trim();
+      const env = document.getElementById('key-env-select').value;
 
-    try {
-      const res = await api.createApiKey({ name, environment: env });
-      if (res.success && res.data) {
-        this.closeAllModals();
-        this.showToast(i18n.t('toast.keyCreated'), 'success');
-        await this.refreshAllData();
-        // Prompt user with full key one time
-        alert(`Secret Key Generated:\n\n${res.data.secret_key}\n\nSave this key immediately!`);
+      try {
+        const res = await api.createApiKey({ name, environment: env });
+        if (res.success && res.data) {
+          this.closeAllModals();
+          this.showToast(i18n.t('toast.keyCreated'), 'success');
+          await this.refreshAllData();
+          // Prompt user with full key one time
+          alert(`Secret Key Generated:\n\n${res.data.secret_key}\n\nSave this key immediately!`);
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
       }
-    } catch (e) {
-      this.showToast(e.message, 'error');
     }
-  }
 
-  switchDeviceModalTab(tab) {
-    const btnQr = document.getElementById('tab-btn-qr');
-    const btnForm = document.getElementById('tab-btn-form');
-    const contentQr = document.getElementById('device-tab-qr-content');
-    const contentForm = document.getElementById('device-tab-form-content');
+    switchDeviceModalTab(tab) {
+      const btnQr = document.getElementById('tab-btn-qr');
+      const btnForm = document.getElementById('tab-btn-form');
+      const contentQr = document.getElementById('device-tab-qr-content');
+      const contentForm = document.getElementById('device-tab-form-content');
 
-    if (tab === 'qr') {
-      if (btnQr) btnQr.classList.add('active');
-      if (btnForm) btnForm.classList.remove('active');
-      if (contentQr) contentQr.style.display = 'block';
-      if (contentForm) contentForm.style.display = 'none';
-      this.loadAddDeviceQr();
-    } else {
-      if (btnForm) btnForm.classList.add('active');
-      if (btnQr) btnQr.classList.remove('active');
-      if (contentForm) contentForm.style.display = 'block';
-      if (contentQr) contentQr.style.display = 'none';
+      if (tab === 'qr') {
+        if (btnQr) btnQr.classList.add('active');
+        if (btnForm) btnForm.classList.remove('active');
+        if (contentQr) contentQr.style.display = 'block';
+        if (contentForm) contentForm.style.display = 'none';
+        this.loadAddDeviceQr();
+      } else {
+        if (btnForm) btnForm.classList.add('active');
+        if (btnQr) btnQr.classList.remove('active');
+        if (contentForm) contentForm.style.display = 'block';
+        if (contentQr) contentQr.style.display = 'none';
+      }
     }
-  }
 
   async loadAddDeviceQr() {
-    const qrSlot = document.getElementById('add-device-qr-image-slot');
-    const sUrl = document.getElementById('add-qr-server-url');
-    const dToken = document.getElementById('add-qr-device-token');
-    const mId = document.getElementById('add-qr-merchant-id');
+      const qrSlot = document.getElementById('add-device-qr-image-slot');
+      const sUrl = document.getElementById('add-qr-server-url');
+      const dToken = document.getElementById('add-qr-device-token');
+      const mId = document.getElementById('add-qr-merchant-id');
 
-    if (sUrl) sUrl.innerText = window.location.origin;
-    if (qrSlot) {
-      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+      if (sUrl) sUrl.innerText = window.location.origin;
+      if (qrSlot) {
+        qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
         <div style="width:24px; height:24px; border:3px solid rgba(16,185,129,0.2); border-top-color:#10b981; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
         <span>Generating QR Code...</span>
       </div>`;
-    }
+      }
 
-    try {
-      let primaryDeviceId = (this.devices && this.devices.length > 0) ? this.devices[0].id : null;
-      if (!primaryDeviceId) {
-        try {
-          const freshDevices = await api.getDevices();
-          if (Array.isArray(freshDevices) && freshDevices.length > 0) {
-            this.devices = freshDevices;
-            primaryDeviceId = this.devices[0].id;
+      try {
+        let primaryDeviceId = (this.devices && this.devices.length > 0) ? this.devices[0].id : null;
+        if (!primaryDeviceId) {
+          try {
+            const freshDevices = await api.getDevices();
+            if (Array.isArray(freshDevices) && freshDevices.length > 0) {
+              this.devices = freshDevices;
+              primaryDeviceId = this.devices[0].id;
+            }
+          } catch (_) { }
+        }
+
+        // If still no device in memory, use 'primary' to auto-provision on server
+        const targetId = primaryDeviceId || 'primary';
+        const res = await api.getDeviceQr(targetId);
+
+        if (res && res.success) {
+          if (qrSlot) {
+            qrSlot.innerHTML = `<img src="${res.qr_code}" alt="Pairing QR Code" style="width:200px; height:200px; display:block; margin:0 auto; border-radius:8px;" />`;
           }
-        } catch (_) {}
-      }
+          if (sUrl && res.payload?.backend_url) sUrl.innerText = res.payload.backend_url;
+          if (dToken && res.payload?.device_token) dToken.innerText = res.payload.device_token;
+          if (mId && res.payload?.merchant_id) mId.innerText = res.payload.merchant_id;
 
-      // If still no device in memory, use 'primary' to auto-provision on server
-      const targetId = primaryDeviceId || 'primary';
-      const res = await api.getDeviceQr(targetId);
-
-      if (res && res.success) {
+          const activeDeviceId = res.payload?.device_id || primaryDeviceId;
+          if (activeDeviceId) {
+            this.startPairingPolling(activeDeviceId);
+          }
+        } else {
+          throw new Error(res?.error || 'QR কোড লোড হতে ব্যর্থ হয়েছে');
+        }
+      } catch (e) {
+        console.error('[loadAddDeviceQr] error:', e);
         if (qrSlot) {
-          qrSlot.innerHTML = `<img src="${res.qr_code}" alt="Pairing QR Code" style="width:200px; height:200px; display:block; margin:0 auto; border-radius:8px;" />`;
-        }
-        if (sUrl && res.payload?.backend_url) sUrl.innerText = res.payload.backend_url;
-        if (dToken && res.payload?.device_token) dToken.innerText = res.payload.device_token;
-        if (mId && res.payload?.merchant_id) mId.innerText = res.payload.merchant_id;
-
-        const activeDeviceId = res.payload?.device_id || primaryDeviceId;
-        if (activeDeviceId) {
-          this.startPairingPolling(activeDeviceId);
-        }
-      } else {
-        throw new Error(res?.error || 'QR কোড লোড হতে ব্যর্থ হয়েছে');
-      }
-    } catch (e) {
-      console.error('[loadAddDeviceQr] error:', e);
-      if (qrSlot) {
-        qrSlot.innerHTML = `
+          qrSlot.innerHTML = `
           <div style="color:var(--danger); padding:24px; text-align:center;">
             <p style="margin:0 0 12px 0; font-size:13px; font-weight:600;">⚠️ ${e.message || 'QR কোড লোড করা যায়নি'}</p>
             <button class="btn btn-secondary-action" style="font-size:12px; padding:6px 14px; margin:0 auto;" onclick="window.payflowApp.loadAddDeviceQr()">
               🔄 Retry (আবার চেষ্টা করুন)
             </button>
           </div>`;
+        }
       }
     }
-  }
 
   async openAddDeviceModal() {
-    const plan = auth.getPlan(this.session?.plan || 'starter');
-    const currentDeviceCount = (this.devices || []).length;
-    if (plan && plan.deviceLimit && currentDeviceCount >= plan.deviceLimit) {
-      alert(`⚠️ Device Limit Reached!\n\nYour current ${plan.label} plan allows a maximum of ${plan.deviceLimit} device(s).\nYou already have ${currentDeviceCount} active device(s).\n\nPlease upgrade your plan to add more Android forwarder devices.`);
-      const nextPlan = this.session?.plan === 'starter' ? 'pro' : (this.session?.plan === 'pro' ? 'business' : 'enterprise');
-      this.openUpgradeModal(nextPlan);
-      return;
+      const plan = auth.getPlan(this.session?.plan || 'starter');
+      const currentDeviceCount = (this.devices || []).length;
+      if (plan && plan.deviceLimit && currentDeviceCount >= plan.deviceLimit) {
+        alert(`⚠️ Device Limit Reached!\n\nYour current ${plan.label} plan allows a maximum of ${plan.deviceLimit} device(s).\nYou already have ${currentDeviceCount} active device(s).\n\nPlease upgrade your plan to add more Android forwarder devices.`);
+        const nextPlan = this.session?.plan === 'starter' ? 'pro' : (this.session?.plan === 'pro' ? 'business' : 'enterprise');
+        this.openUpgradeModal(nextPlan);
+        return;
+      }
+
+      const modal = document.getElementById('modal-add-device');
+      if (!modal) return;
+
+      this.switchDeviceModalTab('qr');
+      modal.classList.add('active');
+      await this.loadAddDeviceQr();
     }
-
-    const modal = document.getElementById('modal-add-device');
-    if (!modal) return;
-
-    this.switchDeviceModalTab('qr');
-    modal.classList.add('active');
-    await this.loadAddDeviceQr();
-  }
 
   async submitAddDevice() {
-    const plan = auth.getPlan(this.session?.plan || 'starter');
-    const currentDeviceCount = (this.devices || []).length;
-    if (plan && plan.deviceLimit && currentDeviceCount >= plan.deviceLimit) {
-      alert(`⚠️ Device Limit Reached!\n\nYour current ${plan.label} plan allows up to ${plan.deviceLimit} device(s).\nPlease upgrade to add more.`);
-      return;
-    }
-
-    const name = document.getElementById('dev-name-input').value.trim();
-    const sim = document.getElementById('dev-sim-input').value.trim();
-
-    if (!name) {
-      this.showToast('Device name is required', 'warning');
-      return;
-    }
-
-    try {
-      const res = await api.addDevice({ device_name: name, sim_number: sim });
-      if (res.success) {
-        this.showToast(i18n.t('toast.deviceAdded', 'Device added successfully'), 'success');
-        await this.refreshAllData();
-        this.switchDeviceModalTab('qr');
-        if (res.data && res.data.id) {
-          const qrSlot = document.getElementById('add-device-qr-image-slot');
-          const qrRes = await api.getDeviceQr(res.data.id);
-          if (qrRes.success) {
-            if (qrSlot) qrSlot.innerHTML = `<img src="${qrRes.qr_code}" alt="Pairing QR Code" style="width:200px; height:200px; display:block;" />`;
-            const sUrl = document.getElementById('add-qr-server-url');
-            const dToken = document.getElementById('add-qr-device-token');
-            const mId = document.getElementById('add-qr-merchant-id');
-            if (sUrl) sUrl.innerText = qrRes.payload.backend_url;
-            if (dToken) dToken.innerText = qrRes.payload.device_token;
-            if (mId) mId.innerText = qrRes.payload.merchant_id;
-
-            this.startPairingPolling(res.data.id);
-          }
-        }
+      const plan = auth.getPlan(this.session?.plan || 'starter');
+      const currentDeviceCount = (this.devices || []).length;
+      if (plan && plan.deviceLimit && currentDeviceCount >= plan.deviceLimit) {
+        alert(`⚠️ Device Limit Reached!\n\nYour current ${plan.label} plan allows up to ${plan.deviceLimit} device(s).\nPlease upgrade to add more.`);
+        return;
       }
-    } catch (e) {
-      this.showToast(e.message, 'error');
-    }
-  }
 
-  stopPairingPolling() {
-    if (this.pairingPollTimer) {
-      clearInterval(this.pairingPollTimer);
-      this.pairingPollTimer = null;
-    }
-  }
+      const name = document.getElementById('dev-name-input').value.trim();
+      const sim = document.getElementById('dev-sim-input').value.trim();
 
-  startPairingPolling(deviceId) {
-    this.stopPairingPolling();
-    const modalStartTime = Date.now();
+      if (!name) {
+        this.showToast('Device name is required', 'warning');
+        return;
+      }
 
-    this.pairingPollTimer = setInterval(async () => {
       try {
-        const devices = await api.getDevices();
-        if (Array.isArray(devices) && devices.length > 0) {
-          const matched = devices.find(d => {
-            const matchesId = d.id === deviceId || d.device_token === deviceId;
-            if (!matchesId) return false;
+        const res = await api.addDevice({ device_name: name, sim_number: sim });
+        if (res.success) {
+          this.showToast(i18n.t('toast.deviceAdded', 'Device added successfully'), 'success');
+          await this.refreshAllData();
+          this.switchDeviceModalTab('qr');
+          if (res.data && res.data.id) {
+            const qrSlot = document.getElementById('add-device-qr-image-slot');
+            const qrRes = await api.getDeviceQr(res.data.id);
+            if (qrRes.success) {
+              if (qrSlot) qrSlot.innerHTML = `<img src="${qrRes.qr_code}" alt="Pairing QR Code" style="width:200px; height:200px; display:block;" />`;
+              const sUrl = document.getElementById('add-qr-server-url');
+              const dToken = document.getElementById('add-qr-device-token');
+              const mId = document.getElementById('add-qr-merchant-id');
+              if (sUrl) sUrl.innerText = qrRes.payload.backend_url;
+              if (dToken) dToken.innerText = qrRes.payload.device_token;
+              if (mId) mId.innerText = qrRes.payload.merchant_id;
 
-            const lastSeenStr = d.last_seen || d.last_seen_at;
-            if (!lastSeenStr) return false;
-
-            const ts = new Date(typeof lastSeenStr === 'string' ? lastSeenStr.replace(' ', 'T') : lastSeenStr).getTime();
-            // ONLY match if a genuine heartbeat was received strictly AFTER the modal was opened
-            if (!isNaN(ts) && ts > modalStartTime + 1000) {
-              return true;
+              this.startPairingPolling(res.data.id);
             }
-            return false;
-          });
-
-          if (matched) {
-            this.stopPairingPolling();
-            this.onDevicePairSuccess(matched);
           }
         }
-      } catch (_) {}
-    }, 2500);
-  }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    }
 
-  onDevicePairSuccess(device) {
-    const deviceName = device.device_name || 'Device';
+    stopPairingPolling() {
+      if (this.pairingPollTimer) {
+        clearInterval(this.pairingPollTimer);
+        this.pairingPollTimer = null;
+      }
+    }
 
-    const slots = [
-      document.getElementById('device-qr-image-slot'),
-      document.getElementById('add-device-qr-image-slot'),
-    ].filter(Boolean);
+    startPairingPolling(deviceId) {
+      this.stopPairingPolling();
+      const modalStartTime = Date.now();
 
-    slots.forEach(slot => {
-      slot.innerHTML = `
+      this.pairingPollTimer = setInterval(async () => {
+        try {
+          const devices = await api.getDevices();
+          if (Array.isArray(devices) && devices.length > 0) {
+            const matched = devices.find(d => {
+              const matchesId = d.id === deviceId || d.device_token === deviceId;
+              if (!matchesId) return false;
+
+              const lastSeenStr = d.last_seen || d.last_seen_at;
+              if (!lastSeenStr) return false;
+
+              const ts = new Date(typeof lastSeenStr === 'string' ? lastSeenStr.replace(' ', 'T') : lastSeenStr).getTime();
+              // ONLY match if a genuine heartbeat was received strictly AFTER the modal was opened
+              if (!isNaN(ts) && ts > modalStartTime + 1000) {
+                return true;
+              }
+              return false;
+            });
+
+            if (matched) {
+              this.stopPairingPolling();
+              this.onDevicePairSuccess(matched);
+            }
+          }
+        } catch (_) { }
+      }, 2500);
+    }
+
+    onDevicePairSuccess(device) {
+      const deviceName = device.device_name || 'Device';
+
+      const slots = [
+        document.getElementById('device-qr-image-slot'),
+        document.getElementById('add-device-qr-image-slot'),
+      ].filter(Boolean);
+
+      slots.forEach(slot => {
+        slot.innerHTML = `
         <div style="padding: 24px; text-align: center; animation: fadeIn 0.3s ease-in-out;">
           <div style="width: 60px; height: 60px; border-radius: 50%; background: #10b981; color: white; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -2533,717 +2533,717 @@ class PayFlowDashboardApp {
           <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Devices page-এ যাচ্ছে...</p>
         </div>
       `;
-    });
+      });
 
-    this.showToast(`🎉 ${deviceName} কানেক্ট হয়েছে!`, 'success');
+      this.showToast(`🎉 ${deviceName} কানেক্ট হয়েছে!`, 'success');
 
-    // Auto: close modal → refresh data → switch to devices view
-    setTimeout(async () => {
-      this.closeAllModals();
-      this.stopPairingPolling();
-      await this.refreshAllData();
-      this.switchView('devices');
-      window.location.hash = '#devices';
-    }, 2000);
-  }
+      // Auto: close modal → refresh data → switch to devices view
+      setTimeout(async () => {
+        this.closeAllModals();
+        this.stopPairingPolling();
+        await this.refreshAllData();
+        this.switchView('devices');
+        window.location.hash = '#devices';
+      }, 2000);
+    }
 
   async showDeviceQrModal(deviceId, deviceName) {
-    const modal = document.getElementById('modal-device-qr');
-    if (!modal) return;
-    const titleEl = document.getElementById('device-qr-title');
-    if (titleEl) titleEl.innerText = `Connect: ${deviceName || 'Android Forwarder'}`;
+      const modal = document.getElementById('modal-device-qr');
+      if (!modal) return;
+      const titleEl = document.getElementById('device-qr-title');
+      if (titleEl) titleEl.innerText = `Connect: ${deviceName || 'Android Forwarder'}`;
 
-    const qrSlot = document.getElementById('device-qr-image-slot');
-    if (qrSlot) {
-      qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">Generating QR Code...</div>`;
-    }
-
-    modal.classList.add('active');
-
-    try {
-      const res = await api.getDeviceQr(deviceId);
-      if (res.success) {
-        if (qrSlot) {
-          qrSlot.innerHTML = `<img src="${res.qr_code}" alt="Pairing QR Code" style="width:220px; height:220px; display:block;" />`;
-        }
-        const sUrl = document.getElementById('qr-server-url');
-        const dToken = document.getElementById('qr-device-token');
-        const mId = document.getElementById('qr-merchant-id');
-        if (sUrl) sUrl.innerText = res.payload.backend_url;
-        if (dToken) dToken.innerText = res.payload.device_token;
-        if (mId) mId.innerText = res.payload.merchant_id;
-
-        // Auto-poll to detect when device scans and connects
-        this.startPairingPolling(deviceId);
-      }
-    } catch (e) {
+      const qrSlot = document.getElementById('device-qr-image-slot');
       if (qrSlot) {
-        qrSlot.innerHTML = `<div style="color:var(--danger); padding:20px;">Failed to load QR code: ${e.message}</div>`;
+        qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">Generating QR Code...</div>`;
+      }
+
+      modal.classList.add('active');
+
+      try {
+        const res = await api.getDeviceQr(deviceId);
+        if (res.success) {
+          if (qrSlot) {
+            qrSlot.innerHTML = `<img src="${res.qr_code}" alt="Pairing QR Code" style="width:220px; height:220px; display:block;" />`;
+          }
+          const sUrl = document.getElementById('qr-server-url');
+          const dToken = document.getElementById('qr-device-token');
+          const mId = document.getElementById('qr-merchant-id');
+          if (sUrl) sUrl.innerText = res.payload.backend_url;
+          if (dToken) dToken.innerText = res.payload.device_token;
+          if (mId) mId.innerText = res.payload.merchant_id;
+
+          // Auto-poll to detect when device scans and connects
+          this.startPairingPolling(deviceId);
+        }
+      } catch (e) {
+        if (qrSlot) {
+          qrSlot.innerHTML = `<div style="color:var(--danger); padding:20px;">Failed to load QR code: ${e.message}</div>`;
+        }
       }
     }
-  }
 
   async pingDeviceTest(deviceId) {
-    this.showToast('Pinging device forwarder...', 'info');
-    const start = Date.now();
-    try {
-      const devices = await api.getDevices();
-      const latency = Math.max(22, Math.round(Date.now() - start));
-      const target = (devices || []).find(d => d.id === deviceId);
-      if (target && target.status === 'ONLINE') {
-        this.showToast(`⚡ ${target.device_name || 'Device'} responded in ${latency}ms! Signal & latency optimal.`, 'success');
-      } else {
-        this.showToast(`⚠️ Device is OFFLINE or waiting for phone heartbeat.`, 'warning');
+      this.showToast('Pinging device forwarder...', 'info');
+      const start = Date.now();
+      try {
+        const devices = await api.getDevices();
+        const latency = Math.max(22, Math.round(Date.now() - start));
+        const target = (devices || []).find(d => d.id === deviceId);
+        if (target && target.status === 'ONLINE') {
+          this.showToast(`⚡ ${target.device_name || 'Device'} responded in ${latency}ms! Signal & latency optimal.`, 'success');
+        } else {
+          this.showToast(`⚠️ Device is OFFLINE or waiting for phone heartbeat.`, 'warning');
+        }
+        await this.refreshAllData();
+      } catch (e) {
+        this.showToast('Ping failed: ' + e.message, 'error');
       }
-      await this.refreshAllData();
-    } catch (e) {
-      this.showToast('Ping failed: ' + e.message, 'error');
     }
-  }
 
-  openConnectWebsiteModal() {
-    const modal = document.getElementById('modal-connect-website');
-    if (modal) modal.classList.add('active');
-  }
+    openConnectWebsiteModal() {
+      const modal = document.getElementById('modal-connect-website');
+      if (modal) modal.classList.add('active');
+    }
 
   async submitConnectWebsite() {
-    const name = document.getElementById('site-name-input')?.value.trim();
-    const domain = document.getElementById('site-domain-input')?.value.trim();
-    const platform = document.getElementById('site-platform-select')?.value;
-    const webhook_url = document.getElementById('site-webhook-input')?.value.trim();
+      const name = document.getElementById('site-name-input')?.value.trim();
+      const domain = document.getElementById('site-domain-input')?.value.trim();
+      const platform = document.getElementById('site-platform-select')?.value;
+      const webhook_url = document.getElementById('site-webhook-input')?.value.trim();
 
-    if (!domain) {
-      this.showToast('Domain URL is required', 'warning');
-      return;
-    }
-
-    try {
-      const res = await api.connectWebsite({ name, domain, platform, webhook_url });
-      if (res.success) {
-        this.closeAllModals();
-        this.showToast('Website connected successfully!', 'success');
-        await this.renderWebhooksView();
+      if (!domain) {
+        this.showToast('Domain URL is required', 'warning');
+        return;
       }
-    } catch (e) {
-      this.showToast(e.message, 'error');
+
+      try {
+        const res = await api.connectWebsite({ name, domain, platform, webhook_url });
+        if (res.success) {
+          this.closeAllModals();
+          this.showToast('Website connected successfully!', 'success');
+          await this.renderWebhooksView();
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
     }
-  }
 
-  testSiteWebhook(siteId, url) {
-    this.showToast(`Ping sent to ${url}: HTTP 200 OK (84ms)`, 'success');
-  }
-
-  openMerchantAuthModal() {
-    if (this.session) {
-      const midEl = document.getElementById('modal-active-merchant-id');
-      const bizEl = document.getElementById('modal-active-business-name');
-      const emailEl = document.getElementById('modal-active-email');
-      const keyEl = document.getElementById('modal-active-api-key');
-
-      if (midEl) midEl.textContent = this.session.merchantId || this.session.id || '--';
-      if (bizEl) bizEl.textContent = this.session.business || this.session.name || 'Merchant Store';
-      if (emailEl) emailEl.textContent = this.session.email || '--';
-      if (keyEl) keyEl.textContent = this.session.apiKey || '--';
+    testSiteWebhook(siteId, url) {
+      this.showToast(`Ping sent to ${url}: HTTP 200 OK (84ms)`, 'success');
     }
-    const modal = document.getElementById('modal-merchant-auth');
-    if (modal) modal.classList.add('active');
-  }
+
+    openMerchantAuthModal() {
+      if (this.session) {
+        const midEl = document.getElementById('modal-active-merchant-id');
+        const bizEl = document.getElementById('modal-active-business-name');
+        const emailEl = document.getElementById('modal-active-email');
+        const keyEl = document.getElementById('modal-active-api-key');
+
+        if (midEl) midEl.textContent = this.session.merchantId || this.session.id || '--';
+        if (bizEl) bizEl.textContent = this.session.business || this.session.name || 'Merchant Store';
+        if (emailEl) emailEl.textContent = this.session.email || '--';
+        if (keyEl) keyEl.textContent = this.session.apiKey || '--';
+      }
+      const modal = document.getElementById('modal-merchant-auth');
+      if (modal) modal.classList.add('active');
+    }
 
   async submitRegisterMerchant() {
-    const business_name = document.getElementById('reg-biz-name')?.value.trim();
-    const name = document.getElementById('reg-owner-name')?.value.trim();
-    const email = document.getElementById('reg-email')?.value.trim();
+      const business_name = document.getElementById('reg-biz-name')?.value.trim();
+      const name = document.getElementById('reg-owner-name')?.value.trim();
+      const email = document.getElementById('reg-email')?.value.trim();
 
-    if (!name || !email) {
-      this.showToast('Please enter merchant name and email', 'warning');
-      return;
-    }
-
-    try {
-      const res = await api.registerMerchant({ business_name, name, email });
-      if (res.success) {
-        this.closeAllModals();
-        this.showToast(`Congratulations ${res.merchant.name}! New Merchant ID: ${res.merchant.id}`, 'success');
+      if (!name || !email) {
+        this.showToast('Please enter merchant name and email', 'warning');
+        return;
       }
-    } catch (e) {
-      this.showToast(e.message, 'error');
+
+      try {
+        const res = await api.registerMerchant({ business_name, name, email });
+        if (res.success) {
+          this.closeAllModals();
+          this.showToast(`Congratulations ${res.merchant.name}! New Merchant ID: ${res.merchant.id}`, 'success');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
     }
-  }
 
   async removeDevice(id) {
-    if (!confirm('Are you sure you want to disconnect and delete this device?')) return;
-    try {
-      await api.deleteDevice(id);
-      this.devices = (this.devices || []).filter(d => d.id !== id);
-      this.renderDevicesView();
-      this.showToast('Device deleted successfully', 'success');
-      await this.refreshAllData();
-    } catch (e) {
-      this.showToast(e.message, 'error');
+      if (!confirm('Are you sure you want to disconnect and delete this device?')) return;
+      try {
+        await api.deleteDevice(id);
+        this.devices = (this.devices || []).filter(d => d.id !== id);
+        this.renderDevicesView();
+        this.showToast('Device deleted successfully', 'success');
+        await this.refreshAllData();
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
     }
-  }
 
-  toggleKeyReveal(keyId, secret, prefix) {
-    const el = document.getElementById(`key-mask-${keyId}`);
-    if (!el) return;
+    toggleKeyReveal(keyId, secret, prefix) {
+      const el = document.getElementById(`key-mask-${keyId}`);
+      if (!el) return;
 
-    if (this.revealedKeys.has(keyId)) {
-      this.revealedKeys.delete(keyId);
-      el.innerText = `${prefix}••••••••••••••••`;
-    } else {
-      this.revealedKeys.add(keyId);
-      el.innerText = secret;
+      if (this.revealedKeys.has(keyId)) {
+        this.revealedKeys.delete(keyId);
+        el.innerText = `${prefix}••••••••••••••••`;
+      } else {
+        this.revealedKeys.add(keyId);
+        el.innerText = secret;
+      }
     }
-  }
 
   async sendTestWebhook() {
-    const url = document.getElementById('wh-url-input')?.value.trim();
-    try {
-      const res = await api.sendTestWebhook(url);
-      this.showToast(`Test Webhook: ${res.status_code} (${res.response_time_ms}ms)`, res.delivered ? 'success' : 'info');
-    } catch (e) {
-      this.showToast(e.message, 'error');
-    }
-  }
-
-  closeAllModals() {
-    this.stopPairingPolling();
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-  }
-
-  // ==========================================
-  // UTILITIES & EXPORTS
-  // ==========================================
-
-  copyText(text) {
-    navigator.clipboard.writeText(text);
-    this.showToast(i18n.t('toast.copied'), 'success');
-  }
-
-  copySnippet(elementId, btn) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-    const textToCopy = el.innerText || el.textContent;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      if (btn) {
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span style="color:#10b981;">Copied!</span>`;
-        setTimeout(() => {
-          btn.innerHTML = originalHtml;
-        }, 2000);
+      const url = document.getElementById('wh-url-input')?.value.trim();
+      try {
+        const res = await api.sendTestWebhook(url);
+        this.showToast(`Test Webhook: ${res.status_code} (${res.response_time_ms}ms)`, res.delivered ? 'success' : 'info');
+      } catch (e) {
+        this.showToast(e.message, 'error');
       }
-      this.showToast('Code snippet copied to clipboard', 'success');
-    }).catch(() => {
-      this.showToast('Could not copy code', 'error');
-    });
-  }
-
-  toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme') || 'light';
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('payflow_theme', next);
-    this.updateThemeButton();
-  }
-
-  updateThemeButton() {
-    const theme = document.documentElement.getAttribute('data-theme');
-    const btn = document.getElementById('btn-theme-toggle');
-    if (btn) {
-      btn.innerHTML = theme === 'dark'
-        ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
-        : `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
     }
-  }
 
-  showToast(message, type = 'info') {
-    const container = document.getElementById('toast-stack');
-    if (!container) return;
+    closeAllModals() {
+      this.stopPairingPolling();
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+    }
 
-    const iconSvg = type === 'success'
-      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
-      : (type === 'error'
-        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
-        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`);
+    // ==========================================
+    // UTILITIES & EXPORTS
+    // ==========================================
 
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
+    copyText(text) {
+      navigator.clipboard.writeText(text);
+      this.showToast(i18n.t('toast.copied'), 'success');
+    }
+
+    copySnippet(elementId, btn) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const textToCopy = el.innerText || el.textContent;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        if (btn) {
+          const originalHtml = btn.innerHTML;
+          btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span style="color:#10b981;">Copied!</span>`;
+          setTimeout(() => {
+            btn.innerHTML = originalHtml;
+          }, 2000);
+        }
+        this.showToast('Code snippet copied to clipboard', 'success');
+      }).catch(() => {
+        this.showToast('Could not copy code', 'error');
+      });
+    }
+
+    toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('payflow_theme', next);
+      this.updateThemeButton();
+    }
+
+    updateThemeButton() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      const btn = document.getElementById('btn-theme-toggle');
+      if (btn) {
+        btn.innerHTML = theme === 'dark'
+          ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+          : `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+      }
+    }
+
+    showToast(message, type = 'info') {
+      const container = document.getElementById('toast-stack');
+      if (!container) return;
+
+      const iconSvg = type === 'success'
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+        : (type === 'error'
+          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
+          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`);
+
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
       <span style="display:inline-flex; align-items:center;">${iconSvg}</span>
       <span>${message}</span>
     `;
 
-    container.appendChild(toast);
-    setTimeout(() => {
-      toast.remove();
-    }, 3200);
-  }
-
-  handleGlobalSearch(query) {
-    const q = (query || '').toLowerCase().trim();
-    if (!q) {
-      this.renderCurrentView();
-      return;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3200);
     }
 
-    // Filter transactions
-    const filteredTxs = this.transactions.filter(t => 
-      t.trx_id.toLowerCase().includes(q) ||
-      (t.sender && t.sender.toLowerCase().includes(q)) ||
-      (t.order_id && t.order_id.toLowerCase().includes(q)) ||
-      t.amount.toString().includes(q)
-    );
+    handleGlobalSearch(query) {
+      const q = (query || '').toLowerCase().trim();
+      if (!q) {
+        this.renderCurrentView();
+        return;
+      }
 
-    const slot = this.currentView === 'home' 
-      ? document.getElementById('recent-transactions-slot')
-      : document.getElementById('transactions-view-slot');
+      // Filter transactions
+      const filteredTxs = this.transactions.filter(t =>
+        t.trx_id.toLowerCase().includes(q) ||
+        (t.sender && t.sender.toLowerCase().includes(q)) ||
+        (t.order_id && t.order_id.toLowerCase().includes(q)) ||
+        t.amount.toString().includes(q)
+      );
 
-    if (slot) {
-      slot.innerHTML = components.renderTransactionsTable(filteredTxs, 50);
-    }
-  }
+      const slot = this.currentView === 'home'
+        ? document.getElementById('recent-transactions-slot')
+        : document.getElementById('transactions-view-slot');
 
-  // ==========================================
-  // PAYMENT CHANNELS & INSTRUCTIONS HANDLERS
-  // ==========================================
-  openAddPaymentMethodModal() {
-    document.getElementById('pm-id').value = '';
-    document.getElementById('pm-modal-title').innerText = 'Add Payment Channel & Instructions';
-    document.getElementById('pm-provider-type').value = 'bkash';
-    document.getElementById('pm-account-number').value = '';
-    document.getElementById('pm-account-name').value = '';
-    document.getElementById('pm-bank-name').value = '';
-    document.getElementById('pm-branch-name').value = '';
-    document.getElementById('pm-routing-number').value = '';
-    document.getElementById('pm-is-active').value = '1';
-    document.getElementById('pm-qr-url').value = '';
-    const fileInput = document.getElementById('pm-qr-file-input');
-    if (fileInput) fileInput.value = '';
-    this.updateQrPreview('');
-
-    const advDetails = document.getElementById('pm-advanced-details');
-    if (advDetails) advDetails.removeAttribute('open');
-
-    this.onPaymentTypeChange(true);
-    const modal = document.getElementById('modal-payment-method');
-    if (modal) modal.classList.add('active');
-  }
-
-  onPaymentTypeChange(isNew = false) {
-    const type = document.getElementById('pm-provider-type').value;
-    const bankFields = document.getElementById('pm-bank-fields');
-    const labelNumber = document.getElementById('pm-label-number');
-
-    if (type === 'bank') {
-      bankFields.style.display = 'block';
-      labelNumber.innerText = 'Bank Account Number *';
-    } else if (type === 'binance') {
-      bankFields.style.display = 'none';
-      labelNumber.innerText = 'Binance Pay ID *';
-    } else {
-      bankFields.style.display = 'none';
-      labelNumber.innerText = 'Merchant Phone Number *';
-    }
-
-    // Sync theme color input with text
-    const colorInput = document.getElementById('pm-theme-color');
-    const colorTextInput = document.getElementById('pm-theme-color-text');
-    colorInput.oninput = () => { colorTextInput.value = colorInput.value; };
-    colorTextInput.oninput = () => { colorInput.value = colorTextInput.value; };
-
-    // Set presets if it is a new channel
-    if (isNew) {
-      if (type === 'bkash') {
-        document.getElementById('pm-title').value = 'bKash';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#E2136E';
-        document.getElementById('pm-theme-color-text').value = '#E2136E';
-        document.getElementById('pm-sender-label').value = 'Your bKash Number *';
-        document.getElementById('pm-trx-label').value = 'bKash TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open bKash App or dial *247#\n2. Select Payment and enter: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm payment';
-      } else if (type === 'nagad') {
-        document.getElementById('pm-title').value = 'Nagad';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#F7941D';
-        document.getElementById('pm-theme-color-text').value = '#F7941D';
-        document.getElementById('pm-sender-label').value = 'Your Nagad Number *';
-        document.getElementById('pm-trx-label').value = 'Nagad TxnID *';
-        document.getElementById('pm-instructions').value = '1. Open Nagad App or dial *167#\n2. Select Merchant Pay and enter: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
-      } else if (type === 'rocket') {
-        document.getElementById('pm-title').value = 'Rocket';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#8C3494';
-        document.getElementById('pm-theme-color-text').value = '#8C3494';
-        document.getElementById('pm-sender-label').value = 'Your Rocket Number *';
-        document.getElementById('pm-trx-label').value = 'Rocket TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open Rocket App or dial *322#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
-      } else if (type === 'upay') {
-        document.getElementById('pm-title').value = 'Upay';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#004F9F';
-        document.getElementById('pm-theme-color-text').value = '#004F9F';
-        document.getElementById('pm-sender-label').value = 'Your Upay Number *';
-        document.getElementById('pm-trx-label').value = 'Upay TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open Upay App or dial *268#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm payment';
-      } else if (type === 'tap') {
-        document.getElementById('pm-title').value = 'TAP';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#E4002B';
-        document.getElementById('pm-theme-color-text').value = '#E4002B';
-        document.getElementById('pm-sender-label').value = 'Your TAP Number *';
-        document.getElementById('pm-trx-label').value = 'TAP TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open TAP App or dial *201#\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
-      } else if (type === 'islamic_wallet') {
-        document.getElementById('pm-title').value = 'Islamic Wallet';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#008850';
-        document.getElementById('pm-theme-color-text').value = '#008850';
-        document.getElementById('pm-sender-label').value = 'Your Account Number *';
-        document.getElementById('pm-trx-label').value = 'Islamic Wallet TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open Islamic Wallet App\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter T-PIN to confirm';
-      } else if (type === 'mcash') {
-        document.getElementById('pm-title').value = 'mCash';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#008542';
-        document.getElementById('pm-theme-color-text').value = '#008542';
-        document.getElementById('pm-sender-label').value = 'Your mCash Number *';
-        document.getElementById('pm-trx-label').value = 'mCash TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open CellFin or mCash App (dial *259#)\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
-      } else if (type === 'mycash') {
-        document.getElementById('pm-title').value = 'MYCash';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#D32F2F';
-        document.getElementById('pm-theme-color-text').value = '#D32F2F';
-        document.getElementById('pm-sender-label').value = 'Your MYCash Number *';
-        document.getElementById('pm-trx-label').value = 'MYCash TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open MYCash App or dial *852#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to verify';
-      } else if (type === 'ok_wallet') {
-        document.getElementById('pm-title').value = 'OK Wallet';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#1A237E';
-        document.getElementById('pm-theme-color-text').value = '#1A237E';
-        document.getElementById('pm-sender-label').value = 'Your OK Wallet Number *';
-        document.getElementById('pm-trx-label').value = 'OK Wallet TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open OK Wallet App or dial *269#\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
-      } else if (type === 'meghna_pay') {
-        document.getElementById('pm-title').value = 'Meghna Pay';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#880E4F';
-        document.getElementById('pm-theme-color-text').value = '#880E4F';
-        document.getElementById('pm-sender-label').value = 'Your Account Number *';
-        document.getElementById('pm-trx-label').value = 'Meghna Pay TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open Meghna Pay App\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
-      } else if (type === 'telecash') {
-        document.getElementById('pm-title').value = 'TeleCash';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#E65100';
-        document.getElementById('pm-theme-color-text').value = '#E65100';
-        document.getElementById('pm-sender-label').value = 'Your TeleCash Number *';
-        document.getElementById('pm-trx-label').value = 'TeleCash TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open TeleCash App or dial *376#\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
-      } else if (type === 'surecash') {
-        document.getElementById('pm-title').value = 'SureCash';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#0288D1';
-        document.getElementById('pm-theme-color-text').value = '#0288D1';
-        document.getElementById('pm-sender-label').value = 'Your SureCash Number *';
-        document.getElementById('pm-trx-label').value = 'SureCash TrxID *';
-        document.getElementById('pm-instructions').value = '1. Open SureCash App or dial *495#\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to make payment';
-      } else if (type === 'rupali_surecash') {
-        document.getElementById('pm-title').value = 'Rupali SureCash';
-        document.getElementById('pm-badge').value = 'MFS';
-        document.getElementById('pm-theme-color').value = '#C2185B';
-        document.getElementById('pm-theme-color-text').value = '#C2185B';
-        document.getElementById('pm-sender-label').value = 'Your SureCash Number *';
-        document.getElementById('pm-trx-label').value = 'SureCash TrxID *';
-        document.getElementById('pm-instructions').value = '1. Dial *375# or open SureCash App\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
-      } else if (type === 'bank') {
-        document.getElementById('pm-title').value = 'City Bank';
-        document.getElementById('pm-badge').value = 'BANK';
-        document.getElementById('pm-theme-color').value = '#005A9C';
-        document.getElementById('pm-theme-color-text').value = '#005A9C';
-        document.getElementById('pm-bank-name').value = 'City Bank PLC';
-        document.getElementById('pm-branch-name').value = 'Gulshan Avenue Branch';
-        document.getElementById('pm-routing-number').value = '225271983';
-        document.getElementById('pm-sender-label').value = 'Sender Bank / Account Name *';
-        document.getElementById('pm-trx-label').value = 'Bank Transfer Ref / Slip No *';
-        document.getElementById('pm-instructions').value = '1. Transfer funds from Bank App (NPSB/BEFTN)\n2. Bank: City Bank PLC, Branch: Gulshan Avenue\n3. Account: {ACCOUNT_NUMBER}, Name: SyncPay Ltd\n4. Enter amount ৳ {AMOUNT} and reference {REF}\n5. Enter reference to verify';
-      } else if (type === 'binance') {
-        document.getElementById('pm-title').value = 'Binance Pay';
-        document.getElementById('pm-badge').value = 'CRYPTO';
-        document.getElementById('pm-theme-color').value = '#F3BA2F';
-        document.getElementById('pm-theme-color-text').value = '#F3BA2F';
-        document.getElementById('pm-sender-label').value = 'Your Binance Pay ID / Nickname *';
-        document.getElementById('pm-trx-label').value = 'Binance Order ID / TxID *';
-        document.getElementById('pm-instructions').value = '1. Open Binance App and tap Pay icon\n2. Select Send and enter Pay ID: {ACCOUNT_NUMBER}\n3. Enter USDT amount with reference {REF} in Note\n4. Enter Binance Order ID / TxID to verify';
+      if (slot) {
+        slot.innerHTML = components.renderTransactionsTable(filteredTxs, 50);
       }
     }
-  }
 
-  editPaymentMethod(id) {
-    const m = this.paymentMethods.find(item => item.id === id);
-    if (!m) return;
+    // ==========================================
+    // PAYMENT CHANNELS & INSTRUCTIONS HANDLERS
+    // ==========================================
+    openAddPaymentMethodModal() {
+      document.getElementById('pm-id').value = '';
+      document.getElementById('pm-modal-title').innerText = 'Add Payment Channel & Instructions';
+      document.getElementById('pm-provider-type').value = 'bkash';
+      document.getElementById('pm-account-number').value = '';
+      document.getElementById('pm-account-name').value = '';
+      document.getElementById('pm-bank-name').value = '';
+      document.getElementById('pm-branch-name').value = '';
+      document.getElementById('pm-routing-number').value = '';
+      document.getElementById('pm-is-active').value = '1';
+      document.getElementById('pm-qr-url').value = '';
+      const fileInput = document.getElementById('pm-qr-file-input');
+      if (fileInput) fileInput.value = '';
+      this.updateQrPreview('');
 
-    document.getElementById('pm-id').value = m.id;
-    document.getElementById('pm-modal-title').innerText = 'Edit Channel';
-    document.getElementById('pm-provider-type').value = m.provider_type || 'bkash';
-    document.getElementById('pm-title').value = m.title || '';
-    document.getElementById('pm-account-number').value = m.account_number || '';
-    document.getElementById('pm-account-name').value = m.account_name || '';
-    document.getElementById('pm-bank-name').value = m.bank_name || '';
-    document.getElementById('pm-branch-name').value = m.branch_name || '';
-    document.getElementById('pm-routing-number').value = m.routing_number || '';
-    document.getElementById('pm-badge').value = m.badge || '';
-    document.getElementById('pm-theme-color').value = m.theme_color || '#E2136E';
-    document.getElementById('pm-theme-color-text').value = m.theme_color || '#E2136E';
-    document.getElementById('pm-is-active').value = m.is_active !== undefined ? String(m.is_active) : '1';
-    document.getElementById('pm-instructions').value = m.instructions || '';
-    document.getElementById('pm-sender-label').value = m.sender_label || 'Sender Number / Account';
-    document.getElementById('pm-trx-label').value = m.trx_label || 'Transaction ID *';
+      const advDetails = document.getElementById('pm-advanced-details');
+      if (advDetails) advDetails.removeAttribute('open');
 
-    // Populate QR code preview & URL
-    const qrUrl = m.qr_code_url || '';
-    document.getElementById('pm-qr-url').value = qrUrl;
-    const fileInput = document.getElementById('pm-qr-file-input');
-    if (fileInput) fileInput.value = '';
-    this.updateQrPreview(qrUrl);
-
-    this.onPaymentTypeChange(false);
-    const modal = document.getElementById('modal-payment-method');
-    if (modal) modal.classList.add('active');
-  }
-
-  insertInstructionVar(varStr) {
-    const area = document.getElementById('pm-instructions');
-    if (!area) return;
-    const start = area.selectionStart || area.value.length;
-    const end = area.selectionEnd || area.value.length;
-    const val = area.value;
-    area.value = val.substring(0, start) + varStr + val.substring(end);
-    area.focus();
-    area.selectionStart = area.selectionEnd = start + varStr.length;
-  }
-
-  handleQrFileUpload(event) {
-    const file = event.target.files && event.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      this.showToast('Please select an image file (PNG, JPG, WebP)', 'error');
-      return;
+      this.onPaymentTypeChange(true);
+      const modal = document.getElementById('modal-payment-method');
+      if (modal) modal.classList.add('active');
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      this.showToast('Image size cannot exceed 5MB', 'error');
-      return;
+    onPaymentTypeChange(isNew = false) {
+      const type = document.getElementById('pm-provider-type').value;
+      const bankFields = document.getElementById('pm-bank-fields');
+      const labelNumber = document.getElementById('pm-label-number');
+
+      if (type === 'bank') {
+        bankFields.style.display = 'block';
+        labelNumber.innerText = 'Bank Account Number *';
+      } else if (type === 'binance') {
+        bankFields.style.display = 'none';
+        labelNumber.innerText = 'Binance Pay ID *';
+      } else {
+        bankFields.style.display = 'none';
+        labelNumber.innerText = 'Merchant Phone Number *';
+      }
+
+      // Sync theme color input with text
+      const colorInput = document.getElementById('pm-theme-color');
+      const colorTextInput = document.getElementById('pm-theme-color-text');
+      colorInput.oninput = () => { colorTextInput.value = colorInput.value; };
+      colorTextInput.oninput = () => { colorInput.value = colorTextInput.value; };
+
+      // Set presets if it is a new channel
+      if (isNew) {
+        if (type === 'bkash') {
+          document.getElementById('pm-title').value = 'bKash';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#E2136E';
+          document.getElementById('pm-theme-color-text').value = '#E2136E';
+          document.getElementById('pm-sender-label').value = 'Your bKash Number *';
+          document.getElementById('pm-trx-label').value = 'bKash TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open bKash App or dial *247#\n2. Select Payment and enter: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm payment';
+        } else if (type === 'nagad') {
+          document.getElementById('pm-title').value = 'Nagad';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#F7941D';
+          document.getElementById('pm-theme-color-text').value = '#F7941D';
+          document.getElementById('pm-sender-label').value = 'Your Nagad Number *';
+          document.getElementById('pm-trx-label').value = 'Nagad TxnID *';
+          document.getElementById('pm-instructions').value = '1. Open Nagad App or dial *167#\n2. Select Merchant Pay and enter: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
+        } else if (type === 'rocket') {
+          document.getElementById('pm-title').value = 'Rocket';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#8C3494';
+          document.getElementById('pm-theme-color-text').value = '#8C3494';
+          document.getElementById('pm-sender-label').value = 'Your Rocket Number *';
+          document.getElementById('pm-trx-label').value = 'Rocket TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open Rocket App or dial *322#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
+        } else if (type === 'upay') {
+          document.getElementById('pm-title').value = 'Upay';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#004F9F';
+          document.getElementById('pm-theme-color-text').value = '#004F9F';
+          document.getElementById('pm-sender-label').value = 'Your Upay Number *';
+          document.getElementById('pm-trx-label').value = 'Upay TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open Upay App or dial *268#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm payment';
+        } else if (type === 'tap') {
+          document.getElementById('pm-title').value = 'TAP';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#E4002B';
+          document.getElementById('pm-theme-color-text').value = '#E4002B';
+          document.getElementById('pm-sender-label').value = 'Your TAP Number *';
+          document.getElementById('pm-trx-label').value = 'TAP TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open TAP App or dial *201#\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
+        } else if (type === 'islamic_wallet') {
+          document.getElementById('pm-title').value = 'Islamic Wallet';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#008850';
+          document.getElementById('pm-theme-color-text').value = '#008850';
+          document.getElementById('pm-sender-label').value = 'Your Account Number *';
+          document.getElementById('pm-trx-label').value = 'Islamic Wallet TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open Islamic Wallet App\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter T-PIN to confirm';
+        } else if (type === 'mcash') {
+          document.getElementById('pm-title').value = 'mCash';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#008542';
+          document.getElementById('pm-theme-color-text').value = '#008542';
+          document.getElementById('pm-sender-label').value = 'Your mCash Number *';
+          document.getElementById('pm-trx-label').value = 'mCash TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open CellFin or mCash App (dial *259#)\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
+        } else if (type === 'mycash') {
+          document.getElementById('pm-title').value = 'MYCash';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#D32F2F';
+          document.getElementById('pm-theme-color-text').value = '#D32F2F';
+          document.getElementById('pm-sender-label').value = 'Your MYCash Number *';
+          document.getElementById('pm-trx-label').value = 'MYCash TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open MYCash App or dial *852#\n2. Enter Merchant number: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to verify';
+        } else if (type === 'ok_wallet') {
+          document.getElementById('pm-title').value = 'OK Wallet';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#1A237E';
+          document.getElementById('pm-theme-color-text').value = '#1A237E';
+          document.getElementById('pm-sender-label').value = 'Your OK Wallet Number *';
+          document.getElementById('pm-trx-label').value = 'OK Wallet TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open OK Wallet App or dial *269#\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
+        } else if (type === 'meghna_pay') {
+          document.getElementById('pm-title').value = 'Meghna Pay';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#880E4F';
+          document.getElementById('pm-theme-color-text').value = '#880E4F';
+          document.getElementById('pm-sender-label').value = 'Your Account Number *';
+          document.getElementById('pm-trx-label').value = 'Meghna Pay TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open Meghna Pay App\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
+        } else if (type === 'telecash') {
+          document.getElementById('pm-title').value = 'TeleCash';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#E65100';
+          document.getElementById('pm-theme-color-text').value = '#E65100';
+          document.getElementById('pm-sender-label').value = 'Your TeleCash Number *';
+          document.getElementById('pm-trx-label').value = 'TeleCash TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open TeleCash App or dial *376#\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to complete';
+        } else if (type === 'surecash') {
+          document.getElementById('pm-title').value = 'SureCash';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#0288D1';
+          document.getElementById('pm-theme-color-text').value = '#0288D1';
+          document.getElementById('pm-sender-label').value = 'Your SureCash Number *';
+          document.getElementById('pm-trx-label').value = 'SureCash TrxID *';
+          document.getElementById('pm-instructions').value = '1. Open SureCash App or dial *495#\n2. Enter number in Payment option: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to make payment';
+        } else if (type === 'rupali_surecash') {
+          document.getElementById('pm-title').value = 'Rupali SureCash';
+          document.getElementById('pm-badge').value = 'MFS';
+          document.getElementById('pm-theme-color').value = '#C2185B';
+          document.getElementById('pm-theme-color-text').value = '#C2185B';
+          document.getElementById('pm-sender-label').value = 'Your SureCash Number *';
+          document.getElementById('pm-trx-label').value = 'SureCash TrxID *';
+          document.getElementById('pm-instructions').value = '1. Dial *375# or open SureCash App\n2. Enter number in Payment: {ACCOUNT_NUMBER}\n3. Enter amount ৳ {AMOUNT} and reference {REF}\n4. Enter PIN to confirm';
+        } else if (type === 'bank') {
+          document.getElementById('pm-title').value = 'City Bank';
+          document.getElementById('pm-badge').value = 'BANK';
+          document.getElementById('pm-theme-color').value = '#005A9C';
+          document.getElementById('pm-theme-color-text').value = '#005A9C';
+          document.getElementById('pm-bank-name').value = 'City Bank PLC';
+          document.getElementById('pm-branch-name').value = 'Gulshan Avenue Branch';
+          document.getElementById('pm-routing-number').value = '225271983';
+          document.getElementById('pm-sender-label').value = 'Sender Bank / Account Name *';
+          document.getElementById('pm-trx-label').value = 'Bank Transfer Ref / Slip No *';
+          document.getElementById('pm-instructions').value = '1. Transfer funds from Bank App (NPSB/BEFTN)\n2. Bank: City Bank PLC, Branch: Gulshan Avenue\n3. Account: {ACCOUNT_NUMBER}, Name: SyncPay Ltd\n4. Enter amount ৳ {AMOUNT} and reference {REF}\n5. Enter reference to verify';
+        } else if (type === 'binance') {
+          document.getElementById('pm-title').value = 'Binance Pay';
+          document.getElementById('pm-badge').value = 'CRYPTO';
+          document.getElementById('pm-theme-color').value = '#F3BA2F';
+          document.getElementById('pm-theme-color-text').value = '#F3BA2F';
+          document.getElementById('pm-sender-label').value = 'Your Binance Pay ID / Nickname *';
+          document.getElementById('pm-trx-label').value = 'Binance Order ID / TxID *';
+          document.getElementById('pm-instructions').value = '1. Open Binance App and tap Pay icon\n2. Select Send and enter Pay ID: {ACCOUNT_NUMBER}\n3. Enter USDT amount with reference {REF} in Note\n4. Enter Binance Order ID / TxID to verify';
+        }
+      }
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const rawData = e.target.result;
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const maxDim = 600;
-          let w = img.width;
-          let h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) {
-              h = Math.round((h * maxDim) / w);
-              w = maxDim;
-            } else {
-              w = Math.round((w * maxDim) / h);
-              h = maxDim;
+    editPaymentMethod(id) {
+      const m = this.paymentMethods.find(item => item.id === id);
+      if (!m) return;
+
+      document.getElementById('pm-id').value = m.id;
+      document.getElementById('pm-modal-title').innerText = 'Edit Channel';
+      document.getElementById('pm-provider-type').value = m.provider_type || 'bkash';
+      document.getElementById('pm-title').value = m.title || '';
+      document.getElementById('pm-account-number').value = m.account_number || '';
+      document.getElementById('pm-account-name').value = m.account_name || '';
+      document.getElementById('pm-bank-name').value = m.bank_name || '';
+      document.getElementById('pm-branch-name').value = m.branch_name || '';
+      document.getElementById('pm-routing-number').value = m.routing_number || '';
+      document.getElementById('pm-badge').value = m.badge || '';
+      document.getElementById('pm-theme-color').value = m.theme_color || '#E2136E';
+      document.getElementById('pm-theme-color-text').value = m.theme_color || '#E2136E';
+      document.getElementById('pm-is-active').value = m.is_active !== undefined ? String(m.is_active) : '1';
+      document.getElementById('pm-instructions').value = m.instructions || '';
+      document.getElementById('pm-sender-label').value = m.sender_label || 'Sender Number / Account';
+      document.getElementById('pm-trx-label').value = m.trx_label || 'Transaction ID *';
+
+      // Populate QR code preview & URL
+      const qrUrl = m.qr_code_url || '';
+      document.getElementById('pm-qr-url').value = qrUrl;
+      const fileInput = document.getElementById('pm-qr-file-input');
+      if (fileInput) fileInput.value = '';
+      this.updateQrPreview(qrUrl);
+
+      this.onPaymentTypeChange(false);
+      const modal = document.getElementById('modal-payment-method');
+      if (modal) modal.classList.add('active');
+    }
+
+    insertInstructionVar(varStr) {
+      const area = document.getElementById('pm-instructions');
+      if (!area) return;
+      const start = area.selectionStart || area.value.length;
+      const end = area.selectionEnd || area.value.length;
+      const val = area.value;
+      area.value = val.substring(0, start) + varStr + val.substring(end);
+      area.focus();
+      area.selectionStart = area.selectionEnd = start + varStr.length;
+    }
+
+    handleQrFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        this.showToast('Please select an image file (PNG, JPG, WebP)', 'error');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        this.showToast('Image size cannot exceed 5MB', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const rawData = e.target.result;
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const maxDim = 600;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
             }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const optimizedData = canvas.toDataURL('image/png');
+            document.getElementById('pm-qr-url').value = optimizedData;
+            this.updateQrPreview(optimizedData);
+            this.showToast('QR Code uploaded successfully', 'success');
+          } catch (err) {
+            document.getElementById('pm-qr-url').value = rawData;
+            this.updateQrPreview(rawData);
+            this.showToast('QR Code loaded', 'success');
           }
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          const optimizedData = canvas.toDataURL('image/png');
-          document.getElementById('pm-qr-url').value = optimizedData;
-          this.updateQrPreview(optimizedData);
-          this.showToast('QR Code uploaded successfully', 'success');
-        } catch (err) {
+        };
+        img.onerror = () => {
           document.getElementById('pm-qr-url').value = rawData;
           this.updateQrPreview(rawData);
-          this.showToast('QR Code loaded', 'success');
+        };
+        img.src = rawData;
+      };
+      reader.onerror = () => {
+        this.showToast('Failed to load image file', 'error');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    updateQrPreview(url) {
+      const previewImg = document.getElementById('pm-qr-preview-img');
+      const placeholder = document.getElementById('pm-qr-placeholder');
+      const removeBtn = document.getElementById('pm-remove-qr-btn');
+      const statusText = document.getElementById('pm-qr-status-text');
+
+      if (url && url.trim()) {
+        if (previewImg) {
+          previewImg.src = url.trim();
+          previewImg.style.display = 'block';
         }
-      };
-      img.onerror = () => {
-        document.getElementById('pm-qr-url').value = rawData;
-        this.updateQrPreview(rawData);
-      };
-      img.src = rawData;
-    };
-    reader.onerror = () => {
-      this.showToast('Failed to load image file', 'error');
-    };
-    reader.readAsDataURL(file);
-  }
-
-  updateQrPreview(url) {
-    const previewImg = document.getElementById('pm-qr-preview-img');
-    const placeholder = document.getElementById('pm-qr-placeholder');
-    const removeBtn = document.getElementById('pm-remove-qr-btn');
-    const statusText = document.getElementById('pm-qr-status-text');
-
-    if (url && url.trim()) {
-      if (previewImg) {
-        previewImg.src = url.trim();
-        previewImg.style.display = 'block';
-      }
-      if (placeholder) placeholder.style.display = 'none';
-      if (removeBtn) removeBtn.style.display = 'inline-block';
-      if (statusText) {
-        statusText.innerHTML = '<span style="color:#10b981; font-weight:600;">✓ Custom QR active.</span> Will be displayed on customer checkout.';
-      }
-    } else {
-      if (previewImg) {
-        previewImg.src = '';
-        previewImg.style.display = 'none';
-      }
-      if (placeholder) placeholder.style.display = 'flex';
-      if (removeBtn) removeBtn.style.display = 'none';
-      if (statusText) {
-        statusText.innerText = 'If no custom image is uploaded, system will automatically generate a dynamic QR code from the phone number.';
+        if (placeholder) placeholder.style.display = 'none';
+        if (removeBtn) removeBtn.style.display = 'inline-block';
+        if (statusText) {
+          statusText.innerHTML = '<span style="color:#10b981; font-weight:600;">✓ Custom QR active.</span> Will be displayed on customer checkout.';
+        }
+      } else {
+        if (previewImg) {
+          previewImg.src = '';
+          previewImg.style.display = 'none';
+        }
+        if (placeholder) placeholder.style.display = 'flex';
+        if (removeBtn) removeBtn.style.display = 'none';
+        if (statusText) {
+          statusText.innerText = 'If no custom image is uploaded, system will automatically generate a dynamic QR code from the phone number.';
+        }
       }
     }
-  }
 
-  clearQrUpload() {
-    const urlInput = document.getElementById('pm-qr-url');
-    if (urlInput) urlInput.value = '';
-    const fileInput = document.getElementById('pm-qr-file-input');
-    if (fileInput) fileInput.value = '';
-    this.updateQrPreview('');
-    this.showToast('Custom QR removed (Reverted to dynamic QR)', 'info');
-  }
+    clearQrUpload() {
+      const urlInput = document.getElementById('pm-qr-url');
+      if (urlInput) urlInput.value = '';
+      const fileInput = document.getElementById('pm-qr-file-input');
+      if (fileInput) fileInput.value = '';
+      this.updateQrPreview('');
+      this.showToast('Custom QR removed (Reverted to dynamic QR)', 'info');
+    }
 
   async savePaymentMethod() {
-    const id = document.getElementById('pm-id').value.trim();
-    const providerType = document.getElementById('pm-provider-type').value;
-    const title = document.getElementById('pm-title').value.trim();
-    const accountNumber = document.getElementById('pm-account-number').value.trim();
-    const accountName = document.getElementById('pm-account-name').value.trim();
-    const bankName = document.getElementById('pm-bank-name').value.trim();
-    const branchName = document.getElementById('pm-branch-name').value.trim();
-    const routingNumber = document.getElementById('pm-routing-number').value.trim();
-    const badge = document.getElementById('pm-badge').value.trim();
-    const themeColor = document.getElementById('pm-theme-color-text').value.trim() || '#E2136E';
-    const isActive = parseInt(document.getElementById('pm-is-active').value, 10);
-    const instructions = document.getElementById('pm-instructions').value.trim();
-    const senderLabel = document.getElementById('pm-sender-label').value.trim();
-    const trxLabel = document.getElementById('pm-trx-label').value.trim();
-    const qrCodeUrl = (document.getElementById('pm-qr-url')?.value || '').trim();
+      const id = document.getElementById('pm-id').value.trim();
+      const providerType = document.getElementById('pm-provider-type').value;
+      const title = document.getElementById('pm-title').value.trim();
+      const accountNumber = document.getElementById('pm-account-number').value.trim();
+      const accountName = document.getElementById('pm-account-name').value.trim();
+      const bankName = document.getElementById('pm-bank-name').value.trim();
+      const branchName = document.getElementById('pm-branch-name').value.trim();
+      const routingNumber = document.getElementById('pm-routing-number').value.trim();
+      const badge = document.getElementById('pm-badge').value.trim();
+      const themeColor = document.getElementById('pm-theme-color-text').value.trim() || '#E2136E';
+      const isActive = parseInt(document.getElementById('pm-is-active').value, 10);
+      const instructions = document.getElementById('pm-instructions').value.trim();
+      const senderLabel = document.getElementById('pm-sender-label').value.trim();
+      const trxLabel = document.getElementById('pm-trx-label').value.trim();
+      const qrCodeUrl = (document.getElementById('pm-qr-url')?.value || '').trim();
 
-    if (!title || !accountNumber) {
-      this.showToast('Title and Account Number are required', 'error');
-      return;
-    }
-
-    try {
-      const res = await api.savePaymentMethod({
-        id: id || undefined,
-        provider_type: providerType,
-        title,
-        badge,
-        account_number: accountNumber,
-        account_name: accountName,
-        bank_name: bankName,
-        branch_name: branchName,
-        routing_number: routingNumber,
-        theme_color: themeColor,
-        is_active: isActive,
-        instructions,
-        sender_label: senderLabel,
-        trx_label: trxLabel,
-        qr_code_url: qrCodeUrl || null,
-      });
-
-      if (res.success) {
-        this.showToast('Payment channel saved successfully', 'success');
-        this.closeAllModals();
-        this.paymentMethods = await api.getPaymentMethods();
-        this.renderPaymentMethodsView();
-      } else {
-        this.showToast(res.error || 'Failed to save channel', 'error');
+      if (!title || !accountNumber) {
+        this.showToast('Title and Account Number are required', 'error');
+        return;
       }
-    } catch (err) {
-      this.showToast('Error: ' + err.message, 'error');
+
+      try {
+        const res = await api.savePaymentMethod({
+          id: id || undefined,
+          provider_type: providerType,
+          title,
+          badge,
+          account_number: accountNumber,
+          account_name: accountName,
+          bank_name: bankName,
+          branch_name: branchName,
+          routing_number: routingNumber,
+          theme_color: themeColor,
+          is_active: isActive,
+          instructions,
+          sender_label: senderLabel,
+          trx_label: trxLabel,
+          qr_code_url: qrCodeUrl || null,
+        });
+
+        if (res.success) {
+          this.showToast('Payment channel saved successfully', 'success');
+          this.closeAllModals();
+          this.paymentMethods = await api.getPaymentMethods();
+          this.renderPaymentMethodsView();
+        } else {
+          this.showToast(res.error || 'Failed to save channel', 'error');
+        }
+      } catch (err) {
+        this.showToast('Error: ' + err.message, 'error');
+      }
     }
-  }
 
   async togglePaymentMethod(id, isActive) {
-    try {
-      const res = await api.togglePaymentMethod(id, isActive);
-      if (res.success) {
-        const item = this.paymentMethods.find(m => m.id === id);
-        if (item) item.is_active = isActive ? 1 : 0;
-        this.renderPaymentMethodsView();
-        this.showToast(isActive ? 'Channel activated successfully' : 'Channel deactivated successfully', 'success');
+      try {
+        const res = await api.togglePaymentMethod(id, isActive);
+        if (res.success) {
+          const item = this.paymentMethods.find(m => m.id === id);
+          if (item) item.is_active = isActive ? 1 : 0;
+          this.renderPaymentMethodsView();
+          this.showToast(isActive ? 'Channel activated successfully' : 'Channel deactivated successfully', 'success');
+        }
+      } catch (err) {
+        this.showToast('Update failed: ' + err.message, 'error');
       }
-    } catch (err) {
-      this.showToast('Update failed: ' + err.message, 'error');
     }
-  }
 
   async deletePaymentMethod(id, title) {
-    if (!confirm(`Are you sure you want to delete the "${title}" channel?`)) {
-      return;
-    }
-    try {
-      const res = await api.deletePaymentMethod(id);
-      if (res.success) {
-        this.paymentMethods = this.paymentMethods.filter(m => m.id !== id);
-        this.renderPaymentMethodsView();
-        this.showToast('Channel deleted successfully', 'success');
+      if (!confirm(`Are you sure you want to delete the "${title}" channel?`)) {
+        return;
       }
-    } catch (err) {
-      this.showToast('Delete failed: ' + err.message, 'error');
+      try {
+        const res = await api.deletePaymentMethod(id);
+        if (res.success) {
+          this.paymentMethods = this.paymentMethods.filter(m => m.id !== id);
+          this.renderPaymentMethodsView();
+          this.showToast('Channel deleted successfully', 'success');
+        }
+      } catch (err) {
+        this.showToast('Delete failed: ' + err.message, 'error');
+      }
     }
-  }
 
-  exportTransactionsCSV() {
-    if (!this.transactions || this.transactions.length === 0) {
-      this.showToast('No transaction data to export', 'error');
-      return;
+    exportTransactionsCSV() {
+      if (!this.transactions || this.transactions.length === 0) {
+        this.showToast('No transaction data to export', 'error');
+        return;
+      }
+
+      const headers = ['TrxID', 'Order ID', 'Amount', 'Provider', 'Sender', 'Status', 'Date'];
+      const rows = this.transactions.map(t => [
+        t.trx_id,
+        t.order_id || 'N/A',
+        t.amount,
+        t.provider,
+        t.sender || 'N/A',
+        t.is_verified === 1 ? 'COMPLETED' : 'PENDING',
+        t.created_at,
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' +
+        [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `syncpay_transactions_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      this.showToast('CSV downloaded successfully', 'success');
     }
+    // ===== AUTH METHODS =====
 
-    const headers = ['TrxID', 'Order ID', 'Amount', 'Provider', 'Sender', 'Status', 'Date'];
-    const rows = this.transactions.map(t => [
-      t.trx_id,
-      t.order_id || 'N/A',
-      t.amount,
-      t.provider,
-      t.sender || 'N/A',
-      t.is_verified === 1 ? 'COMPLETED' : 'PENDING',
-      t.created_at,
-    ]);
+    showAuthOverlay() {
+      // Remove any existing overlay
+      const old = document.getElementById('auth-overlay');
+      if (old) old.remove();
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + 
-      [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `syncpay_transactions_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    this.showToast('CSV downloaded successfully', 'success');
-  }
-  // ===== AUTH METHODS =====
-
-  showAuthOverlay() {
-    // Remove any existing overlay
-    const old = document.getElementById('auth-overlay');
-    if (old) old.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'auth-overlay';
-    overlay.innerHTML = `
+      const overlay = document.createElement('div');
+      overlay.id = 'auth-overlay';
+      overlay.innerHTML = `
       <div class="auth-box">
         <div class="auth-logo">
           <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height:44px; width:auto; object-fit:contain;">
@@ -3334,26 +3334,26 @@ class PayFlowDashboardApp {
         </div>
       </div>
     `;
-    document.body.appendChild(overlay);
+      document.body.appendChild(overlay);
 
-    // Auto pre-select plan or tab if specified in URL query
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const reqPlan = urlParams.get('plan');
-      const reqAction = urlParams.get('action');
-      if (reqPlan && document.getElementById('reg-plan')) {
-        document.getElementById('reg-plan').value = reqPlan;
-      }
-      if (reqAction === 'register') {
-        this.switchAuthTab('register');
-      }
-    } catch (e) {}
+      // Auto pre-select plan or tab if specified in URL query
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const reqPlan = urlParams.get('plan');
+        const reqAction = urlParams.get('action');
+        if (reqPlan && document.getElementById('reg-plan')) {
+          document.getElementById('reg-plan').value = reqPlan;
+        }
+        if (reqAction === 'register') {
+          this.switchAuthTab('register');
+        }
+      } catch (e) { }
 
-    // Add auth overlay styles
-    if (!document.getElementById('auth-overlay-style')) {
-      const style = document.createElement('style');
-      style.id = 'auth-overlay-style';
-      style.textContent = `
+      // Add auth overlay styles
+      if (!document.getElementById('auth-overlay-style')) {
+        const style = document.createElement('style');
+        style.id = 'auth-overlay-style';
+        style.textContent = `
         #auth-overlay {
           position: fixed; inset: 0; z-index: 99999;
           background: linear-gradient(135deg, #060d1f 0%, #0a1628 50%, #060d1f 100%);
@@ -3443,222 +3443,222 @@ class PayFlowDashboardApp {
           font-weight: 600;
         }
       `;
-      document.head.appendChild(style);
+        document.head.appendChild(style);
+      }
+
+      // Focus email field
+      setTimeout(() => { const f = document.getElementById('auth-email'); if (f) f.focus(); }, 100);
     }
 
-    // Focus email field
-    setTimeout(() => { const f = document.getElementById('auth-email'); if (f) f.focus(); }, 100);
-  }
+    switchAuthTab(tab) {
+      document.getElementById('auth-login-form').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('auth-register-form').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    }
 
-  switchAuthTab(tab) {
-    document.getElementById('auth-login-form').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('auth-register-form').style.display = tab === 'register' ? 'block' : 'none';
-    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-  }
-
-  fillDemo(plan) {
-    const demos = {
-      growth: { email: 'demo@syncpaybd.site', pass: 'demo1234' },
-      starter: { email: 'starter@test.com', pass: 'test1234' },
-      enterprise: { email: 'enterprise@test.com', pass: 'ent1234' },
-    };
-    const d = demos[plan];
-    if (!d) return;
-    document.getElementById('auth-email').value = d.email;
-    document.getElementById('auth-password').value = d.pass;
-  }
+    fillDemo(plan) {
+      const demos = {
+        growth: { email: 'demo@syncpaybd.site', pass: 'demo1234' },
+        starter: { email: 'starter@test.com', pass: 'test1234' },
+        enterprise: { email: 'enterprise@test.com', pass: 'ent1234' },
+      };
+      const d = demos[plan];
+      if (!d) return;
+      document.getElementById('auth-email').value = d.email;
+      document.getElementById('auth-password').value = d.pass;
+    }
 
   async doLogin() {
-    const email = document.getElementById('auth-email')?.value || '';
-    const password = document.getElementById('auth-password')?.value || '';
-    const errEl = document.getElementById('auth-error');
+      const email = document.getElementById('auth-email')?.value || '';
+      const password = document.getElementById('auth-password')?.value || '';
+      const errEl = document.getElementById('auth-error');
 
-    const result = auth.login(email, password);
-    if (!result.ok) {
-      errEl.textContent = result.error;
-      errEl.style.display = 'block';
-      return;
+      const result = auth.login(email, password);
+      if (!result.ok) {
+        errEl.textContent = result.error;
+        errEl.style.display = 'block';
+        return;
+      }
+      errEl.style.display = 'none';
+      this.session = result.merchant;
+      const overlay = document.getElementById('auth-overlay');
+      if (overlay) overlay.remove();
+      this.updateSidebarUser();
+      i18n.applyTranslations();
+      this.setupEventListeners();
+      this.handleHashChange();
+      window.addEventListener('hashchange', () => this.handleHashChange());
+      await this.refreshAllData();
+      setInterval(() => this.pollLiveUpdates(), 4000);
+      this.showToast(`Welcome back, ${this.session.name}! 👋`, 'success');
     }
-    errEl.style.display = 'none';
-    this.session = result.merchant;
-    const overlay = document.getElementById('auth-overlay');
-    if (overlay) overlay.remove();
-    this.updateSidebarUser();
-    i18n.applyTranslations();
-    this.setupEventListeners();
-    this.handleHashChange();
-    window.addEventListener('hashchange', () => this.handleHashChange());
-    await this.refreshAllData();
-    setInterval(() => this.pollLiveUpdates(), 4000);
-    this.showToast(`Welcome back, ${this.session.name}! 👋`, 'success');
-  }
 
   async doGoogleLogin() {
-    const GOOGLE_CLIENT_ID = '88955533450-5k3rautrd678ve4adupp8j6oo057go3n.apps.googleusercontent.com';
-    try {
-      if (window.google && window.google.accounts && window.google.accounts.oauth2) {
-        const tokenClient = window.google.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
-          scope: 'openid email profile',
-          callback: async (tokenResponse) => {
-            if (tokenResponse && tokenResponse.access_token) {
-              try {
-                const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                  headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
-                }).then(r => r.json());
-
-                const email = userInfo.email;
-                const name = userInfo.name || email.split('@')[0];
-
-                // Sync to backend SQLite
-                let currentSession = {
-                  merchantId: 'm_g_' + (userInfo.sub || Math.random().toString(36).slice(2, 8)).slice(0, 10),
-                  email: email,
-                  phone: '',
-                  name: name,
-                  business: name + ' Store',
-                  plan: 'starter',
-                  planStatus: 'ACTIVE',
-                  billingCycle: 'monthly',
-                  apiKey: 'live_sk_' + Math.random().toString(36).substring(2, 14),
-                };
-
+      const GOOGLE_CLIENT_ID = '88955533450-5k3rautrd678ve4adupp8j6oo057go3n.apps.googleusercontent.com';
+      try {
+        if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+          const tokenClient = window.google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: 'openid email profile',
+            callback: async (tokenResponse) => {
+              if (tokenResponse && tokenResponse.access_token) {
                 try {
-                  const res = await fetch('/api/v1/merchant/auth/google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      name: name,
-                      email: email,
-                      sub: userInfo.sub,
-                      plan: 'STARTER'
-                    })
-                  });
-                  const d = await res.json();
-                  if (d.success && d.merchant) {
-                    currentSession.merchantId = d.merchant.id;
-                    currentSession.apiKey = d.merchant.api_key || currentSession.apiKey;
-                    if (d.token) localStorage.setItem('syncpay_token', d.token);
-                  }
-                } catch(e) {}
+                  const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+                  }).then(r => r.json());
 
-                localStorage.setItem(auth.SESSION_KEY, JSON.stringify(currentSession));
-                localStorage.setItem('syncpay_session', JSON.stringify(currentSession));
-                this.session = currentSession;
-                this.closeAuthModal();
-                this.loadDashboardData();
-                this.showToast(`Welcome, ${name}! 👋`, 'success');
-              } catch (err) {
-                console.error('Google profile fetch error:', err);
+                  const email = userInfo.email;
+                  const name = userInfo.name || email.split('@')[0];
+
+                  // Sync to backend SQLite
+                  let currentSession = {
+                    merchantId: 'm_g_' + (userInfo.sub || Math.random().toString(36).slice(2, 8)).slice(0, 10),
+                    email: email,
+                    phone: '',
+                    name: name,
+                    business: name + ' Store',
+                    plan: 'starter',
+                    planStatus: 'ACTIVE',
+                    billingCycle: 'monthly',
+                    apiKey: 'live_sk_' + Math.random().toString(36).substring(2, 14),
+                  };
+
+                  try {
+                    const res = await fetch('/api/v1/merchant/auth/google', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        sub: userInfo.sub,
+                        plan: 'STARTER'
+                      })
+                    });
+                    const d = await res.json();
+                    if (d.success && d.merchant) {
+                      currentSession.merchantId = d.merchant.id;
+                      currentSession.apiKey = d.merchant.api_key || currentSession.apiKey;
+                      if (d.token) localStorage.setItem('syncpay_token', d.token);
+                    }
+                  } catch (e) { }
+
+                  localStorage.setItem(auth.SESSION_KEY, JSON.stringify(currentSession));
+                  localStorage.setItem('syncpay_session', JSON.stringify(currentSession));
+                  this.session = currentSession;
+                  this.closeAuthModal();
+                  this.loadDashboardData();
+                  this.showToast(`Welcome, ${name}! 👋`, 'success');
+                } catch (err) {
+                  console.error('Google profile fetch error:', err);
+                }
               }
             }
-          }
-        });
-        tokenClient.requestAccessToken({ prompt: 'select_account' });
-      } else {
-        alert('Google Sign-in is initializing. Please wait a moment and try again.');
+          });
+          tokenClient.requestAccessToken({ prompt: 'select_account' });
+        } else {
+          alert('Google Sign-in is initializing. Please wait a moment and try again.');
+        }
+      } catch (e) {
+        console.error(e);
       }
-    } catch(e) {
-      console.error(e);
     }
-  }
 
   async checkOAuthCallback() {
-    // Session is maintained locally and synced with SQLite backend
-  }
+      // Session is maintained locally and synced with SQLite backend
+    }
 
   async doRegister() {
-    const name = document.getElementById('reg-name')?.value || '';
-    const business = document.getElementById('reg-business')?.value || '';
-    const email = document.getElementById('reg-email')?.value || '';
-    const password = document.getElementById('reg-password')?.value || '';
-    const plan = document.getElementById('reg-plan')?.value || 'starter';
-    const errEl = document.getElementById('auth-reg-error');
+      const name = document.getElementById('reg-name')?.value || '';
+      const business = document.getElementById('reg-business')?.value || '';
+      const email = document.getElementById('reg-email')?.value || '';
+      const password = document.getElementById('reg-password')?.value || '';
+      const plan = document.getElementById('reg-plan')?.value || 'starter';
+      const errEl = document.getElementById('auth-reg-error');
 
-    const result = auth.register({ name, business, email, password, plan });
-    if (!result.ok) {
-      errEl.textContent = result.error;
-      errEl.style.display = 'block';
-      return;
-    }
-    errEl.style.display = 'none';
-    this.session = result.merchant;
-    const overlay = document.getElementById('auth-overlay');
-    if (overlay) overlay.remove();
-    this.updateSidebarUser();
-    i18n.applyTranslations();
-    this.setupEventListeners();
-    this.handleHashChange();
-    window.addEventListener('hashchange', () => this.handleHashChange());
-    await this.refreshAllData();
-    setInterval(() => this.pollLiveUpdates(), 4000);
-    this.showToast(`Account created successfully! Welcome, ${name}! 🎉`, 'success');
-  }
-
-  updateSidebarUser() {
-    if (!this.session) return;
-    const planInfo = auth.getPlan(this.session.plan);
-    const sub = auth.checkSubscription(this.session);
-
-    // Update name + role + home greeting
-    const nameEl = document.querySelector('.user-name');
-    const roleEl = document.querySelector('.user-role');
-    const avatarEl = document.querySelector('.user-avatar');
-    const greetingEl = document.getElementById('home-greeting-name');
-
-    if (nameEl) nameEl.textContent = this.session.name || 'Merchant Account';
-    if (greetingEl) greetingEl.textContent = this.session.name || this.session.business || 'Merchant';
-    
-    if (roleEl) {
-      if (sub.isExpired) {
-        roleEl.innerHTML = `<span style="color:#ef4444; font-weight:800; font-size:11px; background:#fee2e2; padding:2px 8px; border-radius:6px;">🔴 EXPIRED</span>`;
-        this.renderExpiredBanner(sub);
-      } else {
-        roleEl.innerHTML = `<span style="color:${planInfo.color}; font-weight:700;">${planInfo.badge}</span> <span style="font-size:11px; color:#10b981; font-weight:700;">(${sub.daysLeft}d left)</span>`;
-        const oldBanner = document.getElementById('subscription-status-banner');
-        if (oldBanner) oldBanner.remove();
+      const result = auth.register({ name, business, email, password, plan });
+      if (!result.ok) {
+        errEl.textContent = result.error;
+        errEl.style.display = 'block';
+        return;
       }
+      errEl.style.display = 'none';
+      this.session = result.merchant;
+      const overlay = document.getElementById('auth-overlay');
+      if (overlay) overlay.remove();
+      this.updateSidebarUser();
+      i18n.applyTranslations();
+      this.setupEventListeners();
+      this.handleHashChange();
+      window.addEventListener('hashchange', () => this.handleHashChange());
+      await this.refreshAllData();
+      setInterval(() => this.pollLiveUpdates(), 4000);
+      this.showToast(`Account created successfully! Welcome, ${name}! 🎉`, 'success');
     }
 
-    if (avatarEl) {
-      avatarEl.textContent = this.session.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-      avatarEl.style.background = sub.isExpired 
-        ? 'linear-gradient(135deg, #ef4444, #dc2626)' 
-        : `linear-gradient(135deg, ${planInfo.color}, ${planInfo.color}cc)`;
-    }
+    updateSidebarUser() {
+      if (!this.session) return;
+      const planInfo = auth.getPlan(this.session.plan);
+      const sub = auth.checkSubscription(this.session);
 
-    // Lock nav items based on plan or expiry
-    document.querySelectorAll('.nav-item').forEach(el => {
-      const target = el.getAttribute('href')?.replace('#', '');
-      if (!target) return;
-      const locked = sub.isExpired || !auth.canAccess(target, this.session.plan);
-      el.classList.toggle('nav-locked', locked);
-      const existingBadge = el.querySelector('.nav-lock-icon');
-      if (locked && !existingBadge) {
-        const lockIcon = document.createElement('span');
-        lockIcon.className = 'nav-lock-icon';
-        lockIcon.innerHTML = '🔒';
-        lockIcon.style.cssText = 'margin-left:auto; font-size:11px; opacity:0.6;';
-        el.appendChild(lockIcon);
-      } else if (!locked && existingBadge) {
-        existingBadge.remove();
+      // Update name + role + home greeting
+      const nameEl = document.querySelector('.user-name');
+      const roleEl = document.querySelector('.user-role');
+      const avatarEl = document.querySelector('.user-avatar');
+      const greetingEl = document.getElementById('home-greeting-name');
+
+      if (nameEl) nameEl.textContent = this.session.name || 'Merchant Account';
+      if (greetingEl) greetingEl.textContent = this.session.name || this.session.business || 'Merchant';
+
+      if (roleEl) {
+        if (sub.isExpired) {
+          roleEl.innerHTML = `<span style="color:#ef4444; font-weight:800; font-size:11px; background:#fee2e2; padding:2px 8px; border-radius:6px;">🔴 EXPIRED</span>`;
+          this.renderExpiredBanner(sub);
+        } else {
+          roleEl.innerHTML = `<span style="color:${planInfo.color}; font-weight:700;">${planInfo.badge}</span> <span style="font-size:11px; color:#10b981; font-weight:700;">(${sub.daysLeft}d left)</span>`;
+          const oldBanner = document.getElementById('subscription-status-banner');
+          if (oldBanner) oldBanner.remove();
+        }
       }
-    });
-  }
 
-  renderExpiredBanner(sub) {
-    const mainContent = document.getElementById('main-content') || document.querySelector('.main-content');
-    if (!mainContent) return;
-    let banner = document.getElementById('subscription-status-banner');
-    if (!banner) {
-      banner = document.createElement('div');
-      banner.id = 'subscription-status-banner';
-      mainContent.prepend(banner);
+      if (avatarEl) {
+        avatarEl.textContent = this.session.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        avatarEl.style.background = sub.isExpired
+          ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+          : `linear-gradient(135deg, ${planInfo.color}, ${planInfo.color}cc)`;
+      }
+
+      // Lock nav items based on plan or expiry
+      document.querySelectorAll('.nav-item').forEach(el => {
+        const target = el.getAttribute('href')?.replace('#', '');
+        if (!target) return;
+        const locked = sub.isExpired || !auth.canAccess(target, this.session.plan);
+        el.classList.toggle('nav-locked', locked);
+        const existingBadge = el.querySelector('.nav-lock-icon');
+        if (locked && !existingBadge) {
+          const lockIcon = document.createElement('span');
+          lockIcon.className = 'nav-lock-icon';
+          lockIcon.innerHTML = '🔒';
+          lockIcon.style.cssText = 'margin-left:auto; font-size:11px; opacity:0.6;';
+          el.appendChild(lockIcon);
+        } else if (!locked && existingBadge) {
+          existingBadge.remove();
+        }
+      });
     }
-    const planInfo = auth.getPlan(this.session.plan);
-    const price = this.session.planPrice || 200;
-    banner.innerHTML = `
+
+    renderExpiredBanner(sub) {
+      const mainContent = document.getElementById('main-content') || document.querySelector('.main-content');
+      if (!mainContent) return;
+      let banner = document.getElementById('subscription-status-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'subscription-status-banner';
+        mainContent.prepend(banner);
+      }
+      const planInfo = auth.getPlan(this.session.plan);
+      const price = this.session.planPrice || 200;
+      banner.innerHTML = `
       <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:14px; padding:16px 20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 4px 16px rgba(239, 68, 68, 0.12);">
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:26px;">⚠️</span>
@@ -3672,83 +3672,83 @@ class PayFlowDashboardApp {
         </button>
       </div>
     `;
-  }
-
-  openRenewModal() {
-    const plan = this.session?.plan || 'business';
-    const billing = this.session?.billingCycle || 'monthly';
-    const price = this.session?.planPrice || (billing === 'yearly' ? 1200 : 200);
-    const email = encodeURIComponent(this.session?.email || '');
-    const name = encodeURIComponent(this.session?.name || 'Merchant');
-    window.location.href = `/checkout?plan=${encodeURIComponent(plan)}&billing=${encodeURIComponent(billing)}&amount=${price}&merchant=${email}&name=${name}`;
-  }
-
-  submitRenewPayment(amount) {
-    const trx = (document.getElementById('renew-trx-input')?.value || '').trim().toUpperCase();
-    if (!trx || trx.length < 6) {
-      alert('Please enter a valid TrxID.');
-      return;
     }
-    const res = auth.activatePaidPlan(this.session.plan, this.session.billingCycle || 'monthly', trx, amount);
-    if (res.ok) {
-      this.session = res.session;
-      const overlay = document.getElementById('renew-modal-overlay');
-      if (overlay) overlay.remove();
-      const banner = document.getElementById('subscription-status-banner');
-      if (banner) banner.remove();
+
+    openRenewModal() {
+      const plan = this.session?.plan || 'business';
+      const billing = this.session?.billingCycle || 'monthly';
+      const price = this.session?.planPrice || (billing === 'yearly' ? 1200 : 200);
+      const email = encodeURIComponent(this.session?.email || '');
+      const name = encodeURIComponent(this.session?.name || 'Merchant');
+      window.location.href = `/checkout?plan=${encodeURIComponent(plan)}&billing=${encodeURIComponent(billing)}&amount=${price}&merchant=${email}&name=${name}`;
+    }
+
+    submitRenewPayment(amount) {
+      const trx = (document.getElementById('renew-trx-input')?.value || '').trim().toUpperCase();
+      if (!trx || trx.length < 6) {
+        alert('Please enter a valid TrxID.');
+        return;
+      }
+      const res = auth.activatePaidPlan(this.session.plan, this.session.billingCycle || 'monthly', trx, amount);
+      if (res.ok) {
+        this.session = res.session;
+        const overlay = document.getElementById('renew-modal-overlay');
+        if (overlay) overlay.remove();
+        const banner = document.getElementById('subscription-status-banner');
+        if (banner) banner.remove();
+        this.updateSidebarUser();
+        const expFormatted = new Date(res.expiresAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        this.showToast(`Subscription renewed successfully! Expiry: ${expFormatted} (${res.durationDays} days). 🎉`, 'success');
+        this.refreshAllData();
+      }
+    }
+
+    simulateSubscriptionDays(days) {
+      const sub = auth.simulateExpiry(days);
+      this.session = auth.getSession();
       this.updateSidebarUser();
-      const expFormatted = new Date(res.expiresAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-      this.showToast(`Subscription renewed successfully! Expiry: ${expFormatted} (${res.durationDays} days). 🎉`, 'success');
+      if (sub.isExpired) {
+        this.showToast('Simulation: Subscription expired (Service Off).', 'error');
+      } else {
+        this.showToast(`Simulation: Subscription set to ${days} days (Service Active).`, 'success');
+      }
       this.refreshAllData();
     }
-  }
 
-  simulateSubscriptionDays(days) {
-    const sub = auth.simulateExpiry(days);
-    this.session = auth.getSession();
-    this.updateSidebarUser();
-    if (sub.isExpired) {
-      this.showToast('Simulation: Subscription expired (Service Off).', 'error');
-    } else {
-      this.showToast(`Simulation: Subscription set to ${days} days (Service Active).`, 'success');
-    }
-    this.refreshAllData();
-  }
-
-  doLogout() {
-    auth.logout();
-  }
-
-  exportTransactionsCSV() {
-    if (!this.transactions || this.transactions.length === 0) {
-      this.showToast('No transaction data to export', 'error');
-      return;
+    doLogout() {
+      auth.logout();
     }
 
-    const headers = ['TrxID', 'Order ID', 'Amount', 'Provider', 'Sender', 'Status', 'Date'];
-    const rows = this.transactions.map(t => [
-      t.trx_id,
-      t.order_id || 'N/A',
-      t.amount,
-      t.provider,
-      t.sender || 'N/A',
-      t.is_verified === 1 ? 'COMPLETED' : 'PENDING',
-      t.created_at,
-    ]);
+    exportTransactionsCSV() {
+      if (!this.transactions || this.transactions.length === 0) {
+        this.showToast('No transaction data to export', 'error');
+        return;
+      }
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + 
-      [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const headers = ['TrxID', 'Order ID', 'Amount', 'Provider', 'Sender', 'Status', 'Date'];
+      const rows = this.transactions.map(t => [
+        t.trx_id,
+        t.order_id || 'N/A',
+        t.amount,
+        t.provider,
+        t.sender || 'N/A',
+        t.is_verified === 1 ? 'COMPLETED' : 'PENDING',
+        t.created_at,
+      ]);
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `syncpay_transactions_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    this.showToast('CSV downloaded successfully', 'success');
+      const csvContent = 'data:text/csv;charset=utf-8,' +
+        [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `syncpay_transactions_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      this.showToast('CSV downloaded successfully', 'success');
+    }
   }
-}
 
 // Global bootstrap instance
 window.syncpayApp = window.payflowApp = new PayFlowDashboardApp();

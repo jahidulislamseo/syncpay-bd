@@ -23,6 +23,8 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   late final TextEditingController _tokenCtrl;
   late final TextEditingController _backendUrlCtrl;
   late String _deviceId;
+  String? _scannedDeviceId;
+  String? _scannedDeviceName;
 
   @override
   void initState() {
@@ -76,6 +78,8 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
             : 'SyncPay Merchant Store';
         if (json['device_token'] != null) _tokenCtrl.text = json['device_token'].toString();
         if (json['backend_url'] != null) _backendUrlCtrl.text = json['backend_url'].toString();
+        if (json['device_id'] != null) _scannedDeviceId = json['device_id'].toString();
+        if (json['device_name'] != null) _scannedDeviceName = json['device_name'].toString();
 
         setState(() => _isManual = true);
 
@@ -121,6 +125,8 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
             deviceToken: _tokenCtrl.text.trim(),
             merchantId: _merchantIdCtrl.text.trim(),
             merchantName: _businessNameCtrl.text.trim(),
+            deviceId: _scannedDeviceId,
+            deviceName: _scannedDeviceName,
           );
 
       if (!mounted) return;

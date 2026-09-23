@@ -166,7 +166,7 @@ export const components = {
       const isVerified = tx.is_verified === 1;
       const statusClass = isVerified ? 'badge-completed' : 'badge-pending';
       const statusText = isVerified ? i18n.t('status.COMPLETED') : i18n.t('status.PENDING');
-      
+
       const p = (tx.provider || 'bKash');
       let iconSrc = '/images/bkash.svg';
       if (p.toLowerCase().includes('nagad')) iconSrc = '/images/nagad.svg';
@@ -301,7 +301,7 @@ export const components = {
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0;">SyncPay Android Forwarder APK</h3>
-              <span class="badge badge-completed" style="font-size: 10px;">v1.1.0 STABLE</span>
+              <span class="badge badge-completed" style="font-size: 10px;">v1.2.0 STABLE</span>
             </div>
             <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0 0;">
               Install on your SIM-enabled Android phone. bKash, Nagad, and Rocket SMS are automatically captured and verified.
@@ -338,51 +338,51 @@ export const components = {
       ` : `
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:20px;">
         ${devices.map(d => {
-          const isOnline = d.status === 'ONLINE';
-          const batt = d.battery_level != null ? d.battery_level : null;
-          const isCharging = d.is_charging === true || d.is_charging === 1;
-          const model = d.device_model || (d.device_name && d.device_name !== 'Android Forwarder' ? d.device_name : 'Telephony Device');
-          const osVer = d.android_version ? (d.android_version.startsWith('Android') ? d.android_version : `Android ${d.android_version}`) : 'Awaiting sync';
+      const isOnline = d.status === 'ONLINE';
+      const batt = d.battery_level != null ? d.battery_level : null;
+      const isCharging = d.is_charging === true || d.is_charging === 1;
+      const model = d.device_model || (d.device_name && d.device_name !== 'Android Forwarder' ? d.device_name : 'Telephony Device');
+      const osVer = d.android_version ? (d.android_version.startsWith('Android') ? d.android_version : `Android ${d.android_version}`) : 'Awaiting sync';
 
-          let battColor = '#10b981';
-          let battDisplay = 'Standby';
-          if (batt !== null) {
-            battDisplay = `${batt}%`;
-            if (batt < 20) battColor = '#ef4444';
-            else if (batt < 35) battColor = '#f59e0b';
-          } else if (!isOnline) {
-            battDisplay = 'Offline';
-          }
+      let battColor = '#10b981';
+      let battDisplay = 'Standby';
+      if (batt !== null) {
+        battDisplay = `${batt}%`;
+        if (batt < 20) battColor = '#ef4444';
+        else if (batt < 35) battColor = '#f59e0b';
+      } else if (!isOnline) {
+        battDisplay = 'Offline';
+      }
 
-          let simDisplayHtml = 'Awaiting SIM Telemetry';
-          if (d.sim_slots && Array.isArray(d.sim_slots) && d.sim_slots.length > 0) {
-            simDisplayHtml = d.sim_slots.map((s, idx) => {
-              const carrier = s.carrier || s.displayName || 'Active';
-              const slotNum = s.slot_index !== undefined ? s.slot_index + 1 : idx + 1;
-              return `SIM ${slotNum}: <strong style="color:var(--text-primary);">${carrier}</strong>`;
-            }).join(' • ');
-          } else if (d.sim_number) {
-            simDisplayHtml = `SIM 1: <strong style="color:var(--text-primary);">${d.sim_number}</strong>`;
-          }
+      let simDisplayHtml = 'Awaiting SIM Telemetry';
+      if (d.sim_slots && Array.isArray(d.sim_slots) && d.sim_slots.length > 0) {
+        simDisplayHtml = d.sim_slots.map((s, idx) => {
+          const carrier = s.carrier || s.displayName || 'Active';
+          const slotNum = s.slot_index !== undefined ? s.slot_index + 1 : idx + 1;
+          return `SIM ${slotNum}: <strong style="color:var(--text-primary);">${carrier}</strong>`;
+        }).join(' • ');
+      } else if (d.sim_number) {
+        simDisplayHtml = `SIM 1: <strong style="color:var(--text-primary);">${d.sim_number}</strong>`;
+      }
 
-          const activeMethods = (window.payflowApp?.paymentMethods || []).filter(m => m.is_active);
-          let walletsHtml = '';
-          if (activeMethods.length > 0) {
-            walletsHtml = activeMethods.map(m => {
-              const type = (m.channel_type || '').toLowerCase();
-              let color = '#6366f1';
-              let bg = 'rgba(99,102,241,0.1)';
-              if (type.includes('bkash')) { color = '#e2136e'; bg = 'rgba(226,19,110,0.1)'; }
-              else if (type.includes('nagad')) { color = '#f7941d'; bg = 'rgba(247,148,29,0.1)'; }
-              else if (type.includes('rocket')) { color = '#8c2b8d'; bg = 'rgba(140,43,141,0.1)'; }
-              else if (type.includes('upay')) { color = '#00a859'; bg = 'rgba(0,168,89,0.1)'; }
-              return `<span style="display:inline-flex; align-items:center; gap:3px; background:${bg}; color:${color}; padding:2px 6px; border-radius:4px; font-weight:700;">● ${m.channel_name || m.channel_type}</span>`;
-            }).join(' ');
-          } else {
-            walletsHtml = `<span style="color:var(--text-secondary); font-size:12px;">Universal Ingest (bKash / Nagad / Rocket / Upay)</span>`;
-          }
+      const activeMethods = (window.payflowApp?.paymentMethods || []).filter(m => m.is_active);
+      let walletsHtml = '';
+      if (activeMethods.length > 0) {
+        walletsHtml = activeMethods.map(m => {
+          const type = (m.channel_type || '').toLowerCase();
+          let color = '#6366f1';
+          let bg = 'rgba(99,102,241,0.1)';
+          if (type.includes('bkash')) { color = '#e2136e'; bg = 'rgba(226,19,110,0.1)'; }
+          else if (type.includes('nagad')) { color = '#f7941d'; bg = 'rgba(247,148,29,0.1)'; }
+          else if (type.includes('rocket')) { color = '#8c2b8d'; bg = 'rgba(140,43,141,0.1)'; }
+          else if (type.includes('upay')) { color = '#00a859'; bg = 'rgba(0,168,89,0.1)'; }
+          return `<span style="display:inline-flex; align-items:center; gap:3px; background:${bg}; color:${color}; padding:2px 6px; border-radius:4px; font-weight:700;">● ${m.channel_name || m.channel_type}</span>`;
+        }).join(' ');
+      } else {
+        walletsHtml = `<span style="color:var(--text-secondary); font-size:12px;">Universal Ingest (bKash / Nagad / Rocket / Upay)</span>`;
+      }
 
-          return `
+      return `
           <div class="card-panel" style="display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;">
             <!-- Top bar -->
             <div>
@@ -468,15 +468,15 @@ export const components = {
                   <span class="detail-key">⏱️ Last Heartbeat</span>
                   <span class="detail-val" style="font-size:12px; color:var(--text-secondary);">
                     ${(() => {
-                      if (!d.last_seen) return isOnline ? 'Active Just Now' : 'Not recorded yet';
-                      const s = typeof d.last_seen === 'string' ? d.last_seen.replace(' ', 'T') : d.last_seen;
-                      const parsed = new Date(s);
-                      if (isNaN(parsed.getTime())) return 'Active Just Now';
-                      const diffSec = Math.floor((Date.now() - parsed.getTime()) / 1000);
-                      if (diffSec < 30) return 'Active (Just now)';
-                      if (diffSec < 120) return `${diffSec}s ago`;
-                      return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    })()}
+          if (!d.last_seen) return isOnline ? 'Active Just Now' : 'Not recorded yet';
+          const s = typeof d.last_seen === 'string' ? d.last_seen.replace(' ', 'T') : d.last_seen;
+          const parsed = new Date(s);
+          if (isNaN(parsed.getTime())) return 'Active Just Now';
+          const diffSec = Math.floor((Date.now() - parsed.getTime()) / 1000);
+          if (diffSec < 30) return 'Active (Just now)';
+          if (diffSec < 120) return `${diffSec}s ago`;
+          return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        })()}
                   </span>
                 </div>
               </div>
@@ -497,7 +497,7 @@ export const components = {
             </div>
           </div>
           `;
-        }).join('')}
+    }).join('')}
       </div>
     `}
     `;
@@ -541,11 +541,11 @@ export const components = {
             </thead>
             <tbody>
               ${list.map(k => {
-                const env = (k.environment || 'production').toUpperCase();
-                const prefix = k.key_prefix || 'pf_live_';
-                const secret = k.secret_key || `${prefix}••••••••••••••••`;
+      const env = (k.environment || 'production').toUpperCase();
+      const prefix = k.key_prefix || 'pf_live_';
+      const secret = k.secret_key || `${prefix}••••••••••••••••`;
 
-                return `
+      return `
                   <tr>
                     <td><strong style="color:var(--text-primary);">${k.name || 'API Key'}</strong></td>
                     <td>
@@ -574,7 +574,7 @@ export const components = {
                     </td>
                   </tr>
                 `;
-              }).join('')}
+    }).join('')}
             </tbody>
           </table>
         </div>
@@ -619,9 +619,9 @@ export const components = {
               <span class="badge" style="background:${statusBg}; color:${statusColor}; font-size:11px; font-weight:800;">${statusLabel}</span>
             </div>
             <p style="font-size:13px; color:var(--text-muted); margin:4px 0 0 0;">
-              ${subInfo.isExpired 
-                ? '<span style="color:#ef4444; font-weight:700;">⚠️ Subscription has expired. Your automation service is suspended—renew now to resume.</span>' 
-                : `Next billing & renewal date: <strong>${expiryFormatted}</strong> (${subInfo.daysLeft} days left)।`}
+              ${subInfo.isExpired
+        ? '<span style="color:#ef4444; font-weight:700;">⚠️ Subscription has expired. Your automation service is suspended—renew now to resume.</span>'
+        : `Next billing & renewal date: <strong>${expiryFormatted}</strong> (${subInfo.daysLeft} days left)।`}
             </p>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">

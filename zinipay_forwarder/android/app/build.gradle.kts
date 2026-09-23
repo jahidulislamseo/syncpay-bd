@@ -18,8 +18,8 @@ android {
         applicationId = "dev.jahidulislam.syncpay"
         minSdk = flutter.minSdkVersion // Android 5.0 Lollipop
         targetSdk = 34 // Android 14 (Universal Production Compatibility)
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         ndk {
             abiFilters.clear()

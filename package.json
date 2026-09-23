@@ -1,6 +1,6 @@
 {
   "name": "syncpay-bd",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Self-hosted SMS-based payment automation engine for bKash, Nagad, Rocket, and Upay (SyncPay BD)",
   "type": "module",
   "engines": {

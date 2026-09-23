@@ -264,7 +264,7 @@ class MainActivity : FlutterActivity(), TextToSpeech.OnInitListener {
         val fullDeviceName = if (model.startsWith(manufacturer, ignoreCase = true)) model else "$manufacturer $model"
         val androidVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
 
-        var appVersion = "1.1.0"
+        var appVersion = "1.2.0"
         try {
             val pInfo = packageManager.getPackageInfo(packageName, 0)
             val vCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pInfo.longVersionCode else pInfo.versionCode.toLong()

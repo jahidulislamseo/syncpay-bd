@@ -394,20 +394,31 @@ class AgentNotifier extends StateNotifier<AgentState> {
     required String deviceToken,
     required String merchantId,
     required String merchantName,
+    String? deviceId,
+    String? deviceName,
   }) async {
     await _vault.setBackendUrl(backendUrl);
     await _vault.setDeviceToken(deviceToken);
     await _vault.setMerchantId(merchantId);
     await _vault.setMerchantName(merchantName);
+    if (deviceId != null && deviceId.isNotEmpty) {
+      await _vault.setDeviceId(deviceId);
+    }
+    if (deviceName != null && deviceName.isNotEmpty) {
+      await _vault.setDeviceName(deviceName);
+    }
 
     state = state.copyWith(
       backendUrl: backendUrl,
       deviceToken: deviceToken,
       merchantId: merchantId,
       merchantName: merchantName,
+      deviceId: (deviceId != null && deviceId.isNotEmpty) ? deviceId : state.deviceId,
+      deviceName: (deviceName != null && deviceName.isNotEmpty) ? deviceName : state.deviceName,
     );
 
     await pingBackend();
+    await _refreshDeviceInfo();
     await _vault.addLog('Pairing Config Updated', 'Connected to $merchantName ($merchantId)');
   }
 

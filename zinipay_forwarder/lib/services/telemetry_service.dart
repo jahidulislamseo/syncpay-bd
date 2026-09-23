@@ -32,7 +32,7 @@ class DeviceTelemetry {
     this.deviceManufacturer = '',
     this.deviceBrand = '',
     this.androidVersion = '',
-    this.appVersion = '1.1.0',
+    this.appVersion = '1.2.0',
   });
 
   factory DeviceTelemetry.fromMap(Map<dynamic, dynamic> map) {
@@ -49,7 +49,7 @@ class DeviceTelemetry {
       deviceManufacturer: map['device_manufacturer']?.toString() ?? '',
       deviceBrand: map['device_brand']?.toString() ?? '',
       androidVersion: map['android_version']?.toString() ?? '',
-      appVersion: map['app_version']?.toString() ?? '1.1.0',
+      appVersion: map['app_version']?.toString() ?? '1.2.0',
     );
   }
 
@@ -93,6 +93,10 @@ class TelemetryService {
 
     final payload = {
       'device_token': token,
+      'device_id': prefs.getString('zp_device_id') ?? '',
+      'device_name': telemetry.deviceName.isNotEmpty ? telemetry.deviceName : (prefs.getString('zp_device_name') ?? ''),
+      'device_model': telemetry.deviceModel,
+      'android_version': telemetry.androidVersion,
       'battery_level': telemetry.batteryLevel,
       'is_charging': telemetry.isCharging,
       'charger_type': telemetry.chargerType,
