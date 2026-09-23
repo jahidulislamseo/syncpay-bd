@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="canonical" href="https://syncpaybd.site/checkout">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
   <script>
     if (window.location.pathname.endsWith('.html')) {
       const clean = window.location.pathname.replace(/\.html$/, '') || '/';
@@ -1284,6 +1285,40 @@
       } else if (paymentMethods.length > 0) {
         selectMethodById(paymentMethods[0].id);
       }
+
+      const activeInvId = (invoiceData && (invoiceData.id || invoiceData.invoice_id)) || invoiceId;
+      if (activeInvId) {
+        listenRealTimeEvents(activeInvId);
+      }
+    }
+
+    function listenRealTimeEvents(invId) {
+      if (!invId || typeof EventSource === 'undefined') return;
+      try {
+        const sse = new EventSource(`/api/v1/payments/events/${encodeURIComponent(invId)}`);
+        sse.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.status === 'PAID') {
+              sse.close();
+              const alertSuccess = document.getElementById('alert-success');
+              const btn = document.getElementById('btn-submit');
+              if (alertSuccess) {
+                alertSuccess.style.display = 'block';
+                alertSuccess.innerHTML = `🎉 <strong>Payment Auto-Verified via MFS SMS!</strong> Redirecting...`;
+              }
+              if (btn) btn.style.display = 'none';
+              const redirect = data.invoice?.redirect_url || invoiceData?.redirect_url;
+              if (redirect) {
+                setTimeout(() => { window.location.href = redirect; }, 1500);
+              }
+            }
+          } catch (err) {}
+        };
+        sse.onerror = () => {
+          sse.close();
+        };
+      } catch (err) {}
     }
 
     function fallbackDemo() {

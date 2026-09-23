@@ -289,6 +289,51 @@ export async function paymentRoutes(fastify) {
         return reply.send({ success: true, invoice: { ...invoice, merchant_name, merchant_logo_url } });
     });
     // ==========================================
+    // 5b. Real-Time Server-Sent Events (SSE) Stream
+    // ==========================================
+    fastify.get('/api/v1/payments/events/:id', async (request, reply) => {
+        const invoiceId = request.params.id;
+        reply.raw.setHeader('Content-Type', 'text/event-stream');
+        reply.raw.setHeader('Cache-Control', 'no-cache, no-transform');
+        reply.raw.setHeader('Connection', 'keep-alive');
+        reply.raw.setHeader('Access-Control-Allow-Origin', '*');
+        const invoice = await InvoiceRepository.findByInvoiceId(invoiceId);
+        if (!invoice) {
+            reply.raw.write(`data: ${JSON.stringify({ error: 'Invoice not found' })}\n\n`);
+            reply.raw.end();
+            return;
+        }
+        reply.raw.write(`data: ${JSON.stringify({ status: invoice.status, invoice })}\n\n`);
+        if (invoice.status === 'PAID' || invoice.status === 'EXPIRED') {
+            reply.raw.end();
+            return;
+        }
+        let closed = false;
+        request.raw.on('close', () => {
+            closed = true;
+        });
+        const interval = setInterval(async () => {
+            if (closed) {
+                clearInterval(interval);
+                return;
+            }
+            try {
+                const current = await InvoiceRepository.findByInvoiceId(invoiceId);
+                if (current) {
+                    reply.raw.write(`data: ${JSON.stringify({ status: current.status, invoice: current })}\n\n`);
+                    if (current.status === 'PAID' || current.status === 'EXPIRED') {
+                        clearInterval(interval);
+                        reply.raw.end();
+                    }
+                }
+            }
+            catch {
+                clearInterval(interval);
+                reply.raw.end();
+            }
+        }, 1000);
+    });
+    // ==========================================
     // 6. Generate QR Code for Checkout
     // ==========================================
     fastify.get('/api/v1/payment/qr', async (request, reply) => {
