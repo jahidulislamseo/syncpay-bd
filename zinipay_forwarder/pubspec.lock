@@ -367,7 +367,7 @@ packages:
       sha256: f98b8e388588583d3f781f6806e4f4c9f9e189d898d27f0c249b93a1973dd122
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.1.0"
   local_auth_windows:
     dependency: transitive
     description:
@@ -780,7 +780,7 @@ packages:
       sha256: "7a3f37b05d989967cdddcbb571f1ea834867ae2faa29725fd085180e0883aa15"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.1.0"
   xml:
     dependency: transitive
     description:
