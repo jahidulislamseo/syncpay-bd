@@ -22,8 +22,17 @@
     },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/api", "dest": "/api/index.js" },
-    { "src": "/app", "dest": "/download.html" },
     { "src": "/login", "dest": "/login.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/checkout", "dest": "/checkout.html" },
+    { "src": "/checkout/(.*)", "dest": "/checkout.html" },
+    { "src": "/pay/(.*)", "dest": "/checkout.html" },
+    { "src": "/app", "dest": "/download.html" },
+    { "src": "/download", "dest": "/download.html" },
+    { "src": "/docs/api", "dest": "/docs/api.html" },
+    { "src": "/docs/trx-verification", "dest": "/docs/trx-verification.html" },
+    { "src": "/docs/webhook", "dest": "/docs/webhook.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
