@@ -28,6 +28,17 @@ export async function merchantRoutes(fastify) {
         }
         return DEMO_17DIGIT_MERCHANT_ID;
     }
+    function resolveAuthMerchantId(request) {
+        const authHeader = request.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.substring(7);
+            const { valid, payload } = CryptoUtil.verifyJwt(token);
+            if (valid && payload?.id) {
+                return payload.id;
+            }
+        }
+        return resolveMerchantId(request);
+    }
     // Get merchant dashboard stats
     fastify.get('/api/v1/merchant/stats', async (request, reply) => {
         const merchantId = resolveMerchantId(request);
@@ -674,22 +685,7 @@ export async function merchantRoutes(fastify) {
     // ==========================================
     // 1. Get current merchant branding configuration
     fastify.get('/api/v1/merchant/branding', async (request, reply) => {
-        let merchantId = DEMO_MERCHANT_ID;
-        const authHeader = request.headers.authorization;
-        const apiKey = (request.headers['syncpay-api-key'] || request.headers['x-api-key'] || request.headers['payflow-api-key']);
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            const token = authHeader.substring(7);
-            const { valid, payload } = CryptoUtil.verifyJwt(token);
-            if (valid && payload?.id) {
-                merchantId = payload.id;
-            }
-        }
-        else if (apiKey) {
-            const authResult = await MerchantService.authenticateApiKey(apiKey);
-            if (authResult.authenticated && authResult.merchant) {
-                merchantId = authResult.merchant.id;
-            }
-        }
+        const merchantId = resolveAuthMerchantId(request);
         const merchant = await MerchantRepository.findById(merchantId);
         if (!merchant) {
             return reply.status(404).send({ success: false, error: 'Merchant account not found' });
@@ -719,22 +715,7 @@ export async function merchantRoutes(fastify) {
     });
     // 2. Save or update merchant branding configuration
     fastify.post('/api/v1/merchant/branding', async (request, reply) => {
-        let merchantId = DEMO_MERCHANT_ID;
-        const authHeader = request.headers.authorization;
-        const apiKey = (request.headers['syncpay-api-key'] || request.headers['x-api-key'] || request.headers['payflow-api-key']);
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            const token = authHeader.substring(7);
-            const { valid, payload } = CryptoUtil.verifyJwt(token);
-            if (valid && payload?.id) {
-                merchantId = payload.id;
-            }
-        }
-        else if (apiKey) {
-            const authResult = await MerchantService.authenticateApiKey(apiKey);
-            if (authResult.authenticated && authResult.merchant) {
-                merchantId = authResult.merchant.id;
-            }
-        }
+        const merchantId = resolveAuthMerchantId(request);
         const merchant = await MerchantRepository.findById(merchantId);
         if (!merchant) {
             return reply.status(404).send({ success: false, error: 'Merchant not found' });

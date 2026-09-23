@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import rateLimit from '@fastify/rate-limit';
@@ -115,8 +116,6 @@ server.get('/health', async (req) => {
     system: 'SyncPay BD Gateway',
   };
 });
-
-import fs from 'node:fs';
 
 const publicDir = fs.existsSync(path.resolve(__dirname, '../public'))
   ? path.resolve(__dirname, '../public')

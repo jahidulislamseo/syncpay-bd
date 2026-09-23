@@ -24,6 +24,22 @@ function extractApiKey(request: FastifyRequest): string | undefined {
   return undefined;
 }
 
+// Centralized payment URL resolver supporting custom merchant domains and brand slugs
+async function resolvePaymentUrl(request: FastifyRequest, merchantId: string, invoiceId: string): Promise<string> {
+  const host = request.headers.host || 'localhost:4000';
+  const protocol = (request.headers['x-forwarded-proto'] as string) || request.protocol || 'http';
+  let paymentUrl = `${protocol}://${host}/checkout?invoice_id=${invoiceId}`;
+  try {
+    const fullMerchant = await MerchantRepository.findById(merchantId);
+    if (fullMerchant?.custom_domain && fullMerchant.has_custom_domain) {
+      paymentUrl = `https://${fullMerchant.custom_domain}/checkout?invoice_id=${invoiceId}`;
+    } else if (fullMerchant?.brand_slug) {
+      paymentUrl = `${protocol}://${host}/pay/${fullMerchant.brand_slug}?invoice_id=${invoiceId}`;
+    }
+  } catch {}
+  return paymentUrl;
+}
+
 // Request Validation Schemas
 const payflowCreateInvoiceSchema = z.object({
   cus_name: z.string().optional(),
@@ -102,18 +118,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       webhookUrl: webhook_url || undefined,
     });
 
-    const host = request.headers.host || 'localhost:4000';
-    const protocol = (request.headers['x-forwarded-proto'] as string) || request.protocol || 'http';
-
-    let payment_url = `${protocol}://${host}/checkout?invoice_id=${invoice.invoice_id}`;
-    try {
-      const fullMerchant = await MerchantRepository.findById(authResult.merchant.id);
-      if (fullMerchant?.custom_domain && fullMerchant.has_custom_domain) {
-        payment_url = `https://${fullMerchant.custom_domain}/checkout?invoice_id=${invoice.invoice_id}`;
-      } else if (fullMerchant?.brand_slug) {
-        payment_url = `${protocol}://${host}/pay/${fullMerchant.brand_slug}?invoice_id=${invoice.invoice_id}`;
-      }
-    } catch {}
+    const payment_url = await resolvePaymentUrl(request, authResult.merchant.id, invoice.invoice_id);
 
     return reply.status(201).send({
       status: true,
@@ -278,18 +283,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       redirectUrl: 'http://localhost:4000/success',
     });
 
-    const host = request.headers.host || 'localhost:4000';
-    const protocol = (request.headers['x-forwarded-proto'] as string) || request.protocol || 'http';
-
-    let checkout_url = `${protocol}://${host}/checkout?invoice_id=${invoice.invoice_id}`;
-    try {
-      const fullMerchant = await MerchantRepository.findById(auth.merchant.id);
-      if (fullMerchant?.custom_domain && fullMerchant.has_custom_domain) {
-        checkout_url = `https://${fullMerchant.custom_domain}/checkout?invoice_id=${invoice.invoice_id}`;
-      } else if (fullMerchant?.brand_slug) {
-        checkout_url = `${protocol}://${host}/pay/${fullMerchant.brand_slug}?invoice_id=${invoice.invoice_id}`;
-      }
-    } catch {}
+    const checkout_url = await resolvePaymentUrl(request, auth.merchant.id, invoice.invoice_id);
 
     return reply.status(201).send({
       success: true,

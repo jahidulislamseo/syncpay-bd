@@ -2,7 +2,6 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { DeviceService } from '../services/device.service.js';
 import { TransactionService } from '../services/transaction.service.js';
-import { MfsParser } from '../parsers/mfs.parser.js';
 
 const ingestSchema = z.object({
   device_id: z.string().min(1, 'device_id is required'),
