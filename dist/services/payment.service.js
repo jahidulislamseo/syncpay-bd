@@ -1,6 +1,7 @@
 import { InvoiceRepository } from '../db/repositories/invoice.repository.js';
 import { TransactionRepository } from '../db/repositories/transaction.repository.js';
 import { WebhookService } from './webhook.service.js';
+import { TelegramService } from './telegram.service.js';
 export class PaymentService {
     static async createInvoice(params) {
         const invoiceId = 'PF' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -47,7 +48,7 @@ export class PaymentService {
             const found = await InvoiceRepository.findByInvoiceId(params.invoiceId);
             if (found)
                 invoice = found;
-            // Dispatch webhook
+            // Dispatch webhook with resilient retries
             if (invoice?.webhook_url) {
                 WebhookService.dispatch({
                     merchantId: params.merchantId,
@@ -64,6 +65,15 @@ export class PaymentService {
                     },
                 });
             }
+            // Asynchronous Telegram payment alert notification
+            TelegramService.sendPaymentAlert({
+                amount: params.amount,
+                provider: lockResult.transaction?.provider || 'bKash',
+                trxId: params.trxId,
+                invoiceId: invoice?.invoice_id || params.invoiceId || 'N/A',
+                customerName: invoice?.customer_name,
+                merchantName: invoice?.merchant_id,
+            }).catch((err) => console.warn('[TelegramAlert] Skipped:', err.message));
         }
         return {
             success: true,

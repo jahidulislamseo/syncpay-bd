@@ -1824,13 +1824,21 @@
         const data = await res.json();
         if (data.success && data.verified) {
           alertSuccess.style.display = 'block';
+          alertSuccess.innerHTML = `
+            🎉 <strong>Payment Verified Successfully!</strong>
+            <div style="margin-top: 10px;">
+              <button type="button" onclick="printReceipt('${trxId}', ${expectedAmt}, '${invId}', '${activeMethod?.provider_type || 'bKash'}')" style="background: #0f172a; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; font-size: 13px;">
+                🧾 Download / Print Official Receipt (PDF)
+              </button>
+            </div>
+          `;
           btn.style.display = 'none';
 
           const redirect = data.redirect_url || invoiceData?.redirect_url;
           if (redirect) {
             setTimeout(() => {
               window.location.href = redirect;
-            }, 1800);
+            }, 3000);
           }
         } else {
           alertError.style.display = 'block';
@@ -1844,6 +1852,52 @@
         btn.disabled = false;
         btn.innerHTML = `<span>Confirm & Verify Payment</span>`;
       }
+    function printReceipt(trx, amt, inv, provider) {
+      const printWindow = window.open('', '_blank', 'width=650,height=800');
+      if (!printWindow) return;
+      const merchant = (invoiceData && (invoiceData.merchant_name || invoiceData.customer_name)) || 'SyncPay BD Merchant';
+      const dateStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka', dateStyle: 'full', timeStyle: 'short' });
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Receipt - ${inv}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: auto; }
+            .receipt-card { border: 2px solid #e2e8f0; border-radius: 16px; padding: 32px; background: #fff; }
+            .header { text-align: center; border-bottom: 2px dashed #e2e8f0; padding-bottom: 24px; margin-bottom: 24px; }
+            .logo { font-size: 24px; font-weight: 800; color: #0284c7; }
+            .badge { display: inline-block; background: #ecfdf5; color: #059669; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; margin-top: 8px; }
+            .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+            .label { color: #64748b; font-weight: 500; }
+            .val { font-weight: 700; color: #0f172a; }
+            .total-row { display: flex; justify-content: space-between; padding: 16px 0; border-top: 2px solid #0f172a; margin-top: 12px; font-size: 18px; font-weight: 800; }
+            .footer { text-align: center; margin-top: 24px; font-size: 12px; color: #94a3b8; }
+            .btn-print { margin-top: 20px; padding: 12px 20px; background: #0284c7; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; font-size: 15px; }
+            @media print { .btn-print { display: none; } body { padding: 0; } .receipt-card { border: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="receipt-card">
+            <div class="header">
+              <div class="logo">SyncPay BD</div>
+              <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Official Payment Receipt & Voucher</div>
+              <div class="badge">✓ PAYMENT VERIFIED & SETTLED</div>
+            </div>
+            <div class="row"><span class="label">Merchant Name</span><span class="val">${merchant}</span></div>
+            <div class="row"><span class="label">Invoice Reference</span><span class="val">#${inv}</span></div>
+            <div class="row"><span class="label">Transaction ID (TrxID)</span><span class="val" style="font-family: monospace;">${trx.toUpperCase()}</span></div>
+            <div class="row"><span class="label">Payment Provider</span><span class="val">${(provider || 'bKash').toUpperCase()}</span></div>
+            <div class="row"><span class="label">Date & Time (BST)</span><span class="val">${dateStr}</span></div>
+            <div class="total-row"><span>Total Paid Amount</span><span style="color: #0284c7;">৳ ${amt} BDT</span></div>
+            <button class="btn-print" onclick="window.print()">🖨️ Print or Save as PDF</button>
+            <div class="footer">Verified by SyncPay BD Engine • Automated MFS Settlement</div>
+          </div>
+        </body>
+        </html>
+      `;
+      printWindow.document.write(html);
+      printWindow.document.close();
     }
 
     function handleClose() {

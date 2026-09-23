@@ -5,6 +5,7 @@ import { PaymentService } from '../services/payment.service.js';
 import { MerchantService } from '../services/merchant.service.js';
 import { InvoiceRepository } from '../db/repositories/invoice.repository.js';
 import { MerchantRepository } from '../db/repositories/merchant.repository.js';
+import { fraudShield, recordFailedVerification, clearVerificationAttempts } from '../middleware/fraud-shield.js';
 
 // API Key extractor supporting SyncPay / PayFlow headers, query params, or body
 function extractApiKey(request: FastifyRequest): string | undefined {
@@ -183,7 +184,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
   // ==========================================
   // 3. Checkout Settlement Endpoint
   // ==========================================
-  fastify.post('/api/v1/payments/verify', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/api/v1/payments/verify', { preHandler: [fraudShield] }, async (request: FastifyRequest, reply: FastifyReply) => {
     const parseResult = legacyVerifySchema.safeParse(request.body);
     if (!parseResult.success) {
       return reply.status(400).send({
@@ -225,12 +226,15 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     });
 
     if (!settleResult.success) {
+      recordFailedVerification(request);
       return reply.status(400).send({
         success: false,
         verified: false,
         message: settleResult.reason,
       });
     }
+
+    clearVerificationAttempts(request);
 
     return reply.send({
       success: true,
