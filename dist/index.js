@@ -88,21 +88,15 @@ await server.register(fastifyStatic, {
 });
 const indexHtmlPath = path.join(publicDir, 'index.html');
 const indexHtmlContent = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf8') : '';
-server.get('/home', async (_req, reply) => {
-    return reply.type('text/html').sendFile('index.html');
-});
-server.get('/index.html', async (_req, reply) => {
-    return reply.type('text/html').sendFile('index.html');
-});
-server.get('/test-index', async (_req, reply) => {
-    return reply.type('text/html').sendFile('index.html');
-});
-server.get('/', async (_req, reply) => {
-    return reply.type('text/html').sendFile('index.html');
-});
-server.get('/index', async (_req, reply) => {
-    return reply.type('text/html').sendFile('index.html');
-});
+const sendIndex = async (_req, reply) => {
+    const content = indexHtmlContent || (fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf8') : '');
+    return reply.type('text/html; charset=utf-8').send(content);
+};
+server.get('/', sendIndex);
+server.get('/index', sendIndex);
+server.get('/index.html', sendIndex);
+server.get('/home', sendIndex);
+server.get('/test-index', sendIndex);
 server.get('/login', async (_req, reply) => {
     return reply.type('text/html').sendFile('login.html');
 });

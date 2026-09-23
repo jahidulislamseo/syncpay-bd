@@ -33,8 +33,8 @@ export default async function handler(req, res) {
       targetUrl = req.url || '/';
     }
 
-    if (!targetUrl || targetUrl === '/' || targetUrl === '/index' || targetUrl === '/api/index.js' || targetUrl.startsWith('/api/index.js?')) {
-      targetUrl = '/home';
+    if (!targetUrl || targetUrl === '/api/index.js' || targetUrl.startsWith('/api/index.js?')) {
+      targetUrl = '/';
     }
 
     let payload = undefined;
