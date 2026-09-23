@@ -62,7 +62,6 @@ export default async function handler(req, res) {
 
     const raw = response.rawPayload;
     if (raw && raw.length > 0) {
-      res.setHeader('content-length', Buffer.byteLength(raw));
       res.end(raw);
     } else {
       res.end();
