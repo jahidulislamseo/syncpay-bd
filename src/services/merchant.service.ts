@@ -4,6 +4,7 @@ import { InvoiceRepository, InvoiceEntity } from '../db/repositories/invoice.rep
 import { TransactionRepository, TransactionEntity } from '../db/repositories/transaction.repository.js';
 import { DeviceRepository, DeviceEntity } from '../db/repositories/device.repository.js';
 import { dbService } from '../db/database.js';
+import { CryptoUtil } from '../utils/crypto.js';
 
 export class MerchantService {
   public static async authenticateApiKey(rawApiKey: string): Promise<{
@@ -56,12 +57,19 @@ export class MerchantService {
     return ApiKeyRepository.listByMerchant(merchantId);
   }
 
-  public static async generateApiKey(merchantId: string, name: string): Promise<{ key: string; entity: ApiKeyEntity }> {
-    const rawKey = 'live_' + Math.random().toString(36).substring(2, 8) + '_' + Math.random().toString(36).substring(2, 14);
+  public static async generateApiKey(
+    merchantId: string,
+    name: string,
+    environment: 'production' | 'sandbox' = 'production'
+  ): Promise<{ key: string; entity: ApiKeyEntity }> {
+    const prefix = environment === 'production' ? 'live_sk_' : 'sand_sk_';
+    const randomHex = CryptoUtil.generateToken(20);
+    const rawKey = `${prefix}${randomHex}`;
     const { entity, rawKey: generatedKey } = await ApiKeyRepository.create({
       merchantId,
       name,
       rawApiKey: rawKey,
+      environment,
     });
     return { key: generatedKey, entity };
   }

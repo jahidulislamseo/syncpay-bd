@@ -188,19 +188,50 @@ export async function merchantRoutes(fastify) {
     fastify.get('/api/v1/merchant/api-keys', async (request, reply) => {
         const merchantId = resolveMerchantId(request);
         const keys = await MerchantService.getApiKeys(merchantId);
-        if (!keys || keys.length === 0) {
-            const fallback = dbService.getAllApiKeys(merchantId);
-            return reply.send({ success: true, data: fallback || [] });
-        }
-        return reply.send({ success: true, data: keys });
+        return reply.send({ success: true, data: keys || [] });
     });
     // Generate new API key
     fastify.post('/api/v1/merchant/api-keys', async (request, reply) => {
         const merchantId = resolveMerchantId(request);
-        const body = request.body;
-        const name = body.name || 'New API Key';
-        const { key, entity } = await MerchantService.generateApiKey(merchantId, name);
+        const body = request.body || {};
+        const name = body.name?.trim() || 'Website Integration Key';
+        const env = body.environment === 'sandbox' ? 'sandbox' : 'production';
+        const { key, entity } = await MerchantService.generateApiKey(merchantId, name, env);
         return reply.status(201).send({ success: true, data: { ...entity, secret_key: key } });
+    });
+    // Revoke API key
+    fastify.post('/api/v1/merchant/api-keys/:id/revoke', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const keyId = request.params.id;
+        const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
+        await ApiKeyRepository.revoke(keyId, merchantId);
+        return reply.send({ success: true, message: 'API key revoked successfully' });
+    });
+    fastify.delete('/api/v1/merchant/api-keys/:id', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const keyId = request.params.id;
+        const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
+        await ApiKeyRepository.revoke(keyId, merchantId);
+        return reply.send({ success: true, message: 'API key revoked successfully' });
+    });
+    // Unified Merchant Credentials (Merchant ID, API Key, Webhook Secret)
+    fastify.get('/api/v1/merchant/credentials', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const keys = await MerchantService.getApiKeys(merchantId);
+        const primaryKey = keys && keys.length > 0 ? keys[0] : null;
+        const merchant = await MerchantRepository.findById(merchantId);
+        const webhookSecret = `whsec_${CryptoUtil.hashToken(merchantId).slice(0, 24)}`;
+        return reply.send({
+            success: true,
+            data: {
+                merchant_id: merchantId,
+                api_key: primaryKey?.secret_key || merchant?.api_key || 'live_sk_no78zeijjjdrjmfe2tmmmi',
+                webhook_secret: webhookSecret,
+                webhook_url: merchant?.webhook_url || '',
+                business_name: merchant?.business_name || 'My Store',
+                environment: primaryKey?.environment || 'production',
+            },
+        });
     });
     // Get chart data
     fastify.get('/api/v1/merchant/chart-data', async (request, reply) => {
@@ -221,36 +252,25 @@ export async function merchantRoutes(fastify) {
                 dev = devices[0];
             }
             else {
-                dev = devices.find(d => d.id === deviceId);
-            }
-            // If no device exists yet for this merchant, auto-provision one on the fly
-            if (!dev && (deviceId === 'primary' || deviceId === 'auto' || deviceId === 'default' || devices.length === 0)) {
-                try {
-                    const reg = await DeviceService.registerDevice({
-                        merchantId,
-                        deviceName: 'SyncPay Phone 1',
-                    });
-                    dev = reg.device;
-                    if (reg.token) {
-                        dev.device_token = reg.token;
-                    }
-                    deviceId = dev.id;
-                }
-                catch (regErr) {
-                    fastify.log.warn(`Auto-provisioning device notice: ${regErr.message}`);
-                }
+                dev = devices.find(d => d.id === deviceId) || devices[0];
             }
         }
         catch (e) {
             fastify.log.warn(`DeviceService.listMerchantDevices error: ${e.message}`);
         }
-        if (!dev && (merchantId === DEMO_MERCHANT_ID || merchantId === FALLBACK_MERCHANT_ID)) {
+        if (!dev) {
             try {
-                const fallback = dbService.getAllDevices(FALLBACK_MERCHANT_ID);
-                dev = fallback.find((d) => d.id === deviceId) || fallback[0];
+                const { device, token: rawToken } = await DeviceService.registerDevice({
+                    merchantId,
+                    deviceName: 'Android Forwarder 1',
+                });
+                dev = { ...device, device_token: rawToken };
             }
-            catch (e) {
-                fastify.log.warn(`dbService.getAllDevices error: ${e.message}`);
+            catch (err) {
+                return reply.status(500).send({
+                    success: false,
+                    error: `Failed to initialize device for pairing: ${err.message}`,
+                });
             }
         }
         const token = dev ? dev.device_token || dev.id : deviceId;
@@ -553,12 +573,12 @@ export async function merchantRoutes(fastify) {
                 return reply.status(401).send({ success: false, error: 'Invalid credentials for demo account' });
             }
         }
-        let apiKey = 'live_demo_sec_99410';
+        let apiKey = merchant.api_key || 'live_sk_no78zeijjjdrjmfe2tmmmi';
         try {
             const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
             const keys = await ApiKeyRepository.listByMerchant(merchant.id);
-            if (keys && keys.length > 0) {
-                apiKey = keys[0].key_prefix + '...';
+            if (keys && keys.length > 0 && keys[0].secret_key) {
+                apiKey = keys[0].secret_key;
             }
         }
         catch { }

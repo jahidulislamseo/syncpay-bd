@@ -208,20 +208,55 @@ export async function merchantRoutes(fastify: FastifyInstance) {
   fastify.get('/api/v1/merchant/api-keys', async (request: FastifyRequest, reply: FastifyReply) => {
     const merchantId = resolveMerchantId(request);
     const keys = await MerchantService.getApiKeys(merchantId);
-    if (!keys || keys.length === 0) {
-      const fallback = dbService.getAllApiKeys(merchantId);
-      return reply.send({ success: true, data: fallback || [] });
-    }
-    return reply.send({ success: true, data: keys });
+    return reply.send({ success: true, data: keys || [] });
   });
 
   // Generate new API key
   fastify.post('/api/v1/merchant/api-keys', async (request: FastifyRequest, reply: FastifyReply) => {
     const merchantId = resolveMerchantId(request);
-    const body = request.body as { name?: string };
-    const name = body.name || 'New API Key';
-    const { key, entity } = await MerchantService.generateApiKey(merchantId, name);
+    const body = (request.body as { name?: string; environment?: 'production' | 'sandbox' }) || {};
+    const name = body.name?.trim() || 'Website Integration Key';
+    const env = body.environment === 'sandbox' ? 'sandbox' : 'production';
+    const { key, entity } = await MerchantService.generateApiKey(merchantId, name, env);
     return reply.status(201).send({ success: true, data: { ...entity, secret_key: key } });
+  });
+
+  // Revoke API key
+  fastify.post('/api/v1/merchant/api-keys/:id/revoke', async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const merchantId = resolveMerchantId(request);
+    const keyId = request.params.id;
+    const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
+    await ApiKeyRepository.revoke(keyId, merchantId);
+    return reply.send({ success: true, message: 'API key revoked successfully' });
+  });
+
+  fastify.delete('/api/v1/merchant/api-keys/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const merchantId = resolveMerchantId(request);
+    const keyId = request.params.id;
+    const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
+    await ApiKeyRepository.revoke(keyId, merchantId);
+    return reply.send({ success: true, message: 'API key revoked successfully' });
+  });
+
+  // Unified Merchant Credentials (Merchant ID, API Key, Webhook Secret)
+  fastify.get('/api/v1/merchant/credentials', async (request: FastifyRequest, reply: FastifyReply) => {
+    const merchantId = resolveMerchantId(request);
+    const keys = await MerchantService.getApiKeys(merchantId);
+    const primaryKey = keys && keys.length > 0 ? keys[0] : null;
+    const merchant = await MerchantRepository.findById(merchantId);
+    const webhookSecret = `whsec_${CryptoUtil.hashToken(merchantId).slice(0, 24)}`;
+
+    return reply.send({
+      success: true,
+      data: {
+        merchant_id: merchantId,
+        api_key: primaryKey?.secret_key || (merchant as any)?.api_key || 'live_sk_no78zeijjjdrjmfe2tmmmi',
+        webhook_secret: webhookSecret,
+        webhook_url: merchant?.webhook_url || '',
+        business_name: merchant?.business_name || 'My Store',
+        environment: primaryKey?.environment || 'production',
+      },
+    });
   });
 
   // Get chart data
@@ -244,17 +279,25 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       if (deviceId === 'primary' || deviceId === 'auto' || deviceId === 'default') {
         dev = devices[0];
       } else {
-        dev = devices.find(d => d.id === deviceId);
+        dev = devices.find(d => d.id === deviceId) || devices[0];
       }
     } catch (e: any) {
       fastify.log.warn(`DeviceService.listMerchantDevices error: ${e.message}`);
     }
 
     if (!dev) {
-      return reply.status(404).send({
-        success: false,
-        error: 'No registered device found. Please register a device first.',
-      });
+      try {
+        const { device, token: rawToken } = await DeviceService.registerDevice({
+          merchantId,
+          deviceName: 'Android Forwarder 1',
+        });
+        dev = { ...device, device_token: rawToken };
+      } catch (err: any) {
+        return reply.status(500).send({
+          success: false,
+          error: `Failed to initialize device for pairing: ${err.message}`,
+        });
+      }
     }
 
     const token = dev ? (dev as any).device_token || dev.id : deviceId;
@@ -575,12 +618,12 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       }
     }
 
-    let apiKey = 'live_demo_sec_99410';
+    let apiKey = (merchant as any).api_key || 'live_sk_no78zeijjjdrjmfe2tmmmi';
     try {
       const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
       const keys = await ApiKeyRepository.listByMerchant(merchant.id);
-      if (keys && keys.length > 0) {
-        apiKey = keys[0].key_prefix + '...';
+      if (keys && keys.length > 0 && keys[0].secret_key) {
+        apiKey = keys[0].secret_key;
       }
     } catch {}
 

@@ -1,8 +1,8 @@
 // SyncPay BD — Production Dashboard Master Application Controller
-import { i18n } from './i18n.js?v=1.2.3';
-import { api } from './api.js?v=1.2.3';
-import { components } from './components.js?v=1.2.3';
-import { auth } from './auth.js';
+import { i18n } from './i18n.js?v=1.2.4';
+import { api } from './api.js?v=1.2.4';
+import { components } from './components.js?v=1.2.4';
+import { auth } from './auth.js?v=1.2.4';
 
 class PayFlowDashboardApp {
   constructor() {
@@ -260,7 +260,7 @@ class PayFlowDashboardApp {
 
   async refreshAllData() {
       try {
-        const [stats, txs, invs, devs, keys, chart, methods] = await Promise.all([
+        const [stats, txs, invs, devs, keys, chart, methods, credentials] = await Promise.all([
           api.getStats(),
           api.getTransactions(50),
           api.getInvoices(),
@@ -268,7 +268,10 @@ class PayFlowDashboardApp {
           api.getApiKeys(),
           api.getChartData(7),
           api.getPaymentMethods().catch(() => []),
+          api.getCredentials().catch(() => null),
         ]);
+
+        this.credentials = credentials;
 
         this.stats = stats || {
           todayRevenue: 0,
@@ -750,18 +753,22 @@ class PayFlowDashboardApp {
     renderApiKeysView() {
       const slot = document.getElementById('apikeys-view-slot');
       if (slot) {
-        slot.innerHTML = components.renderApiKeysList(this.apiKeys);
+        slot.innerHTML = components.renderApiKeysList(this.apiKeys, this.credentials, this.subscription);
       }
     }
 
-  async renderWebhooksView() {
-      const slot = document.getElementById('webhooks-view-slot');
-      if (!slot) return;
-      try {
-        const res = await api.getSubscription();
-        slot.innerHTML = components.renderWebhooksView(res.data);
-      } catch (e) {
-        slot.innerHTML = components.renderWebhooksView();
+    async renderWebhooksView() {
+      // Unify API Keys & Webhooks views: navigate to view-api-keys and scroll to webhooks section
+      const viewApiKeys = document.getElementById('view-api-keys');
+      const viewWebhooks = document.getElementById('view-webhooks');
+      if (viewApiKeys && viewWebhooks) {
+        document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+        viewApiKeys.classList.add('active');
+        this.renderApiKeysView();
+        setTimeout(() => {
+          const whSec = document.getElementById('webhooks-section');
+          if (whSec) whSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
       }
     }
 
@@ -2318,28 +2325,52 @@ class PayFlowDashboardApp {
       if (modal) modal.classList.add('active');
     }
 
-  async submitCreateApiKey() {
-      const name = document.getElementById('key-name-input').value.trim();
-      const env = document.getElementById('key-env-select').value;
+    async submitCreateApiKey() {
+      const name = document.getElementById('key-name-input')?.value.trim() || 'Production Web Key';
+      const env = document.getElementById('key-env-select')?.value || 'production';
 
       try {
         const res = await api.createApiKey({ name, environment: env });
         if (res.success && res.data) {
+          const generatedKey = res.data.secret_key;
           this.closeAllModals();
-          this.showToast(i18n.t('toast.keyCreated'), 'success');
-          if (res.data.secret_key) {
+
+          if (generatedKey) {
             try {
               const saved = JSON.parse(localStorage.getItem('syncpay_generated_keys') || '{}');
-              saved[res.data.id || res.data.name] = res.data.secret_key;
+              saved[res.data.id || res.data.name] = generatedKey;
               localStorage.setItem('syncpay_generated_keys', JSON.stringify(saved));
             } catch (_) {}
+
+            // Populate and show dedicated success modal
+            const nameEl = document.getElementById('modal-success-key-name');
+            const inputEl = document.getElementById('modal-success-key-input');
+            if (nameEl) nameEl.textContent = `${name} (${env.toUpperCase()})`;
+            if (inputEl) inputEl.value = generatedKey;
+
+            const succModal = document.getElementById('modal-key-success');
+            if (succModal) succModal.classList.add('active');
           }
+
+          this.showToast('New unique API Key generated successfully!', 'success');
           await this.refreshAllData();
-          // Prompt user with full key one time
-          alert(`Secret Key Generated:\n\n${res.data.secret_key}\n\nSave this key immediately!`);
         }
       } catch (e) {
         this.showToast(e.message, 'error');
+      }
+    }
+
+    copyGeneratedKey() {
+      const input = document.getElementById('modal-success-key-input');
+      if (input && input.value) {
+        this.copyText(input.value);
+        const btn = document.getElementById('btn-copy-generated-key');
+        if (btn) {
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Copied!</span>`;
+          setTimeout(() => {
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy Key</span>`;
+          }, 2500);
+        }
       }
     }
 
@@ -2378,21 +2409,7 @@ class PayFlowDashboardApp {
       }
 
       try {
-        let primaryDeviceId = (this.devices && this.devices.length > 0) ? this.devices[0].id : null;
-        if (!primaryDeviceId) {
-          try {
-            const freshDevices = await api.getDevices();
-            if (Array.isArray(freshDevices) && freshDevices.length > 0) {
-              this.devices = freshDevices;
-              primaryDeviceId = this.devices[0].id;
-            }
-          } catch (_) { }
-        }
-
-        if (!primaryDeviceId) {
-          this.switchDeviceModalTab('form');
-          return;
-        }
+        let primaryDeviceId = (this.devices && this.devices.length > 0) ? this.devices[0].id : 'primary';
 
         const res = await api.getDeviceQr(primaryDeviceId);
 
@@ -2405,9 +2422,14 @@ class PayFlowDashboardApp {
           if (mId && res.payload?.merchant_id) mId.innerText = res.payload.merchant_id;
 
           const activeDeviceId = res.payload?.device_id || primaryDeviceId;
-          if (activeDeviceId) {
+          if (activeDeviceId && activeDeviceId !== 'primary') {
             this.startPairingPolling(activeDeviceId);
           }
+
+          // Silently refresh device list in background so this.devices is populated
+          api.getDevices().then(devs => {
+            if (Array.isArray(devs)) this.devices = devs;
+          }).catch(() => {});
         } else {
           throw new Error(res?.error || 'QR কোড লোড হতে ব্যর্থ হয়েছে');
         }
@@ -2438,14 +2460,8 @@ class PayFlowDashboardApp {
       const modal = document.getElementById('modal-add-device');
       if (!modal) return;
 
-      if (this.devices && this.devices.length > 0) {
-        this.switchDeviceModalTab('qr');
-        modal.classList.add('active');
-        await this.loadAddDeviceQr();
-      } else {
-        this.switchDeviceModalTab('form');
-        modal.classList.add('active');
-      }
+      this.switchDeviceModalTab('qr');
+      modal.classList.add('active');
     }
 
   async submitAddDevice() {
@@ -2726,6 +2742,60 @@ class PayFlowDashboardApp {
       } else {
         this.revealedKeys.add(keyId);
         el.innerText = realSecret;
+      }
+    }
+
+    copyAllCredentials(mId, apiKey, whSec) {
+      const text = `SyncPay BD Payment Credentials:\nMerchant ID: ${mId}\nSecret API Key: ${apiKey}\nWebhook Secret: ${whSec}`;
+      this.copyText(text);
+      this.showToast('All 3 integration credentials copied to clipboard!', 'success');
+    }
+
+    copyCredential(label, value) {
+      this.copyText(value);
+      this.showToast(`${label} copied to clipboard!`, 'success');
+    }
+
+    toggleInputReveal(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (btn) {
+          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+        }
+      } else {
+        input.type = 'password';
+        if (btn) {
+          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+        }
+      }
+    }
+
+    async revokeApiKey(keyId) {
+      if (!confirm('Are you sure you want to revoke this API key? Applications using it will immediately lose access.')) return;
+      try {
+        await api.revokeApiKey(keyId);
+        this.showToast('API key revoked successfully', 'warning');
+        await this.refreshAllData();
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    }
+
+    async saveWebhookUrl() {
+      const input = document.getElementById('wh-url-input');
+      const url = input?.value?.trim() || '';
+      if (!url) {
+        this.showToast('Please enter a valid webhook URL', 'error');
+        return;
+      }
+      try {
+        localStorage.setItem('syncpay_webhook_url', url);
+        await api.updateSettings({ webhook_url: url }).catch(() => {});
+        this.showToast('Webhook URL saved successfully!', 'success');
+      } catch (e) {
+        this.showToast(e.message, 'error');
       }
     }
 

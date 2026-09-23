@@ -13,6 +13,13 @@ function extractApiKey(request: FastifyRequest): string | undefined {
   if (typeof headerKey === 'string' && headerKey.trim()) {
     return headerKey.trim();
   }
+  const authHeader = request.headers.authorization;
+  if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7).trim();
+    if (token.startsWith('live_') || token.startsWith('sand_') || token.startsWith('zini_')) {
+      return token;
+    }
+  }
   const query = request.query as Record<string, string | undefined>;
   if (query?.apikey && query.apikey.trim()) {
     return query.apikey.trim();

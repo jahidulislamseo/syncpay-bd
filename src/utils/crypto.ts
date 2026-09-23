@@ -31,6 +31,13 @@ export class CryptoUtil {
   }
 
   /**
+   * Generate secure random token
+   */
+  public static generateToken(bytes: number = 20): string {
+    return crypto.randomBytes(bytes).toString('hex');
+  }
+
+  /**
    * Generate secure random API key or webhook secret
    */
   public static generateSecret(prefix: string = 'whsec'): string {

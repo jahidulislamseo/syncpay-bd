@@ -3,6 +3,7 @@ import { ApiKeyRepository } from '../db/repositories/api-key.repository.js';
 import { InvoiceRepository } from '../db/repositories/invoice.repository.js';
 import { TransactionRepository } from '../db/repositories/transaction.repository.js';
 import { DeviceRepository } from '../db/repositories/device.repository.js';
+import { CryptoUtil } from '../utils/crypto.js';
 export class MerchantService {
     static async authenticateApiKey(rawApiKey) {
         const keyRecord = await ApiKeyRepository.findByKey(rawApiKey);
@@ -39,12 +40,15 @@ export class MerchantService {
     static async getApiKeys(merchantId) {
         return ApiKeyRepository.listByMerchant(merchantId);
     }
-    static async generateApiKey(merchantId, name) {
-        const rawKey = 'live_' + Math.random().toString(36).substring(2, 8) + '_' + Math.random().toString(36).substring(2, 14);
+    static async generateApiKey(merchantId, name, environment = 'production') {
+        const prefix = environment === 'production' ? 'live_sk_' : 'sand_sk_';
+        const randomHex = CryptoUtil.generateToken(20);
+        const rawKey = `${prefix}${randomHex}`;
         const { entity, rawKey: generatedKey } = await ApiKeyRepository.create({
             merchantId,
             name,
             rawApiKey: rawKey,
+            environment,
         });
         return { key: generatedKey, entity };
     }

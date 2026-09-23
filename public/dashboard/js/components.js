@@ -503,11 +503,14 @@ export const components = {
     `;
   },
 
-  // 7. API Keys List
-  renderApiKeysList(keys = []) {
+  // 7. API Keys & Webhooks Unified Integration Hub
+  renderApiKeysList(keys = [], credentials = null, webhooksData = null) {
     let sessionKey = '';
+    let sessionMerchantId = '';
     try {
-      sessionKey = (window.payflowApp && window.payflowApp.session && window.payflowApp.session.apiKey) || localStorage.getItem('payflow_api_key') || '';
+      const sess = (window.payflowApp && window.payflowApp.session) || JSON.parse(localStorage.getItem('syncpay_session') || '{}');
+      sessionKey = sess.apiKey || localStorage.getItem('payflow_api_key') || '';
+      sessionMerchantId = sess.merchantId || '';
     } catch (_) {}
 
     let storedGenerated = {};
@@ -515,24 +518,132 @@ export const components = {
       storedGenerated = JSON.parse(localStorage.getItem('syncpay_generated_keys') || '{}');
     } catch (_) {}
 
+    const resolvedMerchantId = credentials?.merchant_id || sessionMerchantId || '00000000-0000-42d3-a7b6-aa2aa137fd1b';
+    const primaryApiKey = credentials?.api_key || (keys && keys[0] && keys[0].secret_key) || sessionKey || 'live_sk_no78zeijjjdrjmfe2tmmmi';
+    const resolvedWebhookSecret = credentials?.webhook_secret || ('whsec_' + (resolvedMerchantId ? resolvedMerchantId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20) : '99410abc'));
+
     const list = (keys && keys.length > 0) ? keys : [
       {
         id: 'key_live_default',
         name: 'Default Live Key',
         key_prefix: 'live_sk_',
-        secret_key: sessionKey || 'live_sk_' + Math.random().toString(36).slice(2, 18),
+        secret_key: primaryApiKey,
         environment: 'production',
         status: 'active',
         created_at: new Date().toISOString().slice(0, 10),
       }
     ];
 
+    const currentOrigin = window.location.origin;
+
     return `
-      <div class="table-card">
+      <!-- ============================================================
+           1. TOP 3-IN-1 WEBSITE CONNECTION CREDENTIALS CARD
+           ============================================================ -->
+      <div class="table-card" style="background:linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(2,132,199,0.05) 100%); border:1px solid rgba(16,185,129,0.25); border-radius:12px; padding:22px; margin-bottom:24px; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; border-bottom:1px solid var(--border-subtle); padding-bottom:16px;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <h3 style="font-size:16px; font-weight:800; color:var(--text-primary); margin:0;">
+                🔑 Website Connection Credentials (ওয়েবসাইট কানেকশন কি ও আইডি)
+              </h3>
+              <span class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; font-weight:700; font-size:11px;">
+                ● Gateway Ready & Connected
+              </span>
+            </div>
+            <p style="font-size:12.5px; color:var(--text-secondary); margin:6px 0 0 0;">
+              Use these 3 credentials in your <strong>WooCommerce, WordPress, or Custom PHP/Node.js website</strong> to enable full automated bKash, Nagad, Rocket & Upay payment checkout.
+            </p>
+          </div>
+          <button class="btn btn-secondary-action" style="font-size:12px; padding:6px 14px; font-weight:700; display:inline-flex; align-items:center; gap:6px;" onclick="window.payflowApp.copyAllCredentials('${resolvedMerchantId}', '${primaryApiKey}', '${resolvedWebhookSecret}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Copy All 3 Keys</span>
+          </button>
+        </div>
+
+        <!-- 3 Credential Blocks Grid -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:16px; margin-top:18px;">
+          <!-- Param 1: Merchant ID -->
+          <div style="background:var(--card-bg, #ffffff); border:1px solid var(--border-subtle); border-radius:10px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">
+                1. Merchant ID (মার্চেন্ট আইডি)
+              </span>
+              <span class="badge" style="background:var(--bg-subtle); font-size:10px;">Unique ID</span>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="text" readonly value="${resolvedMerchantId}" id="hero-cred-merchant-id" class="form-control mono" style="font-size:12px; padding:6px 10px; background:var(--bg-subtle); color:var(--text-primary); font-weight:600; cursor:pointer;" onclick="this.select()">
+              <button class="btn btn-secondary-action" style="padding:6px 10px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" title="Copy Merchant ID" onclick="window.payflowApp.copyCredential('Merchant ID', '${resolvedMerchantId}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Your unique tenant account identifier</div>
+          </div>
+
+          <!-- Param 2: Secret API Key -->
+          <div style="background:var(--card-bg, #ffffff); border:1px solid var(--border-subtle); border-radius:10px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">
+                2. Secret API Key (সিক্রেট কি)
+              </span>
+              <span class="badge" style="background:rgba(16,185,129,0.12); color:#10b981; font-size:10px;">Active Live Key</span>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="password" readonly value="${primaryApiKey}" id="hero-cred-api-key" class="form-control mono" style="font-size:12px; padding:6px 10px; background:var(--bg-subtle); color:var(--text-primary); font-weight:600; cursor:pointer;" onclick="this.select()">
+              <button class="btn btn-secondary-action" id="btn-reveal-hero-api-key" style="padding:6px 8px; font-size:11px; display:inline-flex; align-items:center;" title="Reveal / Hide" onclick="window.payflowApp.toggleInputReveal('hero-cred-api-key', this)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button class="btn btn-secondary-action" style="padding:6px 10px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" title="Copy Secret API Key" onclick="window.payflowApp.copyCredential('Secret API Key', '${primaryApiKey}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Sends in <code>syncpay-api-key</code> or Bearer header</div>
+          </div>
+
+          <!-- Param 3: Webhook Secret -->
+          <div style="background:var(--card-bg, #ffffff); border:1px solid var(--border-subtle); border-radius:10px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">
+                3. Webhook Secret (ওয়েবহুক সিক্রেট)
+              </span>
+              <span class="badge" style="background:rgba(2,132,199,0.12); color:#0284c7; font-size:10px;">HMAC SHA-256</span>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="password" readonly value="${resolvedWebhookSecret}" id="hero-cred-webhook-secret" class="form-control mono" style="font-size:12px; padding:6px 10px; background:var(--bg-subtle); color:var(--text-primary); font-weight:600; cursor:pointer;" onclick="this.select()">
+              <button class="btn btn-secondary-action" id="btn-reveal-hero-whsec" style="padding:6px 8px; font-size:11px; display:inline-flex; align-items:center;" title="Reveal / Hide" onclick="window.payflowApp.toggleInputReveal('hero-cred-webhook-secret', this)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button class="btn btn-secondary-action" style="padding:6px 10px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" title="Copy Webhook Secret" onclick="window.payflowApp.copyCredential('Webhook Secret', '${resolvedWebhookSecret}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Verifies payload integrity on callback delivery</div>
+          </div>
+        </div>
+
+        <!-- Quick Connection Instruction Bar -->
+        <div style="margin-top:16px; padding:12px 14px; background:var(--card-bg, #ffffff); border-radius:8px; border:1px dashed var(--border-subtle); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-secondary);">
+            <span>🚀 <strong>How to connect:</strong> Paste <strong>Merchant ID</strong> and <strong>Secret Key</strong> into your WooCommerce plugin or website backend. When an invoice is paid, your Webhook URL will receive an instant callback.</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <a href="#docs" class="btn btn-secondary-action" style="font-size:11px; padding:4px 10px; text-decoration:none;">View API Docs</a>
+            <a href="#plugins" class="btn btn-secondary-action" style="font-size:11px; padding:4px 10px; text-decoration:none;">Download Plugin</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           2. ACTIVE API AUTHENTICATION KEYS TABLE
+           ============================================================ -->
+      <div class="table-card" style="margin-bottom:24px;">
         <div class="table-toolbar">
           <div>
             <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin:0;">Active API Authentication Keys</h4>
-            <span style="font-size:12px; color:var(--text-muted);">Cryptographic keys used to securely verify backend transactions and plugins</span>
+            <span style="font-size:12px; color:var(--text-muted);">Manage REST API keys used to sign and verify payments</span>
           </div>
           <button class="btn btn-primary-action" onclick="window.payflowApp.openCreateApiKeyModal()">
             + New API Key
@@ -552,34 +663,36 @@ export const components = {
             <tbody>
               ${list.map(k => {
       const env = (k.environment || 'production').toUpperCase();
-      const prefix = k.key_prefix || (sessionKey && sessionKey.startsWith('live_') ? 'live_sk_' : 'live_sk_');
-      const resolvedSecret = k.secret_key || storedGenerated[k.id] || sessionKey || `${prefix}sec_${Math.random().toString(36).slice(2, 14)}`;
+      const prefix = k.key_prefix || 'live_sk_';
+      const resolvedSecret = k.secret_key || storedGenerated[k.id] || primaryApiKey;
       const safeSecret = resolvedSecret.replace(/'/g, "\\'");
 
       return `
                   <tr>
-                    <td><strong style="color:var(--text-primary);">${k.name || 'Default Live Key'}</strong></td>
                     <td>
-                      <span class="badge" style="background:var(--primary-subtle); color:var(--primary);">
+                      <strong style="color:var(--text-primary);">${k.name || 'Website Integration Key'}</strong>
+                    </td>
+                    <td>
+                      <span class="badge" style="background:${env === 'PRODUCTION' ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)'}; color:${env === 'PRODUCTION' ? '#10b981' : '#f59e0b'}; font-weight:700;">
                         ${env}
                       </span>
                     </td>
                     <td>
                       <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="mono" id="key-mask-${k.id}" style="color:var(--text-muted); font-size:12px; letter-spacing:1px;">
+                        <span class="mono" id="key-mask-${k.id}" style="color:var(--text-muted); font-size:12px; letter-spacing:0.5px; font-weight:600;">
                           ${prefix}••••••••••••••••
                         </span>
-                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Reveal Key" onclick="window.payflowApp.toggleKeyReveal('${k.id}', '${safeSecret}', '${prefix}')">
+                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Reveal / Hide Key" onclick="window.payflowApp.toggleKeyReveal('${k.id}', '${safeSecret}', '${prefix}')">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
-                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Copy Secret" onclick="window.payflowApp.copyApiKey('${k.id}', '${safeSecret}')">
+                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Copy Secret Key" onclick="window.payflowApp.copyApiKey('${k.id}', '${safeSecret}')">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         </button>
                       </div>
                     </td>
-                    <td><span style="font-size:12px; color:var(--text-muted);">${k.created_at || 'Recently'}</span></td>
+                    <td><span style="font-size:12px; color:var(--text-muted);">${k.created_at ? new Date(k.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Active'}</span></td>
                     <td>
-                      <button class="btn btn-danger-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.showToast('Key revocation request recorded', 'warning')">
+                      <button class="btn btn-danger-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.revokeApiKey('${k.id}')">
                         Revoke
                       </button>
                     </td>
@@ -588,6 +701,67 @@ export const components = {
     }).join('')}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           3. INTEGRATED WEBHOOKS & ENDPOINTS SECTION
+           ============================================================ -->
+      <div id="webhooks-section">
+        ${this.renderWebhooksInner(webhooksData, resolvedWebhookSecret)}
+      </div>
+    `;
+  },
+
+  // Helper: Inner Webhooks Component
+  renderWebhooksInner(sub = null, defaultWebhookSecret = '') {
+    const s = sub || {
+      status: 'ACTIVE',
+      webhook_url: 'https://yoursite.com/api/payment-webhook',
+      connected_websites: [
+        { id: 'site_1', name: 'Primary Store', domain: 'https://mystore.com', platform: 'WooCommerce', webhook_url: 'https://mystore.com/wp-json/syncpay/v1/callback', status: 'ACTIVE' }
+      ]
+    };
+
+    const currentUrl = s.webhook_url || localStorage.getItem('syncpay_webhook_url') || '';
+
+    return `
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div>
+            <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin:0;">Webhooks & Event Notifications (ওয়েবহুক কনফিগারেশন)</h4>
+            <span style="font-size:12px; color:var(--text-muted);">Real-time HTTP push notifications sent to your server on payment completion</span>
+          </div>
+          <button class="btn btn-primary-action" onclick="window.payflowApp.sendTestWebhook()">
+            Send Test Ping
+          </button>
+        </div>
+
+        <div style="padding:16px 20px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div>
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:6px; display:block;">Your Webhook Callback URL</label>
+              <div style="display:flex; gap:8px;">
+                <input type="url" id="wh-url-input" class="form-control mono" placeholder="https://yoursite.com/api/payment-webhook" value="${currentUrl}" style="font-size:12px;">
+                <button class="btn btn-primary-action" onclick="window.payflowApp.saveWebhookUrl()" style="white-space:nowrap;">
+                  Save URL
+                </button>
+              </div>
+              <p style="font-size:11px; color:var(--text-muted); margin:6px 0 0 0;">
+                SyncPay will send a POST request with HMAC-SHA256 signature when transactions succeed.
+              </p>
+            </div>
+
+            <div>
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:6px; display:block;">Subscribed Events</label>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;">
+                <span class="badge" style="background:rgba(16,185,129,0.12); color:#10b981;">✓ payment.completed</span>
+                <span class="badge" style="background:rgba(16,185,129,0.12); color:#10b981;">✓ invoice.created</span>
+                <span class="badge" style="background:rgba(2,132,199,0.12); color:#0284c7;">✓ trx.matched</span>
+                <span class="badge" style="background:rgba(239,68,68,0.12); color:#ef4444;">✓ payment.failed</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `;

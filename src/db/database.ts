@@ -824,6 +824,37 @@ export class DatabaseService {
     };
   }
 
+  public insertApiKey(data: {
+    id: string;
+    merchant_id: string;
+    name: string;
+    key_prefix: string;
+    secret_key: string;
+    environment?: string;
+    status?: string;
+  }) {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO api_keys (id, merchant_id, name, key_prefix, secret_key, environment, status, created_at, last_used)
+      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    `);
+    return stmt.run(
+      data.id,
+      data.merchant_id,
+      data.name,
+      data.key_prefix,
+      data.secret_key,
+      data.environment || 'production',
+      data.status || 'active'
+    );
+  }
+
+  public revokeApiKey(keyId: string, merchantId?: string) {
+    if (merchantId) {
+      return this.db.prepare("UPDATE api_keys SET status = 'revoked' WHERE id = ? AND merchant_id = ?").run(keyId, merchantId);
+    }
+    return this.db.prepare("UPDATE api_keys SET status = 'revoked' WHERE id = ?").run(keyId);
+  }
+
   public getChartData(merchantId: string, days: number = 7) {
     // Aggregated revenue and count by day for last N days
     const rows = this.db.prepare(`

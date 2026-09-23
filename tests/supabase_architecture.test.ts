@@ -88,7 +88,8 @@ describe('Supabase PostgreSQL Architecture & Migration Test Suite', { concurrenc
       deviceModel: '22111317G',
       androidVersion: 'Android 13',
       mfsProvider: 'bKash+Nagad',
-    });
+      status: 'ONLINE',
+    } as any);
 
     assert.ok(entity);
     assert.strictEqual(entity.device_name, 'Redmi Note 12 Forwarder');

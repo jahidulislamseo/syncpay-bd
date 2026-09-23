@@ -11,6 +11,13 @@ function extractApiKey(request) {
     if (typeof headerKey === 'string' && headerKey.trim()) {
         return headerKey.trim();
     }
+    const authHeader = request.headers.authorization;
+    if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7).trim();
+        if (token.startsWith('live_') || token.startsWith('sand_') || token.startsWith('zini_')) {
+            return token;
+        }
+    }
     const query = request.query;
     if (query?.apikey && query.apikey.trim()) {
         return query.apikey.trim();

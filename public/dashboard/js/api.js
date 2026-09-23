@@ -197,11 +197,29 @@ export class ApiClient {
     return [];
   }
 
+  // 9b. Fetch Unified Credentials (Merchant ID, API Key, Webhook Secret)
+  async getCredentials() {
+    try {
+      const res = await this.request('/api/v1/merchant/credentials');
+      if (res.success && res.data) {
+        return res.data;
+      }
+    } catch (e) {}
+    return null;
+  }
+
   // 10. Create API Key
   async createApiKey(payload) {
     return await this.request('/api/v1/merchant/api-keys', {
       method: 'POST',
       body: JSON.stringify(payload),
+    });
+  }
+
+  // 10b. Revoke API Key
+  async revokeApiKey(keyId) {
+    return await this.request(`/api/v1/merchant/api-keys/${keyId}/revoke`, {
+      method: 'POST',
     });
   }
 

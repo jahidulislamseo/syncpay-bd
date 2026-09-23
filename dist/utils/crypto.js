@@ -28,6 +28,12 @@ export class CryptoUtil {
         }
     }
     /**
+     * Generate secure random token
+     */
+    static generateToken(bytes = 20) {
+        return crypto.randomBytes(bytes).toString('hex');
+    }
+    /**
      * Generate secure random API key or webhook secret
      */
     static generateSecret(prefix = 'whsec') {
