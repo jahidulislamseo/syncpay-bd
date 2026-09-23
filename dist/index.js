@@ -23,6 +23,13 @@ await server.register(rateLimit, {
     max: 120,
     timeWindow: '1 minute',
     allowList: ['127.0.0.1', 'localhost'],
+    keyGenerator: (req) => {
+        const xff = req.headers['x-forwarded-for'];
+        if (typeof xff === 'string') {
+            return xff.split(',')[0].trim();
+        }
+        return req.ip || (req.socket && req.socket.remoteAddress) || '127.0.0.1';
+    },
     errorResponseBuilder: (_req, context) => ({
         statusCode: 429,
         error: 'Too Many Requests',

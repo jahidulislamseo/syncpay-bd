@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "vercel-build": "tsc",
+    "build": "tsc && cp -R public/* .",
+    "vercel-build": "tsc && cp -R public/* .",
     "start": "node dist/index.js",
     "test": "node --test --import tsx tests/**/*.test.ts",
     "simulate": "tsx scripts/simulate-sms.ts"
