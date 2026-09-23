@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "public",
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
@@ -11,8 +12,9 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/:path*",              "destination": "/api/index.js" },
-    { "source": "/api",                     "destination": "/api/index.js" },
+    { "source": "/api/:path*", "destination": "/api/index.js" },
+    { "source": "/api",        "destination": "/api/index.js" },
+    { "source": "/health",     "destination": "/api/index.js" },
     { "source": "/login",                   "destination": "/login.html" },
     { "source": "/dashboard",               "destination": "/dashboard.html" },
     { "source": "/admin",                   "destination": "/admin.html" },
@@ -26,3 +28,4 @@
     { "source": "/docs/webhook",           "destination": "/docs/webhook.html" }
   ]
 }
+
