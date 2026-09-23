@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import dayjs from 'dayjs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_PATH = process.env.DB_PATH || (process.env.VERCEL ? '/tmp/syncpay.db' : path.resolve(__dirname, '../../syncpay.db'));
@@ -365,6 +366,10 @@ export class DatabaseService {
         const stmt = this.db.prepare("SELECT * FROM merchants WHERE id = ? OR (id = 'm_demo_101' AND (? = '00000000-0000-0000-0000-000000000101' OR ? = '01711000000260923'))");
         return stmt.get(id, id, id);
     }
+    getMerchantByEmail(email) {
+        const stmt = this.db.prepare('SELECT * FROM merchants WHERE LOWER(email) = LOWER(?)');
+        return stmt.get(email);
+    }
     getMerchantBySlug(slug) {
         const stmt = this.db.prepare('SELECT * FROM merchants WHERE LOWER(brand_slug) = LOWER(?)');
         return stmt.get(slug);
@@ -486,7 +491,7 @@ export class DatabaseService {
         return { success: true, transaction: updated };
     }
     createInvoice(params) {
-        const expiresAt = new Date(Date.now() + (params.expiresInMinutes || 30) * 60000).toISOString();
+        const expiresAt = dayjs().add(params.expiresInMinutes || 30, 'minute').toISOString();
         const provider = params.provider || 'bKash';
         const orderId = params.orderId || params.id;
         const metadataStr = params.metadata ? JSON.stringify(params.metadata) : null;
@@ -819,6 +824,7 @@ export class DatabaseService {
         m.payment_note,
         m.api_key, 
         m.webhook_url, 
+        m.password_hash,
         m.created_at,
         COUNT(DISTINCT d.id) as device_count,
         COUNT(DISTINCT t.id) as transaction_count,

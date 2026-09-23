@@ -48,7 +48,7 @@ export class DeviceRepository {
                     device_model: params.deviceModel || null,
                     android_version: params.androidVersion || null,
                     mfs_provider: params.mfsProvider || 'ALL',
-                    status: 'OFFLINE',
+                    status: 'ONLINE',
                 })
                     .select()
                     .single();
@@ -74,7 +74,7 @@ export class DeviceRepository {
             merchant_id: params.merchantId,
             device_name: params.deviceName,
             device_token_hash: tokenHash,
-            status: 'OFFLINE',
+            status: 'ONLINE',
             created_at: new Date().toISOString(),
         };
         return { entity, rawToken: params.rawToken };

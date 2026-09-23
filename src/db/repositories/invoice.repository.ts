@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { getSupabaseClient, isSupabaseConfigured } from '../supabase.js';
 import { dbService, InvoiceRecord } from '../database.js';
 
@@ -31,7 +32,7 @@ export class InvoiceRepository {
     expiresInMinutes?: number;
   }): Promise<InvoiceEntity> {
     const supabase = getSupabaseClient();
-    const expiresAt = new Date(Date.now() + (params.expiresInMinutes || 30) * 60000).toISOString();
+    const expiresAt = dayjs().add(params.expiresInMinutes || 30, 'minute').toISOString();
 
     if (supabase && isSupabaseConfigured()) {
       const payload: any = {

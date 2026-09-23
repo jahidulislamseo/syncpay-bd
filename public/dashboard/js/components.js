@@ -465,9 +465,10 @@ export const components = {
               </button>
             </div>
           </div>
+          `;
         }).join('')}
       </div>
-      `}
+    `}
     `;
   },
 
@@ -921,5 +922,18 @@ export const components = {
         ${cardsHtml}
       </div>
     `;
-  }
+  },
+
+  // 12. Reusable Generic Data Table Renderer
+  renderDataTable({ columns, data, emptyMessage = 'No records found' }) {
+    if (!data || data.length === 0) {
+      return `<tr><td colspan="${columns.length}" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-light); font-size: 13px;">${emptyMessage}</td></tr>`;
+    }
+    return data.map((item, index) => `
+      <tr>
+        ${columns.map(col => `<td>${col.render ? col.render(item, index) : (item[col.key] ?? '-')}</td>`).join('')}
+      </tr>
+    `).join('');
+  },
 };
+

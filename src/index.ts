@@ -5,6 +5,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import rateLimit from '@fastify/rate-limit';
+import fastifyJwt from '@fastify/jwt';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
+import { validatorCompiler, serializerCompiler } from 'fastify-type-provider-zod';
 
 import { deviceRoutes } from './routes/device.routes.js';
 import { paymentRoutes } from './routes/payment.routes.js';
@@ -18,10 +22,39 @@ const server = Fastify({
   logger: true,
 });
 
+// Configure Zod Type Provider compilers for Fastify
+server.setValidatorCompiler(validatorCompiler);
+server.setSerializerCompiler(serializerCompiler);
+
+// Register Fastify JWT plugin
+await server.register(fastifyJwt, {
+  secret: process.env.JWT_SECRET || 'syncpay-super-secret-production-key-2026',
+});
+
 // Enable CORS
 await server.register(cors, {
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+});
+
+// Swagger & Interactive OpenAPI Documentation Engine
+await server.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'SyncPay BD API Engine',
+      description: 'Automated MFS Payment Verification & Ingestion REST API (bKash, Nagad, Rocket, Upay)',
+      version: '1.0.0',
+    },
+    servers: [{ url: '/' }],
+  },
+});
+
+await server.register(fastifySwaggerUi, {
+  routePrefix: '/api-docs',
+  uiConfig: {
+    docExpansion: 'list',
+    deepLinking: false,
+  },
 });
 
 // Rate limiting to prevent brute-force attacks and DDoS

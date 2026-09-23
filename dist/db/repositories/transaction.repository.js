@@ -4,32 +4,56 @@ export class TransactionRepository {
     static async insert(params) {
         const supabase = getSupabaseClient();
         const upperTrxId = params.trxId.toUpperCase();
-        if (supabase && isSupabaseConfigured()) {
-            const { data, error } = await supabase
-                .from('transactions')
-                .insert({
-                merchant_id: params.merchantId,
-                device_id: params.deviceId || null,
-                invoice_id: params.invoiceId || null,
-                provider: params.provider,
-                trx_id: upperTrxId,
-                sender_number: params.senderNumber || null,
-                amount: params.amount,
-                raw_sms: params.rawSms,
-                status: params.status || 'COMPLETED',
-            })
-                .select('id')
-                .single();
-            if (error) {
-                // Postgres unique violation code 23505
-                if (error.code === '23505' ||
-                    error.message.includes('unique constraint') ||
-                    error.message.includes('uq_merchant_trx')) {
-                    return { success: false, isDuplicate: true };
+        const isMerchantUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.merchantId);
+        const isDeviceUuid = !params.deviceId || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.deviceId);
+        if (supabase && isSupabaseConfigured() && isMerchantUuid && isDeviceUuid) {
+            try {
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .insert({
+                    merchant_id: params.merchantId,
+                    device_id: params.deviceId || null,
+                    invoice_id: params.invoiceId || null,
+                    provider: params.provider,
+                    trx_id: upperTrxId,
+                    sender_number: params.senderNumber || null,
+                    amount: params.amount,
+                    raw_sms: params.rawSms,
+                    status: params.status || 'COMPLETED',
+                })
+                    .select('id')
+                    .single();
+                if (error) {
+                    // Postgres unique violation code 23505
+                    if (error.code === '23505' ||
+                        error.message.includes('unique constraint') ||
+                        error.message.includes('uq_merchant_trx')) {
+                        return { success: false, isDuplicate: true };
+                    }
                 }
-                throw new Error(error.message);
+                else if (data) {
+                    // Also sync to local SQLite
+                    try {
+                        dbService.insertTransaction({
+                            merchantId: params.merchantId,
+                            deviceId: params.deviceId || 'dev_phone_1',
+                            provider: params.provider,
+                            trxId: upperTrxId,
+                            amount: params.amount,
+                            sender: params.senderNumber,
+                            rawSms: params.rawSms,
+                            simSlot: params.simSlot,
+                            carrier: params.carrier,
+                            source: params.source,
+                        });
+                    }
+                    catch { }
+                    return { success: true, id: data.id };
+                }
             }
-            return { success: true, id: data.id };
+            catch (err) {
+                // Fall back to SQLite below
+            }
         }
         // Local SQLite fallback
         const localResult = dbService.insertTransaction({

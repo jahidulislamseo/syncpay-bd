@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import dayjs from 'dayjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -640,7 +641,7 @@ export class DatabaseService {
     webhookUrl?: string;
     expiresInMinutes?: number;
   }): InvoiceRecord {
-    const expiresAt = new Date(Date.now() + (params.expiresInMinutes || 30) * 60000).toISOString();
+    const expiresAt = dayjs().add(params.expiresInMinutes || 30, 'minute').toISOString();
     const provider = params.provider || 'bKash';
     const orderId = params.orderId || params.id;
     const metadataStr = params.metadata ? JSON.stringify(params.metadata) : null;

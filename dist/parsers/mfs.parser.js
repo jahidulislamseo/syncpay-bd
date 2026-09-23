@@ -1,194 +1,110 @@
+const PROVIDER_RULES = [
+    {
+        provider: 'bKash',
+        keywords: ['BKASH', '16247'],
+        trxRegex: /TrxID\s+([A-Z0-9_-]+)/i,
+        amountRegex: /(?:received(?: payment)?|Cash In)\s+Tk\s+([\d,]+\.?\d*)/i,
+        senderRegex: /from\s+([0-9+]+)/i,
+        balanceRegex: /Balance\s+Tk\s+([\d,]+\.?\d*)/i,
+        bodyKeywords: ['bKash', 'TrxID'],
+    },
+    {
+        provider: 'Nagad',
+        keywords: ['NAGAD', '16167'],
+        trxRegex: /(?:TxnID|TrxID):\s*([A-Z0-9]+)/i,
+        amountRegex: /(?:Amount:?\s*Tk|Received Amount:?\s*Tk)\s*([\d,]+\.?\d*)/i,
+        senderRegex: /(?:from|Sender:?)\s*([0-9+]+)/i,
+        balanceRegex: /Balance:?\s*Tk\s*([\d,]+\.?\d*)/i,
+        bodyKeywords: ['Nagad', 'TxnID'],
+    },
+    {
+        provider: 'Rocket',
+        keywords: ['ROCKET', '16216'],
+        trxRegex: /(?:TxnId|TrxID|Txn ID):\s*([A-Z0-9]+)/i,
+        amountRegex: /Tk\s*([\d,]+\.?\d*)\s*received/i,
+        senderRegex: /from\s*([0-9+]+)/i,
+        balanceRegex: /Balance:\s*Tk\s*([\d,]+\.?\d*)/i,
+    },
+    {
+        provider: 'Upay',
+        keywords: ['UPAY', '16268'],
+        trxRegex: /(?:TrxID|TxnID|Txn ID):\s*([A-Z0-9]+)|(?:TrxID|TxnID)\s+([A-Z0-9]+)/i,
+        amountRegex: /(?:received(?: payment)?|Cash In)\s+Tk\s+([\d,]+\.?\d*)|Tk\s*([\d,]+\.?\d*)\s*received/i,
+        senderRegex: /from\s+([0-9+]+)/i,
+        balanceRegex: /Balance\s+Tk\s+([\d,]+\.?\d*)/i,
+        bodyKeywords: ['upay'],
+    },
+    {
+        provider: 'DBBL',
+        keywords: ['DBBL', 'DUTCH-BANGLA', 'DUTCHBANGLA'],
+        trxRegex: /(?:Ref|TxnRef|TxnID|Ref No):\s*([A-Z0-9]+)/i,
+        amountRegex: /[Cc]redited\s+BDT\s+([\d,]+\.?\d*)|BDT\s+([\d,]+\.?\d*)\s+(?:credited|deposited|received)/i,
+        balanceRegex: /(?:Bal|Avl Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i,
+    },
+    {
+        provider: 'BRAC',
+        keywords: ['BRAC BANK', 'BRACBANK'],
+        trxRegex: /(?:Ref|TxnID|TxnRef):\s*([A-Z0-9-]+)/i,
+        amountRegex: /BDT\s+([\d,]+\.?\d*)\s+has been credited|[Cc]redit alert:?\s*BDT\s*([\d,]+\.?\d*)|BDT\s+([\d,]+\.?\d*)\s+credited/i,
+        balanceRegex: /(?:Bal|Avail Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i,
+        bodyKeywords: ['BRAC'],
+    },
+    {
+        provider: 'IslamiBank',
+        keywords: ['IBBL', 'ISLAMI BANK', 'ISLAMIBANK'],
+        trxRegex: /(?:TxnID|Ref|TrxID):\s*([A-Z0-9-]+)/i,
+        amountRegex: /BDT\s+([\d,]+\.?\d*)\s+(?:deposited|credited)|(?:deposited|credited)\s+BDT\s*([\d,]+\.?\d*)/i,
+        balanceRegex: /(?:Bal|Available Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i,
+        bodyKeywords: ['IBBL'],
+    },
+    {
+        provider: 'CityBank',
+        keywords: ['CITY BANK', 'CITYBANK', 'CBTXN'],
+        trxRegex: /(?:Ref|TxnRef|TxnID):\s*([A-Z0-9]+)/i,
+        amountRegex: /Amount BDT\s*([\d,]+\.?\d*)\s+has been credited|[Cc]redit:\s*BDT\s*([\d,]+\.?\d*)|BDT\s*([\d,]+\.?\d*)\s+(?:credited|deposited)/i,
+        balanceRegex: /(?:Bal|Avail Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i,
+    },
+];
 export class MfsParser {
-    // ─── MFS Wallets ─────────────────────────────────────────────────────────
-    /** bKash: received Tk X.XX from PHONE ... TrxID ABC */
-    static parseBkash(text) {
-        const trxMatch = text.match(/TrxID\s+([A-Z0-9_-]+)/i);
-        const amountMatch = text.match(/(?:received(?: payment)?|Cash In)\s+Tk\s+([\d,]+\.?\d*)/i);
-        const senderMatch = text.match(/from\s+([0-9+]+)/i);
-        const balanceMatch = text.match(/Balance\s+Tk\s+([\d,]+\.?\d*)/i);
+    static parseWithRule(rule, text) {
+        const trxMatch = text.match(rule.trxRegex);
+        const amountMatch = text.match(rule.amountRegex);
         if (trxMatch && amountMatch) {
+            const trxId = (trxMatch[1] || trxMatch[2] || '').toUpperCase();
+            const rawAmt = amountMatch[1] || amountMatch[2] || amountMatch[3] || '0';
+            const senderMatch = rule.senderRegex ? text.match(rule.senderRegex) : null;
+            const balanceMatch = rule.balanceRegex ? text.match(rule.balanceRegex) : null;
             return {
-                success: true, provider: 'bKash',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                sender: senderMatch?.[1].replace(/^\+?88/, ''),
-                balance: balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : undefined,
+                success: true,
+                provider: rule.provider,
+                trxId,
+                amount: parseFloat(rawAmt.replace(/,/g, '')),
+                sender: senderMatch?.[1]?.replace(/^\+?88/, ''),
+                balance: balanceMatch ? parseFloat((balanceMatch[1] || '0').replace(/,/g, '')) : undefined,
                 rawText: text,
             };
         }
-        return { success: false, provider: 'bKash', rawText: text, error: 'Failed to extract bKash TrxID or Amount' };
+        return {
+            success: false,
+            provider: rule.provider,
+            rawText: text,
+            error: `Failed to extract ${rule.provider} TrxID or Amount`,
+        };
     }
-    /** Nagad: Amount: Tk X.XX ... TxnID: ABC */
-    static parseNagad(text) {
-        const trxMatch = text.match(/(?:TxnID|TrxID):\s*([A-Z0-9]+)/i);
-        const amountMatch = text.match(/(?:Amount:?\s*Tk|Received Amount:?\s*Tk)\s*([\d,]+\.?\d*)/i);
-        const senderMatch = text.match(/(?:from|Sender:?)\s*([0-9+]+)/i);
-        const balanceMatch = text.match(/Balance:?\s*Tk\s*([\d,]+\.?\d*)/i);
-        if (trxMatch && amountMatch) {
-            return {
-                success: true, provider: 'Nagad',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                sender: senderMatch?.[1].replace(/^\+?88/, ''),
-                balance: balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : undefined,
-                rawText: text,
-            };
-        }
-        return { success: false, provider: 'Nagad', rawText: text, error: 'Failed to extract Nagad TxnID or Amount' };
-    }
-    /** Rocket: Tk X.XX received from PHONE. TxnId: ABC */
-    static parseRocket(text) {
-        const trxMatch = text.match(/(?:TxnId|TrxID|Txn ID):\s*([A-Z0-9]+)/i);
-        const amountMatch = text.match(/Tk\s*([\d,]+\.?\d*)\s*received/i);
-        const senderMatch = text.match(/from\s*([0-9+]+)/i);
-        if (trxMatch && amountMatch) {
-            return {
-                success: true, provider: 'Rocket',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                sender: senderMatch?.[1].replace(/^\+?88/, ''),
-                rawText: text,
-            };
-        }
-        return { success: false, provider: 'Rocket', rawText: text, error: 'Failed to extract Rocket TxnId or Amount' };
-    }
-    /** Upay: received Tk X.XX ... TrxID ABC */
-    static parseUpay(text) {
-        const trxMatch = text.match(/(?:TrxID|TxnID|Txn ID):\s*([A-Z0-9]+)/i) || text.match(/(?:TrxID|TxnID)\s+([A-Z0-9]+)/i);
-        const amountMatch = text.match(/(?:received(?: payment)?|Cash In)\s+Tk\s+([\d,]+\.?\d*)/i) || text.match(/Tk\s*([\d,]+\.?\d*)\s*received/i);
-        const senderMatch = text.match(/from\s+([0-9+]+)/i);
-        const balanceMatch = text.match(/Balance\s+Tk\s+([\d,]+\.?\d*)/i);
-        if (trxMatch && amountMatch) {
-            return {
-                success: true, provider: 'Upay',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                sender: senderMatch?.[1].replace(/^\+?88/, ''),
-                balance: balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : undefined,
-                rawText: text,
-            };
-        }
-        return { success: false, provider: 'Upay', rawText: text, error: 'Failed to extract Upay TrxID or Amount' };
-    }
-    // ─── Banks ───────────────────────────────────────────────────────────────
-    /**
-     * DBBL (Dutch-Bangla Bank):
-     * "Credited BDT 2,000.00 to A/C XXXX1234. Ref: TXN20260919001. Bal: BDT 15,400.00"
-     * "A/C XXXX1234 credited BDT 500.00. TxnRef: DB001. Avl Bal: BDT 8,200.00"
-     */
-    static parseDBBL(text) {
-        const trxMatch = text.match(/(?:Ref|TxnRef|TxnID|Ref No):\s*([A-Z0-9]+)/i);
-        const amountMatch = text.match(/[Cc]redited\s+BDT\s+([\d,]+\.?\d*)/i) ||
-            text.match(/BDT\s+([\d,]+\.?\d*)\s+(?:credited|deposited|received)/i);
-        const balanceMatch = text.match(/(?:Bal|Avl Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i);
-        if (trxMatch && amountMatch) {
-            return {
-                success: true, provider: 'DBBL',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                balance: balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : undefined,
-                rawText: text,
-            };
-        }
-        return { success: false, provider: 'DBBL', rawText: text, error: 'Failed to parse DBBL SMS' };
-    }
-    /**
-     * BRAC Bank:
-     * "Dear Customer, BDT 1,500.00 has been credited to A/C XXXX5678. Ref: BRAC001. Bal: BDT 22,400.00"
-     * "Credit alert: BDT 800.00 credited. TxnID: BRAC-TXN-001. Avail Bal: BDT 9,100.00"
-     */
-    static parseBRAC(text) {
-        const trxMatch = text.match(/(?:Ref|TxnID|TxnRef):\s*([A-Z0-9-]+)/i);
-        const amountMatch = text.match(/BDT\s+([\d,]+\.?\d*)\s+has been credited/i) ||
-            text.match(/[Cc]redit alert:?\s*BDT\s*([\d,]+\.?\d*)/i) ||
-            text.match(/BDT\s+([\d,]+\.?\d*)\s+credited/i);
-        const balanceMatch = text.match(/(?:Bal|Avail Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i);
-        if (trxMatch && amountMatch) {
-            return {
-                success: true, provider: 'BRAC',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                balance: balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : undefined,
-                rawText: text,
-            };
-        }
-        return { success: false, provider: 'BRAC', rawText: text, error: 'Failed to parse BRAC Bank SMS' };
-    }
-    /**
-     * Islami Bank Bangladesh (IBBL):
-     * "BDT 1,000.00 deposited to your IBBL A/C. TxnID: IB2026001. Bal: BDT 5,600.00"
-     * "Your IBBL account credited BDT 2,500.00. Ref: IBBL-001. Available Bal: BDT 14,200.00"
-     */
-    static parseIslamiBank(text) {
-        const trxMatch = text.match(/(?:TxnID|Ref|TrxID):\s*([A-Z0-9-]+)/i);
-        const amountMatch = text.match(/BDT\s+([\d,]+\.?\d*)\s+(?:deposited|credited)/i) ||
-            text.match(/(?:deposited|credited)\s+BDT\s*([\d,]+\.?\d*)/i);
-        const balanceMatch = text.match(/(?:Bal|Available Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i);
-        if (trxMatch && amountMatch) {
-            return {
-                success: true, provider: 'IslamiBank',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                balance: balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : undefined,
-                rawText: text,
-            };
-        }
-        return { success: false, provider: 'IslamiBank', rawText: text, error: 'Failed to parse Islami Bank SMS' };
-    }
-    /**
-     * City Bank:
-     * "Amount BDT 500.00 has been credited to your City Bank A/C. Ref: CB001. Bal: BDT 8,900.00"
-     * "Credit: BDT 1,200.00 to your A/C. TxnRef: CBTXN001. Avail Bal: BDT 12,000.00"
-     */
-    static parseCityBank(text) {
-        const trxMatch = text.match(/(?:Ref|TxnRef|TxnID):\s*([A-Z0-9]+)/i);
-        const amountMatch = text.match(/Amount BDT\s*([\d,]+\.?\d*)\s+has been credited/i) ||
-            text.match(/[Cc]redit:\s*BDT\s*([\d,]+\.?\d*)/i) ||
-            text.match(/BDT\s*([\d,]+\.?\d*)\s+(?:credited|deposited)/i);
-        const balanceMatch = text.match(/(?:Bal|Avail Bal|Balance):\s*BDT\s*([\d,]+\.?\d*)/i);
-        if (trxMatch && amountMatch) {
-            return {
-                success: true, provider: 'CityBank',
-                trxId: trxMatch[1].toUpperCase(),
-                amount: parseFloat(amountMatch[1].replace(/,/g, '')),
-                balance: balanceMatch ? parseFloat(balanceMatch[1].replace(/,/g, '')) : undefined,
-                rawText: text,
-            };
-        }
-        return { success: false, provider: 'CityBank', rawText: text, error: 'Failed to parse City Bank SMS' };
-    }
-    // ─── Universal entrypoint ────────────────────────────────────────────────
     static parse(senderAddress, body) {
         const combined = `${senderAddress} ${body}`.toUpperCase();
-        // MFS Wallets (priority order)
-        if (combined.includes('BKASH') || combined.includes('16247'))
-            return this.parseBkash(body);
-        if (combined.includes('NAGAD') || combined.includes('16167'))
-            return this.parseNagad(body);
-        if (combined.includes('ROCKET') || combined.includes('16216'))
-            return this.parseRocket(body);
-        if (combined.includes('UPAY') || combined.includes('16268'))
-            return this.parseUpay(body);
-        // Banks
-        if (combined.includes('DBBL') || combined.includes('DUTCH-BANGLA') || combined.includes('DUTCHBANGLA'))
-            return this.parseDBBL(body);
-        if (combined.includes('BRAC BANK') || combined.includes('BRACBANK'))
-            return this.parseBRAC(body);
-        if (combined.includes('IBBL') || combined.includes('ISLAMI BANK') || combined.includes('ISLAMIBANK'))
-            return this.parseIslamiBank(body);
-        if (combined.includes('CITY BANK') || combined.includes('CITYBANK') || combined.includes('CBTXN'))
-            return this.parseCityBank(body);
-        // Auto-detect by body keywords
-        if (body.includes('bKash') || body.includes('TrxID'))
-            return this.parseBkash(body);
-        if (body.includes('Nagad') || body.includes('TxnID'))
-            return this.parseNagad(body);
-        if (body.toLowerCase().includes('upay'))
-            return this.parseUpay(body);
-        if (body.includes('IBBL'))
-            return this.parseIslamiBank(body);
-        if (body.includes('BRAC'))
-            return this.parseBRAC(body);
+        // 1. Match by address/header keywords
+        for (const rule of PROVIDER_RULES) {
+            if (rule.keywords.some(kw => combined.includes(kw))) {
+                return this.parseWithRule(rule, body);
+            }
+        }
+        // 2. Auto-detect by body keywords if header is generic
+        for (const rule of PROVIDER_RULES) {
+            if (rule.bodyKeywords && rule.bodyKeywords.some(bk => body.toLowerCase().includes(bk.toLowerCase()))) {
+                return this.parseWithRule(rule, body);
+            }
+        }
         return {
             success: false,
             provider: 'UNKNOWN',
