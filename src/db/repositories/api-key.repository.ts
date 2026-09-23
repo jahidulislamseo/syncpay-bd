@@ -8,6 +8,7 @@ export interface ApiKeyEntity {
   key_prefix: string;
   key_hash: string;
   name: string;
+  secret_key?: string;
   status: 'active' | 'revoked';
   last_used_at?: string | null;
   created_at?: string;
@@ -117,6 +118,7 @@ export class ApiKeyRepository {
       key_prefix: k.key_prefix,
       key_hash: CryptoUtil.hashToken(k.secret_key),
       name: k.name,
+      secret_key: k.secret_key,
       status: k.status as 'active',
       last_used_at: k.last_used,
       created_at: k.created_at,

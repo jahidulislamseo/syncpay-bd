@@ -505,15 +505,25 @@ export const components = {
 
   // 7. API Keys List
   renderApiKeysList(keys = []) {
+    let sessionKey = '';
+    try {
+      sessionKey = (window.payflowApp && window.payflowApp.session && window.payflowApp.session.apiKey) || localStorage.getItem('payflow_api_key') || '';
+    } catch (_) {}
+
+    let storedGenerated = {};
+    try {
+      storedGenerated = JSON.parse(localStorage.getItem('syncpay_generated_keys') || '{}');
+    } catch (_) {}
+
     const list = (keys && keys.length > 0) ? keys : [
       {
         id: 'key_live_default',
-        name: 'Default Production Integration Key',
-        key_prefix: 'live_dem',
-        secret_key: 'live_demo_sec_99410',
+        name: 'Default Live Key',
+        key_prefix: 'live_sk_',
+        secret_key: sessionKey || 'live_sk_' + Math.random().toString(36).slice(2, 18),
         environment: 'production',
         status: 'active',
-        created_at: '2026-09-19 04:14:58',
+        created_at: new Date().toISOString().slice(0, 10),
       }
     ];
 
@@ -542,12 +552,13 @@ export const components = {
             <tbody>
               ${list.map(k => {
       const env = (k.environment || 'production').toUpperCase();
-      const prefix = k.key_prefix || 'pf_live_';
-      const secret = k.secret_key || `${prefix}••••••••••••••••`;
+      const prefix = k.key_prefix || (sessionKey && sessionKey.startsWith('live_') ? 'live_sk_' : 'live_sk_');
+      const resolvedSecret = k.secret_key || storedGenerated[k.id] || sessionKey || `${prefix}sec_${Math.random().toString(36).slice(2, 14)}`;
+      const safeSecret = resolvedSecret.replace(/'/g, "\\'");
 
       return `
                   <tr>
-                    <td><strong style="color:var(--text-primary);">${k.name || 'API Key'}</strong></td>
+                    <td><strong style="color:var(--text-primary);">${k.name || 'Default Live Key'}</strong></td>
                     <td>
                       <span class="badge" style="background:var(--primary-subtle); color:var(--primary);">
                         ${env}
@@ -555,13 +566,13 @@ export const components = {
                     </td>
                     <td>
                       <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="mono" id="key-mask-${k.id}" style="color:var(--text-muted); font-size:12px;">
+                        <span class="mono" id="key-mask-${k.id}" style="color:var(--text-muted); font-size:12px; letter-spacing:1px;">
                           ${prefix}••••••••••••••••
                         </span>
-                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Reveal Key" onclick="window.payflowApp.toggleKeyReveal('${k.id}', '${secret}', '${prefix}')">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 backward" style="display:none;"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Reveal Key" onclick="window.payflowApp.toggleKeyReveal('${k.id}', '${safeSecret}', '${prefix}')">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
-                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Copy Secret" onclick="window.payflowApp.copyText('${secret}')">
+                        <button class="btn btn-secondary-action" style="padding:4px 6px; font-size:11px; display:inline-flex; align-items:center;" title="Copy Secret" onclick="window.payflowApp.copyApiKey('${k.id}', '${safeSecret}')">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         </button>
                       </div>

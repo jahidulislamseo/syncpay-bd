@@ -1,7 +1,7 @@
 // SyncPay BD — Production Dashboard Master Application Controller
-import { i18n } from './i18n.js?v=1.2.1';
-import { api } from './api.js?v=1.2.1';
-import { components } from './components.js?v=1.2.1';
+import { i18n } from './i18n.js?v=1.2.2';
+import { api } from './api.js?v=1.2.2';
+import { components } from './components.js?v=1.2.2';
 import { auth } from './auth.js';
 
 class PayFlowDashboardApp {
@@ -2327,6 +2327,13 @@ class PayFlowDashboardApp {
         if (res.success && res.data) {
           this.closeAllModals();
           this.showToast(i18n.t('toast.keyCreated'), 'success');
+          if (res.data.secret_key) {
+            try {
+              const saved = JSON.parse(localStorage.getItem('syncpay_generated_keys') || '{}');
+              saved[res.data.id || res.data.name] = res.data.secret_key;
+              localStorage.setItem('syncpay_generated_keys', JSON.stringify(saved));
+            } catch (_) {}
+          }
           await this.refreshAllData();
           // Prompt user with full key one time
           alert(`Secret Key Generated:\n\n${res.data.secret_key}\n\nSave this key immediately!`);
@@ -2684,16 +2691,33 @@ class PayFlowDashboardApp {
       }
     }
 
+    copyApiKey(keyId, fallbackSecret) {
+      let keyToCopy = fallbackSecret;
+      if (!keyToCopy || keyToCopy.includes('••')) {
+        let stored = {};
+        try { stored = JSON.parse(localStorage.getItem('syncpay_generated_keys') || '{}'); } catch (_) {}
+        keyToCopy = stored[keyId] || (this.session && this.session.apiKey) || localStorage.getItem('payflow_api_key') || fallbackSecret;
+      }
+      this.copyText(keyToCopy);
+    }
+
     toggleKeyReveal(keyId, secret, prefix) {
       const el = document.getElementById(`key-mask-${keyId}`);
       if (!el) return;
+
+      let realSecret = secret;
+      if (!realSecret || realSecret.includes('••')) {
+        let stored = {};
+        try { stored = JSON.parse(localStorage.getItem('syncpay_generated_keys') || '{}'); } catch (_) {}
+        realSecret = stored[keyId] || (this.session && this.session.apiKey) || localStorage.getItem('payflow_api_key') || secret;
+      }
 
       if (this.revealedKeys.has(keyId)) {
         this.revealedKeys.delete(keyId);
         el.innerText = `${prefix}••••••••••••••••`;
       } else {
         this.revealedKeys.add(keyId);
-        el.innerText = secret;
+        el.innerText = realSecret;
       }
     }
 
