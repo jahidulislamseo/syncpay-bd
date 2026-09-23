@@ -1,7 +1,7 @@
 class AppConfig {
   static const String appName = 'SyncPay Agent';
   static const String appTagline = 'Secure Payment Forwarder';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '1.1.0';
 
   // Default server URLs
   static const String defaultEmulatorBackendUrl = 'http://10.0.2.2:4000';

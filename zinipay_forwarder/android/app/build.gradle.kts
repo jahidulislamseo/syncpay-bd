@@ -18,11 +18,12 @@ android {
         applicationId = "com.zinipay.payflow_agent"
         minSdk = flutter.minSdkVersion // Android 5.0 Lollipop
         targetSdk = 34 // Android 14 (Universal Production Compatibility)
-        versionCode = 4
-        versionName = "1.2.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+            abiFilters.clear()
+            abiFilters.add("arm64-v8a")
         }
     }
 
