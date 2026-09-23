@@ -57,8 +57,15 @@ await server.register(paymentRoutes);
 await server.register(merchantRoutes);
 await server.register(adminRoutes);
 // Health check
-server.get('/health', async () => {
-    return { status: 'OK', timestamp: new Date().toISOString(), system: 'SyncPay BD Gateway', domain: 'syncpaybd.site' };
+server.get('/health', async (req) => {
+    return {
+        status: 'OK',
+        reqUrl: req.url,
+        rawUrl: req.raw.url,
+        matchedPath: req.headers['x-matched-path'],
+        forwardedUri: req.headers['x-forwarded-uri'],
+        system: 'SyncPay BD Gateway',
+    };
 });
 import fs from 'node:fs';
 const publicDir = fs.existsSync(path.resolve(__dirname, '../public'))

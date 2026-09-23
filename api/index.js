@@ -18,9 +18,23 @@ export default async function handler(req, res) {
   try {
     const server = await getServer();
 
-    let targetUrl = req.headers['x-matched-path'] || req.url || '/';
-    if (targetUrl === '/api/index.js' || targetUrl.startsWith('/api/index.js?')) {
-      targetUrl = req.headers['x-matched-path'] || '/';
+    let targetUrl = '/';
+    try {
+      const parsed = new URL(req.url, 'http://localhost');
+      const pathParam = parsed.searchParams.get('__path');
+      if (pathParam) {
+        parsed.searchParams.delete('__path');
+        const remainingQuery = parsed.searchParams.toString();
+        targetUrl = pathParam + (remainingQuery ? `?${remainingQuery}` : '');
+      } else {
+        targetUrl = req.headers['x-matched-path'] || req.url || '/';
+      }
+    } catch {
+      targetUrl = req.url || '/';
+    }
+
+    if (!targetUrl || targetUrl === '/api/index.js' || targetUrl.startsWith('/api/index.js?')) {
+      targetUrl = '/';
     }
 
     let payload = undefined;
