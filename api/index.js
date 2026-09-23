@@ -12,9 +12,18 @@ async function getServer() {
   return await serverPromise;
 }
 
+const HOP_BY_HOP = new Set(['connection', 'keep-alive', 'transfer-encoding', 'upgrade']);
+
 export default async function handler(req, res) {
   try {
     const server = await getServer();
+
+    // In Vercel rewrites, destination rewrite rewrites req.url to /api/index.js
+    // Extract genuine requested URI from x-matched-path header
+    let targetUrl = req.headers['x-matched-path'] || req.url || '/';
+    if (targetUrl === '/api/index.js' || targetUrl.startsWith('/api/index.js?')) {
+      targetUrl = req.headers['x-matched-path'] || '/';
+    }
 
     let payload = undefined;
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -27,14 +36,14 @@ export default async function handler(req, res) {
 
     const response = await server.inject({
       method: req.method,
-      url: req.url,
+      url: targetUrl,
       headers: req.headers,
       payload,
     });
 
     res.statusCode = response.statusCode;
     for (const [key, value] of Object.entries(response.headers)) {
-      if (value !== undefined) {
+      if (value !== undefined && !HOP_BY_HOP.has(key.toLowerCase())) {
         res.setHeader(key, value);
       }
     }
