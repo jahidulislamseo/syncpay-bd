@@ -947,9 +947,9 @@
         <div class="header-titles">
           <div class="header-title-row">
             <span class="header-title" id="provider-title">bKash</span>
-            <span class="badge-bangla-qr" id="badge-qr">MFS</span>
+            <span class="badge-bangla-qr" id="badge-qr">BANGLA QR</span>
           </div>
-          <span class="header-subtitle" id="order-subtitle">Invoice #PFMU80DZWXUWMB</span>
+          <span class="header-subtitle" id="order-subtitle">SyncPay BD Official Plan Checkout</span>
         </div>
       </div>
 
@@ -957,17 +957,15 @@
       <div class="header-center" id="header-merchant-brand">
         <div class="merchant-brand-box">
           <div class="merchant-brand-icon" id="merchant-brand-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <img src="/images/syncpay-icon.png" alt="SyncPay BD" style="width:14px; height:14px; object-fit:contain;">
           </div>
-          <span class="merchant-brand-name" id="merchant-brand-name">
-            <span class="merchant-brand-skeleton"></span>
-          </span>
+          <span class="merchant-brand-name" id="merchant-brand-name">SyncPay BD Official</span>
         </div>
       </div>
 
       <div class="header-right">
         <div class="price-display-box">
-          <div class="price-amount" id="display-amount">৳ 299</div>
+          <div class="price-amount" id="display-amount">৳ 200</div>
           <div class="price-period" id="display-period" style="display:none;"></div>
         </div>
         <button class="btn-close-modal" onclick="handleClose()" title="Close">✕</button>
@@ -997,7 +995,7 @@
           <div class="merchant-number-display" id="merchant-number">01580397069</div>
           <div class="merchant-notice-box">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span id="merchant-notice-text">Account: <strong>bdshop24</strong></span>
+            <span id="merchant-notice-text">Account: <strong>SyncPay BD Billing</strong></span>
           </div>
         </div>
 
@@ -1017,16 +1015,16 @@
           <!-- QR Content -->
           <div class="sub-tab-content" id="content-qr">
             <div class="bangla-qr-inner" onclick="openZoomModal()" title="Click to Zoom QR Code">
-              <div class="qr-card-logo">
+              <div class="qr-card-logo" id="qr-card-logo-wrap" style="display:none;">
                 <span id="qr-brand-name">bKash</span>
               </div>
-              <div class="qr-frame-neutral" id="qr-frame">
-                <div class="qr-white-canvas">
-                  <img id="qr-img" src="/api/v1/payment/qr?data=01580397069&size=240&raw=1" alt="QR Code">
+              <div class="qr-frame-neutral" id="qr-frame" style="border:none; background:transparent; padding:0;">
+                <div class="qr-white-canvas" id="qr-white-canvas" style="width:210px; height:auto; border:none; padding:0; background:transparent;">
+                  <img id="qr-img" src="/images/bkash-bangla-qr-official.png" alt="Official bKash Bangla QR" style="max-width:210px; width:100%; height:auto; border-radius:12px; box-shadow:0 6px 20px rgba(226, 19, 110, 0.15); display:block; margin:0 auto;">
                 </div>
-                <div class="qr-number-sub" id="qr-phone-caption">01580397069</div>
+                <div class="qr-number-sub" id="qr-phone-caption" style="display:none;">01580397069</div>
               </div>
-              <div class="qr-sub-actions" style="justify-content:center;">
+              <div class="qr-sub-actions" style="justify-content:center; margin-top:10px;">
                 <span style="font-size:12px; color:#64748b; font-weight:600; display:inline-flex; align-items:center; gap:5px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
                   Tap to enlarge
@@ -1134,17 +1132,17 @@
     <div class="qr-zoom-card" onclick="event.stopPropagation()">
       <button class="qr-zoom-close-btn" onclick="closeZoomModal()" title="Close (Esc)">✕</button>
 
-      <div class="qr-zoom-frame-box">
-        <div class="zoom-brand-header">
+      <div class="qr-zoom-frame-box" id="zoom-frame-box" style="text-align:center;">
+        <div class="zoom-brand-header" id="zoom-brand-header" style="display:none;">
           <span class="zoom-brand-logo-text" id="zoom-brand-text">bKash</span>
           <span class="zoom-brand-subtag">BANGLA QR</span>
         </div>
 
-        <div class="zoom-color-frame" id="zoom-color-frame">
-          <div class="zoom-white-qr-canvas">
-            <img id="zoom-qr-image" src="/api/v1/payment/qr?data=01580397069&size=360" alt="Bangla QR Large">
+        <div class="zoom-color-frame" id="zoom-color-frame" style="background:transparent; padding:0;">
+          <div class="zoom-white-qr-canvas" id="zoom-white-qr-canvas" style="width:320px; height:auto; padding:0; background:transparent; margin:0 auto;">
+            <img id="zoom-qr-image" src="/images/bkash-bangla-qr-official.png" alt="Official bKash Bangla QR Large" style="max-width:320px; width:100%; height:auto; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:block; margin:0 auto;">
           </div>
-          <div class="zoom-footer-phone-number" id="zoom-phone-number">01580397069</div>
+          <div class="zoom-footer-phone-number" id="zoom-phone-number" style="display:none;">01580397069</div>
         </div>
       </div>
 
@@ -1344,9 +1342,10 @@
           account_number: '01580397069',
           account_name: 'SyncPay BD Billing',
           theme_color: '#E2136E',
+          qr_code_url: '/images/bkash-bangla-qr-official.png',
           sender_label: 'Your bKash Number *',
           trx_label: 'bKash TrxID *',
-          instructions: '1. Open your bKash App or dial *247#\n2. Select Make Payment\n3. Enter Merchant Number: {ACCOUNT_NUMBER}\n4. Enter Amount: ৳ {AMOUNT}\n5. Enter Reference (Ref): {REF}\n6. Enter your PIN to confirm payment',
+          instructions: '1. Open your bKash App and select Make Payment\n2. Scan the official Bangla QR code or enter merchant number: {ACCOUNT_NUMBER}\n3. Enter Amount: ৳ {AMOUNT}\n4. Enter Reference (Ref): {REF}\n5. Enter your PIN to confirm payment',
         },
         {
           id: 'pm_nagad_default',
@@ -1582,23 +1581,111 @@
       const qrData = activeMethod.account_number;
       const defaultQrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=240&raw=1`;
       const defaultZoomQrUrl = `/api/v1/payment/qr?data=${encodeURIComponent(qrData)}&size=360&raw=1`;
-      const customQr = (activeMethod.qr_code_url || activeMethod.qr_image || '').trim();
+      const customQr = (activeMethod.qr_code_url || activeMethod.qr_image || (type === 'bkash' ? '/images/bkash-bangla-qr-official.png' : '')).trim();
       const finalQrUrl = customQr || defaultQrUrl;
       const finalZoomQrUrl = customQr || defaultZoomQrUrl;
 
       const qrImgEl = document.getElementById('qr-img');
+      const logoWrapEl = document.getElementById('qr-card-logo-wrap');
+      const captionEl = document.getElementById('qr-phone-caption');
+      const frameEl = document.getElementById('qr-frame');
+      const canvasEl = document.getElementById('qr-white-canvas');
+
       qrImgEl.src = finalQrUrl;
       qrImgEl.onerror = () => { qrImgEl.src = defaultQrUrl; };
 
-      document.getElementById('qr-phone-caption').innerText = activeMethod.account_number;
-      document.getElementById('qr-brand-name').innerText = shortName;
+      if (customQr) {
+        if (logoWrapEl) logoWrapEl.style.display = 'none';
+        if (captionEl) captionEl.style.display = 'none';
+        if (frameEl) {
+          frameEl.style.border = 'none';
+          frameEl.style.background = 'transparent';
+          frameEl.style.padding = '0';
+        }
+        if (canvasEl) {
+          canvasEl.style.width = '210px';
+          canvasEl.style.height = 'auto';
+          canvasEl.style.border = 'none';
+          canvasEl.style.padding = '0';
+          canvasEl.style.background = 'transparent';
+        }
+        qrImgEl.style.maxWidth = '210px';
+        qrImgEl.style.width = '100%';
+        qrImgEl.style.height = 'auto';
+        qrImgEl.style.borderRadius = '12px';
+        qrImgEl.style.boxShadow = '0 6px 20px rgba(226, 19, 110, 0.15)';
+      } else {
+        if (logoWrapEl) logoWrapEl.style.display = 'flex';
+        if (captionEl) captionEl.style.display = 'block';
+        if (frameEl) {
+          frameEl.style.border = '2px solid #e2e8f0';
+          frameEl.style.background = '#f8fafc';
+          frameEl.style.padding = '10px';
+        }
+        if (canvasEl) {
+          canvasEl.style.width = '170px';
+          canvasEl.style.height = '170px';
+          canvasEl.style.border = '1px solid #f1f5f9';
+          canvasEl.style.padding = '6px';
+          canvasEl.style.background = '#ffffff';
+        }
+        qrImgEl.style.maxWidth = '100%';
+        qrImgEl.style.width = '100%';
+        qrImgEl.style.height = '100%';
+        qrImgEl.style.borderRadius = '0';
+        qrImgEl.style.boxShadow = 'none';
+        document.getElementById('qr-phone-caption').innerText = activeMethod.account_number;
+        document.getElementById('qr-brand-name').innerText = shortName;
+      }
 
       const zoomImgEl = document.getElementById('zoom-qr-image');
+      const zoomBrandBox = document.getElementById('zoom-brand-header');
+      const zoomPhoneBox = document.getElementById('zoom-phone-number');
+      const zoomFrameBox = document.getElementById('zoom-color-frame');
+      const zoomCanvasBox = document.getElementById('zoom-white-qr-canvas');
+
       zoomImgEl.src = finalZoomQrUrl;
       zoomImgEl.onerror = () => { zoomImgEl.src = defaultZoomQrUrl; };
 
-      document.getElementById('zoom-brand-text').innerText = shortName;
-      document.getElementById('zoom-phone-number').innerText = activeMethod.account_number;
+      if (customQr) {
+        if (zoomBrandBox) zoomBrandBox.style.display = 'none';
+        if (zoomPhoneBox) zoomPhoneBox.style.display = 'none';
+        if (zoomFrameBox) {
+          zoomFrameBox.style.background = 'transparent';
+          zoomFrameBox.style.padding = '0';
+        }
+        if (zoomCanvasBox) {
+          zoomCanvasBox.style.width = '320px';
+          zoomCanvasBox.style.height = 'auto';
+          zoomCanvasBox.style.padding = '0';
+          zoomCanvasBox.style.background = 'transparent';
+        }
+        zoomImgEl.style.maxWidth = '320px';
+        zoomImgEl.style.width = '100%';
+        zoomImgEl.style.height = 'auto';
+        zoomImgEl.style.borderRadius = '16px';
+        zoomImgEl.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
+      } else {
+        if (zoomBrandBox) zoomBrandBox.style.display = 'flex';
+        if (zoomPhoneBox) zoomPhoneBox.style.display = 'block';
+        if (zoomFrameBox) {
+          zoomFrameBox.style.background = activeMethod.theme_color || '#E2136E';
+          zoomFrameBox.style.padding = '14px';
+        }
+        if (zoomCanvasBox) {
+          zoomCanvasBox.style.width = '240px';
+          zoomCanvasBox.style.height = '240px';
+          zoomCanvasBox.style.padding = '12px';
+          zoomCanvasBox.style.background = '#ffffff';
+        }
+        zoomImgEl.style.maxWidth = '100%';
+        zoomImgEl.style.width = '100%';
+        zoomImgEl.style.height = '100%';
+        zoomImgEl.style.borderRadius = '8px';
+        zoomImgEl.style.boxShadow = 'none';
+        document.getElementById('zoom-brand-text').innerText = shortName;
+        document.getElementById('zoom-phone-number').innerText = activeMethod.account_number;
+      }
 
       // Update Custom Payment Instructions
       const amt = Number(invoiceData?.amount ?? invoiceData?.expected_amount ?? 299).toFixed(0);
@@ -1852,6 +1939,8 @@
         btn.disabled = false;
         btn.innerHTML = `<span>Confirm & Verify Payment</span>`;
       }
+    }
+
     function printReceipt(trx, amt, inv, provider) {
       const printWindow = window.open('', '_blank', 'width=650,height=800');
       if (!printWindow) return;
