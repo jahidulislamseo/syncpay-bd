@@ -76,7 +76,10 @@ const publicDir = fs.existsSync(path.resolve(__dirname, '../public'))
 await server.register(fastifyStatic, {
     root: publicDir,
     prefix: '/',
+    index: false,
 });
+const indexHtmlPath = path.join(publicDir, 'index.html');
+const indexHtmlContent = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf8') : '';
 // Canonical Non-WWW & Clean URL Hook: Redirect any www.* or *.html request (301 Permanent Redirect)
 server.addHook('onRequest', async (req, reply) => {
     // 1. Enforce Non-WWW Canonical Domain (e.g. www.syncpaybd.site -> syncpaybd.site)
@@ -100,7 +103,13 @@ server.addHook('onRequest', async (req, reply) => {
 });
 // Dashboard & App clean routes (serve HTML directly without extension in URL)
 server.get('/', async (_req, reply) => {
+    if (indexHtmlContent) {
+        return reply.type('text/html; charset=utf-8').send(indexHtmlContent);
+    }
     return reply.type('text/html').sendFile('index.html');
+});
+server.head('/', async (_req, reply) => {
+    return reply.type('text/html; charset=utf-8').header('content-length', Buffer.byteLength(indexHtmlContent)).send('');
 });
 server.get('/login', async (_req, reply) => {
     return reply.type('text/html').sendFile('login.html');
