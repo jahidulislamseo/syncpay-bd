@@ -109,7 +109,12 @@ server.addHook('onRequest', async (req, reply) => {
         return reply.code(301).redirect(target);
     }
 });
-// Dashboard & App clean routes (serve HTML directly without extension in URL)
+server.get('/test-hello', async () => {
+    return 'hello world';
+});
+server.get('/test-index', async (_req, reply) => {
+    return reply.type('text/html').sendFile('index.html');
+});
 server.get('/', async (_req, reply) => {
     return reply.type('text/html').sendFile('index.html');
 });
