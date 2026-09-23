@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/app_localizations.dart';
+import '../dashboard/presentation/agent_shell.dart';
 import '../dashboard/providers/agent_provider.dart';
 import '../permissions/permission_screen.dart';
 import 'qr_scanner_screen.dart';
@@ -87,7 +88,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
               duration: Duration(seconds: 2),
             ),
           );
-          _submitPairing();
+          _submitPairing(isQrScan: true);
           return;
         }
 
@@ -113,7 +114,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     );
   }
 
-  Future<void> _submitPairing() async {
+  Future<void> _submitPairing({bool isQrScan = false}) async {
     if (_formKey.currentState?.validate() ?? false) {
       await ref.read(agentProvider.notifier).updatePairingConfig(
             backendUrl: _backendUrlCtrl.text.trim(),
@@ -124,16 +125,32 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
 
       if (!mounted) return;
 
+      final merchantName = _businessNameCtrl.text.trim();
+      final displayName = merchantName.isNotEmpty ? merchantName : 'SyncPay Merchant Store';
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Device Connected Successfully'),
-          backgroundColor: Color(0xFF10B981),
+        SnackBar(
+          content: Text('✅ $displayName এর সাথে কানেক্ট হয়েছে!'),
+          backgroundColor: const Color(0xFF10B981),
+          duration: const Duration(seconds: 2),
         ),
       );
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PermissionScreen()),
-      );
+      // QR scan = already used app before, go direct to AgentShell (Dashboard)
+      // Manual entry on first time = go to PermissionScreen
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+
+      if (isQrScan) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AgentShell()),
+          (route) => false,
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const PermissionScreen()),
+        );
+      }
     }
   }
 

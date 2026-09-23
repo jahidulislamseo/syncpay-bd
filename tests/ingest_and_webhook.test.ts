@@ -4,10 +4,9 @@ import Fastify, { FastifyInstance } from 'fastify';
 import { deviceRoutes } from '../src/routes/device.routes.js';
 import { paymentRoutes } from '../src/routes/payment.routes.js';
 import { CryptoUtil } from '../src/utils/crypto.js';
-
 describe('Android Device Ingestion & HMAC Webhook Suite', () => {
   let app: FastifyInstance;
-  const DEVICE_TOKEN = 'token_phone_primary'; // seeded in database.ts for dev_phone_1
+  let DEVICE_TOKEN = 'token_chaldal_pri';
 
   before(async () => {
     app = Fastify();

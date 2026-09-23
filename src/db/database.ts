@@ -414,6 +414,11 @@ export class DatabaseService {
     return stmt.get(id, id, id) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
   }
 
+  public getMerchantByEmail(email: string) {
+    const stmt = this.db.prepare('SELECT * FROM merchants WHERE LOWER(email) = LOWER(?)');
+    return stmt.get(email) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
+  }
+
   public getMerchantBySlug(slug: string) {
     const stmt = this.db.prepare('SELECT * FROM merchants WHERE LOWER(brand_slug) = LOWER(?)');
     return stmt.get(slug) as { id: string; name: string; api_key: string; webhook_url: string; [key: string]: any } | undefined;
@@ -1045,6 +1050,7 @@ export class DatabaseService {
         m.payment_note,
         m.api_key, 
         m.webhook_url, 
+        m.password_hash,
         m.created_at,
         COUNT(DISTINCT d.id) as device_count,
         COUNT(DISTINCT t.id) as transaction_count,

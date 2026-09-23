@@ -2460,6 +2460,8 @@ class PayFlowDashboardApp {
   }
 
   onDevicePairSuccess(device) {
+    const deviceName = device.device_name || 'Device';
+
     const slots = [
       document.getElementById('device-qr-image-slot'),
       document.getElementById('add-device-qr-image-slot'),
@@ -2472,16 +2474,22 @@ class PayFlowDashboardApp {
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <h3 style="font-size: 17px; font-weight: 800; color: #10b981; margin: 0 0 6px 0;">🎉 Device Connected!</h3>
-          <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 16px 0;">${device.device_name || 'ফোন'} সফলভাবে কানেক্ট হয়েছে।</p>
-          <button class="btn btn-primary-action" style="padding: 8px 20px; font-size: 13px; font-weight: 700; background: #10b981;" onclick="window.payflowApp.closeAllModals(); window.payflowApp.refreshAllData();">
-            Done (সম্পন্ন)
-          </button>
+          <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 6px 0;">${deviceName} সফলভাবে কানেক্ট হয়েছে।</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Devices page-এ যাচ্ছে...</p>
         </div>
       `;
     });
 
-    this.showToast(`🎉 ${device.device_name || 'Device'} কানেক্ট হয়েছে!`, 'success');
-    this.refreshAllData().catch(() => {});
+    this.showToast(`🎉 ${deviceName} কানেক্ট হয়েছে!`, 'success');
+
+    // Auto: close modal → refresh data → switch to devices view
+    setTimeout(async () => {
+      this.closeAllModals();
+      this.stopPairingPolling();
+      await this.refreshAllData();
+      this.switchView('devices');
+      window.location.hash = '#devices';
+    }, 2000);
   }
 
   async showDeviceQrModal(deviceId, deviceName) {

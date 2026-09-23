@@ -85,14 +85,13 @@ export class MerchantRepository {
     }
 
     // Local SQLite fallback
-    const all = dbService.getAdminMerchants();
-    const local = all.find(
-      (m: any) => m.email === email || m.id === email || m.name.toLowerCase() === email.toLowerCase()
+    const local = dbService.getMerchantByEmail(email) || dbService.getAdminMerchants().find(
+      (m: any) => m.email === email || m.id === email || m.name?.toLowerCase() === email.toLowerCase()
     );
     if (local) {
       return {
         id: local.id,
-        business_name: local.name,
+        business_name: (local as any).business_name || local.name,
         email: local.email || email,
         phone: local.phone || null,
         status: (local.status as any) || 'ACTIVE',
@@ -130,25 +129,39 @@ export class MerchantRepository {
   }): Promise<MerchantEntity> {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
-      const payload: any = {
-        business_name: params.business_name,
-        email: params.email,
-        phone: params.phone || null,
-        password_hash: params.password_hash || null,
-        webhook_url: params.webhook_url || null,
-        redirect_url: params.redirect_url || null,
-        status: 'ACTIVE',
-      };
-      if (params.id) payload.id = params.id;
+      try {
+        const payload: any = {
+          business_name: params.business_name,
+          email: params.email,
+          phone: params.phone || null,
+          password_hash: params.password_hash || null,
+          webhook_url: params.webhook_url || null,
+          redirect_url: params.redirect_url || null,
+          status: 'ACTIVE',
+        };
+        if (params.id) payload.id = params.id;
 
-      const { data, error } = await supabase
-        .from('merchants')
-        .insert(payload)
-        .select()
-        .single();
+        const { data, error } = await supabase
+          .from('merchants')
+          .insert(payload)
+          .select()
+          .single();
 
-      if (error) throw new Error(error.message);
-      return data as MerchantEntity;
+        if (!error && data) {
+          try {
+            dbService.insertMerchant({
+              id: data.id,
+              name: params.business_name,
+              api_key: 'live_sk_' + Math.random().toString(36).substring(2, 14),
+              email: params.email,
+              phone: params.phone,
+              password_hash: params.password_hash,
+              status: 'ACTIVE',
+            });
+          } catch {}
+          return data as MerchantEntity;
+        }
+      } catch {}
     }
 
     // Local SQLite fallback
@@ -163,6 +176,19 @@ export class MerchantRepository {
       webhook_url: params.webhook_url || null,
       redirect_url: params.redirect_url || null,
     };
+    try {
+      dbService.insertMerchant({
+        id,
+        name: params.business_name,
+        api_key: 'live_sk_' + Math.random().toString(36).substring(2, 14),
+        email: params.email,
+        phone: params.phone || '',
+        password_hash: params.password_hash || '',
+        status: 'ACTIVE',
+      });
+    } catch (e: any) {
+      console.warn('[MerchantRepository] SQLite insert notice:', e?.message);
+    }
     return merchant;
   }
 
