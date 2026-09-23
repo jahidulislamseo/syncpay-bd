@@ -201,6 +201,8 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       success: true,
       app_name: 'SyncPay Agent',
       package_name: 'com.zinipay.payflow_agent',
+      developer: 'Jahidul Islam',
+      developer_url: 'https://jahidulislam.dev',
       latest_version: '1.1.0',
       version_code: 2,
       min_supported_version: '1.0.0',

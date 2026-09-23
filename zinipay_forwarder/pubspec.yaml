@@ -1,7 +1,8 @@
 name: payflow_agent
-description: SyncPay BD SMS Telephony Forwarder Agent for bKash, Nagad, Rocket, Upay & Banks.
+description: SyncPay BD MFS Telephony Forwarder Agent developed by Jahidul Islam. Real-time verification for bKash, Nagad, Rocket, Upay & Banks.
 publish_to: 'none'
 version: 1.1.0+2
+homepage: https://jahidulislam.dev
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

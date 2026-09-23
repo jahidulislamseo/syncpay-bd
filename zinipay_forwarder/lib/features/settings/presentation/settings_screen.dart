@@ -350,6 +350,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 8),
               Text('Dedicated hardware-level telephony agent ensuring zero dropped payment notifications.',
                   style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF334155)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Developer:', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.w600)),
+                    Text('Jahidul Islam (jahidulislam.dev)', style: TextStyle(color: Color(0xFF38BDF8), fontSize: 12, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
               const Divider(height: 1),
               const SizedBox(height: 12),
