@@ -1,7 +1,7 @@
 // SyncPay BD — Production Dashboard Master Application Controller
-import { i18n } from './i18n.js?v=1.0.5';
-import { api } from './api.js?v=1.0.5';
-import { components } from './components.js?v=1.0.5';
+import { i18n } from './i18n.js?v=1.1.0';
+import { api } from './api.js?v=1.1.0';
+import { components } from './components.js?v=1.1.0';
 import { auth } from './auth.js';
 
 class PayFlowDashboardApp {
