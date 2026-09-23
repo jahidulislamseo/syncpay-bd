@@ -1270,7 +1270,7 @@ export class DatabaseService {
     query += ' ORDER BY sort_order ASC, created_at ASC';
 
     let res = this.db.prepare(query).all(merchantId);
-    if (!res || res.length === 0) {
+    if ((!res || res.length === 0) && (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101')) {
       const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
       res = this.db.prepare(query).all(fallbackId);
     }
@@ -1281,8 +1281,11 @@ export class DatabaseService {
     if (merchantId) {
       const row = this.db.prepare('SELECT * FROM payment_methods WHERE id = ? AND merchant_id = ?').get(id, merchantId);
       if (row) return row;
-      const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
-      return this.db.prepare('SELECT * FROM payment_methods WHERE id = ? AND merchant_id = ?').get(id, fallbackId);
+      if (merchantId === 'm_demo_101' || merchantId === '00000000-0000-0000-0000-000000000101') {
+        const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
+        return this.db.prepare('SELECT * FROM payment_methods WHERE id = ? AND merchant_id = ?').get(id, fallbackId);
+      }
+      return undefined;
     }
     return this.db.prepare('SELECT * FROM payment_methods WHERE id = ?').get(id);
   }
@@ -1387,21 +1390,38 @@ export class DatabaseService {
   }
 
   public togglePaymentMethod(id: string, merchantId: string, isActive: boolean) {
-    const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
-    this.db.prepare(`
-      UPDATE payment_methods 
-      SET is_active = ?, updated_at = datetime('now')
-      WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
-    `).run(isActive ? 1 : 0, id, merchantId, fallbackId);
+    const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101';
+    if (isDemo) {
+      const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
+      this.db.prepare(`
+        UPDATE payment_methods 
+        SET is_active = ?, updated_at = datetime('now')
+        WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
+      `).run(isActive ? 1 : 0, id, merchantId, fallbackId);
+    } else {
+      this.db.prepare(`
+        UPDATE payment_methods 
+        SET is_active = ?, updated_at = datetime('now')
+        WHERE id = ? AND merchant_id = ?
+      `).run(isActive ? 1 : 0, id, merchantId);
+    }
     return { success: true, id, is_active: isActive };
   }
 
   public deletePaymentMethod(id: string, merchantId: string) {
-    const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
-    this.db.prepare(`
-      DELETE FROM payment_methods 
-      WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
-    `).run(id, merchantId, fallbackId);
+    const isDemo = merchantId === '00000000-0000-0000-0000-000000000101' || merchantId === 'm_demo_101';
+    if (isDemo) {
+      const fallbackId = merchantId === '00000000-0000-0000-0000-000000000101' ? 'm_demo_101' : '00000000-0000-0000-0000-000000000101';
+      this.db.prepare(`
+        DELETE FROM payment_methods 
+        WHERE id = ? AND (merchant_id = ? OR merchant_id = ?)
+      `).run(id, merchantId, fallbackId);
+    } else {
+      this.db.prepare(`
+        DELETE FROM payment_methods 
+        WHERE id = ? AND merchant_id = ?
+      `).run(id, merchantId);
+    }
     return { success: true, id };
   }
 

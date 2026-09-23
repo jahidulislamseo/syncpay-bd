@@ -13,10 +13,21 @@ export class ApiClient {
   }
 
   async request(endpoint, options = {}) {
+    let sessionMerchantId = '';
+    let sessionApiKey = '';
+    try {
+      const sess = JSON.parse(localStorage.getItem('syncpay_session') || '{}');
+      if (sess && sess.merchantId) sessionMerchantId = sess.merchantId;
+      if (sess && sess.apiKey) sessionApiKey = sess.apiKey;
+    } catch (e) {}
+
+    const effectiveApiKey = sessionApiKey || this.apiKey;
+
     const headers = {
-      'syncpay-api-key': this.apiKey,
-      'payflow-api-key': this.apiKey,
-      'zini-api-key': this.apiKey,
+      'syncpay-api-key': effectiveApiKey,
+      'payflow-api-key': effectiveApiKey,
+      'zini-api-key': effectiveApiKey,
+      'x-merchant-id': sessionMerchantId,
       ...options.headers,
     };
 

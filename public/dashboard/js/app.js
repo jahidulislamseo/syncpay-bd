@@ -35,10 +35,13 @@ class PayFlowDashboardApp {
 
     // 3. Initialize session UI
     this.session = auth.getSession();
+    if (this.session && this.session.apiKey) {
+      api.setApiKey(this.session.apiKey);
+    }
     this.updateSidebarUser();
 
-    // Check and show Demo Mode Strip if exploring as demo merchant
-    const isDemoMode = (this.session && (this.session.isDemo || this.session.merchantId === 'm_demo_101')) || window.location.search.includes('demo=true');
+    // Check and show Demo Mode Strip if explicitly exploring demo merchant
+    const isDemoMode = (this.session && (this.session.isDemo === true || this.session.merchantId === 'm_demo_101')) || window.location.search.includes('demo=true');
     this.isDemoMode = isDemoMode;
     const demoStrip = document.getElementById('demo-mode-strip');
     if (demoStrip && isDemoMode) {
@@ -265,12 +268,21 @@ class PayFlowDashboardApp {
         api.getPaymentMethods().catch(() => []),
       ]);
 
-      this.stats = stats;
-      this.transactions = txs;
-      this.invoices = invs;
-      this.devices = devs;
-      this.apiKeys = keys;
-      this.chartData = chart;
+      this.stats = stats || {
+        todayRevenue: 0,
+        todayCount: 0,
+        totalVerified: 0,
+        pendingCount: 0,
+        failedCount: 0,
+        deviceCount: 0,
+        isDemo: false,
+        isLive: true,
+      };
+      this.transactions = txs || [];
+      this.invoices = invs || [];
+      this.devices = devs || [];
+      this.apiKeys = keys || [];
+      this.chartData = chart || [];
       this.paymentMethods = methods || [];
 
       // If user is exploring in Demo Mode and server returned 0 records, inject rich realistic demo data
@@ -285,6 +297,23 @@ class PayFlowDashboardApp {
         this.populateDemoData();
         this.renderCurrentView();
       } else {
+        this.stats = {
+          todayRevenue: 0,
+          todayCount: 0,
+          totalVerified: 0,
+          pendingCount: 0,
+          failedCount: 0,
+          deviceCount: 0,
+          isDemo: false,
+          isLive: true,
+        };
+        this.transactions = [];
+        this.invoices = [];
+        this.devices = [];
+        this.apiKeys = [];
+        this.chartData = [];
+        this.paymentMethods = [];
+        this.renderCurrentView();
         this.showToast(i18n.t('toast.error'), 'error');
       }
     }

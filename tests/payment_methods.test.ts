@@ -83,4 +83,30 @@ describe('Payment Methods Suite: Zero-Prefill & Dynamic Merchant Control', () =>
     const remaining = db.getPaymentMethods(merchantId, false) as any[];
     assert.equal(remaining.length, 0, 'All payment methods should be deleted');
   });
+
+  it('should guarantee a new merchant account is 100% fresh with 0 channels and isolated from others', () => {
+    const freshMerchantId = 'm_fresh_' + Date.now();
+    // Verify fresh merchant starts with 0 channels
+    const initialMethods = db.getPaymentMethods(freshMerchantId, false) as any[];
+    assert.equal(initialMethods.length, 0, 'New merchant must start with 0 payment channels');
+
+    // Populate a channel for demo merchant
+    db.upsertPaymentMethod({
+      merchant_id: merchantId,
+      provider_type: 'bkash',
+      title: 'Demo bKash',
+      account_number: '01900000000',
+      is_active: 1,
+    });
+
+    // Fresh merchant must still have 0 channels (no cross-talk or leakage)
+    const methodsAfterOtherAdded = db.getPaymentMethods(freshMerchantId, false) as any[];
+    assert.equal(methodsAfterOtherAdded.length, 0, 'Fresh merchant must not see another merchant channels');
+
+    // Clean up
+    const demoMethods = db.getPaymentMethods(merchantId, false) as any[];
+    for (const m of demoMethods) {
+      db.deletePaymentMethod(m.id, merchantId);
+    }
+  });
 });

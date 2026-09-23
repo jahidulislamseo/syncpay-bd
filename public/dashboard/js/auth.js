@@ -184,6 +184,9 @@ export const auth = {
       loginAt: new Date().toISOString(),
     };
     localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+    if (session.apiKey) {
+      localStorage.setItem('payflow_api_key', session.apiKey);
+    }
     return { ok: true, merchant: session };
   },
 
@@ -212,6 +215,7 @@ export const auth = {
     localStorage.setItem(this.ACCOUNTS_KEY, JSON.stringify(custom));
     const session = { merchantId: id, email: newMerchant.email, name, business, plan, apiKey, loginAt: new Date().toISOString() };
     localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+    localStorage.setItem('payflow_api_key', apiKey);
     return { ok: true, merchant: session };
   },
 

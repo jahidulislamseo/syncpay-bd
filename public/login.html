@@ -1005,6 +1005,7 @@
         loginAt: new Date().toISOString()
       };
       localStorage.setItem('syncpay_session', JSON.stringify(session));
+      localStorage.setItem('payflow_api_key', session.apiKey);
 
       // Redirect
       const urlParams = new URLSearchParams(window.location.search);
@@ -1073,6 +1074,14 @@
         loginAt: new Date().toISOString()
       };
       localStorage.setItem('syncpay_session', JSON.stringify(session));
+      localStorage.setItem('payflow_api_key', apiKey);
+
+      // Persist to backend database asynchronously
+      fetch('/api/v1/merchant/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, business_name: business, email, phone, password })
+      }).catch(() => {});
 
       window.location.href = '/dashboard';
     }

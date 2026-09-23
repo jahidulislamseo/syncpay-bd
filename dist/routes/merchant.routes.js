@@ -9,9 +9,23 @@ import { MerchantRepository } from '../db/repositories/merchant.repository.js';
 export async function merchantRoutes(fastify) {
     const DEMO_MERCHANT_ID = '00000000-0000-0000-0000-000000000101';
     const FALLBACK_MERCHANT_ID = 'm_demo_101';
+    function resolveMerchantId(request) {
+        const headerMerchantId = (request.headers['x-merchant-id'] || request.headers['merchant-id']);
+        if (headerMerchantId && typeof headerMerchantId === 'string' && headerMerchantId.trim() && headerMerchantId !== 'null' && headerMerchantId !== 'undefined') {
+            return headerMerchantId.trim();
+        }
+        const apiKey = (request.headers['syncpay-api-key'] || request.headers['x-api-key'] || request.headers['payflow-api-key']);
+        if (apiKey && typeof apiKey === 'string' && apiKey.trim() && !apiKey.startsWith('sandbox_test_')) {
+            const merchant = dbService.getMerchantByApiKey(apiKey.trim());
+            if (merchant)
+                return merchant.id;
+        }
+        return DEMO_MERCHANT_ID;
+    }
     // Get merchant dashboard stats
-    fastify.get('/api/v1/merchant/stats', async (_request, reply) => {
-        const stats = await MerchantService.getMerchantStats(DEMO_MERCHANT_ID);
+    fastify.get('/api/v1/merchant/stats', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const stats = await MerchantService.getMerchantStats(merchantId);
         return reply.send({
             success: true,
             data: stats || {
@@ -25,8 +39,9 @@ export async function merchantRoutes(fastify) {
         });
     });
     // Get recent transactions feed
-    fastify.get('/api/v1/merchant/transactions', async (_request, reply) => {
-        const txs = await MerchantService.getTransactions(DEMO_MERCHANT_ID, 50);
+    fastify.get('/api/v1/merchant/transactions', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const txs = await MerchantService.getTransactions(merchantId, 50);
         return reply.send({ success: true, data: txs || [] });
     });
     // Simulate an incoming SMS (for dashboard test trigger)
@@ -36,6 +51,7 @@ export async function merchantRoutes(fastify) {
         const amount = body.amount || 1500;
         const sender = body.sender || '01712345678';
         const trxId = body.trx_id || ('TRX' + Math.random().toString(36).substring(2, 8).toUpperCase());
+        const targetMerchantId = body.merchant_id || resolveMerchantId(request);
         let rawSms = '';
         let senderAddress = '';
         if (provider === 'bKash') {
@@ -55,7 +71,7 @@ export async function merchantRoutes(fastify) {
             rawSms = `Tk ${amount.toFixed(2)} received from ${sender}. TxnId: ${trxId}. Balance: Tk 5,200.00`;
         }
         const ingest = await TransactionService.ingestSms({
-            merchantId: DEMO_MERCHANT_ID,
+            merchantId: targetMerchantId,
             deviceId: '00000000-0000-0000-0000-000000000001',
             sms: rawSms,
             sender: senderAddress,
@@ -74,13 +90,15 @@ export async function merchantRoutes(fastify) {
         });
     });
     // Get merchant invoices
-    fastify.get('/api/v1/merchant/invoices', async (_request, reply) => {
-        const invoices = await MerchantService.getInvoices(DEMO_MERCHANT_ID, 100);
+    fastify.get('/api/v1/merchant/invoices', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const invoices = await MerchantService.getInvoices(merchantId, 100);
         return reply.send({ success: true, data: invoices || [] });
     });
     // Get merchant devices
-    fastify.get('/api/v1/merchant/devices', async (_request, reply) => {
-        const devices = await DeviceService.listMerchantDevices(DEMO_MERCHANT_ID);
+    fastify.get('/api/v1/merchant/devices', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const devices = await DeviceService.listMerchantDevices(merchantId);
         return reply.send({ success: true, data: devices || [] });
     });
     const PLAN_DEVICE_LIMITS = {
@@ -98,7 +116,7 @@ export async function merchantRoutes(fastify) {
     // Register new device
     fastify.post('/api/v1/merchant/devices', async (request, reply) => {
         const body = request.body;
-        const merchantId = body.merchant_id || DEMO_MERCHANT_ID;
+        const merchantId = body.merchant_id || resolveMerchantId(request);
         const deviceName = body.device_name || 'Android Forwarder';
         try {
             const merchant = await MerchantRepository.findById(merchantId);
@@ -126,20 +144,23 @@ export async function merchantRoutes(fastify) {
     // Delete device
     fastify.delete('/api/v1/merchant/devices/:id', async (request, reply) => {
         const deviceId = request.params.id;
+        const merchantId = resolveMerchantId(request);
         try {
-            await DeviceService.removeDevice(deviceId, DEMO_MERCHANT_ID);
+            await DeviceService.removeDevice(deviceId, merchantId);
         }
         catch (e) {
-            fastify.log.warn(`Failed removing device from DEMO_MERCHANT_ID: ${e.message}`);
+            fastify.log.warn(`Failed removing device from merchantId ${merchantId}: ${e.message}`);
+        }
+        if (merchantId === DEMO_MERCHANT_ID || merchantId === FALLBACK_MERCHANT_ID) {
+            try {
+                await DeviceService.removeDevice(deviceId, FALLBACK_MERCHANT_ID);
+            }
+            catch (e) {
+                fastify.log.warn(`Failed removing device from FALLBACK_MERCHANT_ID: ${e.message}`);
+            }
         }
         try {
-            await DeviceService.removeDevice(deviceId, FALLBACK_MERCHANT_ID);
-        }
-        catch (e) {
-            fastify.log.warn(`Failed removing device from FALLBACK_MERCHANT_ID: ${e.message}`);
-        }
-        try {
-            dbService.deleteDevice(deviceId);
+            dbService.deleteDevice(deviceId, merchantId);
         }
         catch (e) {
             fastify.log.warn(`Failed removing device from dbService: ${e.message}`);
@@ -147,40 +168,44 @@ export async function merchantRoutes(fastify) {
         return reply.send({ success: true, message: 'Device deleted successfully' });
     });
     // Get merchant API keys
-    fastify.get('/api/v1/merchant/api-keys', async (_request, reply) => {
-        const keys = await MerchantService.getApiKeys(DEMO_MERCHANT_ID);
+    fastify.get('/api/v1/merchant/api-keys', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
+        const keys = await MerchantService.getApiKeys(merchantId);
         if (!keys || keys.length === 0) {
-            const fallback = dbService.getAllApiKeys(FALLBACK_MERCHANT_ID);
-            return reply.send({ success: true, data: fallback });
+            const fallback = dbService.getAllApiKeys(merchantId);
+            return reply.send({ success: true, data: fallback || [] });
         }
         return reply.send({ success: true, data: keys });
     });
     // Generate new API key
     fastify.post('/api/v1/merchant/api-keys', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
         const body = request.body;
         const name = body.name || 'New API Key';
-        const { key, entity } = await MerchantService.generateApiKey(FALLBACK_MERCHANT_ID, name);
+        const { key, entity } = await MerchantService.generateApiKey(merchantId, name);
         return reply.status(201).send({ success: true, data: { ...entity, secret_key: key } });
     });
     // Get chart data
     fastify.get('/api/v1/merchant/chart-data', async (request, reply) => {
+        const merchantId = resolveMerchantId(request);
         const query = request.query;
         const days = parseInt(query.days || '7', 10);
-        const chartData = dbService.getChartData(DEMO_MERCHANT_ID, days);
+        const chartData = dbService.getChartData(merchantId, days);
         return reply.send({ success: true, data: chartData || [] });
     });
     // Device Pairing QR Code Generation
     fastify.get('/api/v1/merchant/devices/:id/qr', async (request, reply) => {
         const deviceId = request.params.id;
+        const merchantId = resolveMerchantId(request);
         let dev = null;
         try {
-            const devices = (await DeviceService.listMerchantDevices(DEMO_MERCHANT_ID)) || [];
+            const devices = (await DeviceService.listMerchantDevices(merchantId)) || [];
             dev = devices.find(d => d.id === deviceId);
         }
         catch (e) {
             fastify.log.warn(`DeviceService.listMerchantDevices error: ${e.message}`);
         }
-        if (!dev) {
+        if (!dev && (merchantId === DEMO_MERCHANT_ID || merchantId === FALLBACK_MERCHANT_ID)) {
             try {
                 const fallback = dbService.getAllDevices(FALLBACK_MERCHANT_ID);
                 dev = fallback.find((d) => d.id === deviceId);
@@ -295,9 +320,10 @@ export async function merchantRoutes(fastify) {
     // ==========================================
     // Merchant Payment Methods & Instruction Management
     // ==========================================
-    fastify.get('/api/v1/merchant/payment-methods', async (_request, reply) => {
+    fastify.get('/api/v1/merchant/payment-methods', async (request, reply) => {
         try {
-            const methods = dbService.getPaymentMethods(DEMO_MERCHANT_ID, false);
+            const merchantId = resolveMerchantId(request);
+            const methods = dbService.getPaymentMethods(merchantId, false);
             return reply.send({ success: true, data: methods });
         }
         catch (e) {
@@ -306,6 +332,7 @@ export async function merchantRoutes(fastify) {
     });
     fastify.post('/api/v1/merchant/payment-methods', async (request, reply) => {
         try {
+            const merchantId = resolveMerchantId(request);
             const body = request.body;
             if (!body.title || !body.account_number || !body.provider_type) {
                 return reply.status(400).send({
@@ -315,7 +342,7 @@ export async function merchantRoutes(fastify) {
             }
             const method = dbService.upsertPaymentMethod({
                 id: body.id,
-                merchant_id: DEMO_MERCHANT_ID,
+                merchant_id: merchantId,
                 provider_type: body.provider_type,
                 title: body.title,
                 badge: body.badge,
@@ -344,8 +371,9 @@ export async function merchantRoutes(fastify) {
     });
     fastify.patch('/api/v1/merchant/payment-methods/:id/toggle', async (request, reply) => {
         try {
+            const merchantId = resolveMerchantId(request);
             const body = request.body;
-            const res = dbService.togglePaymentMethod(request.params.id, DEMO_MERCHANT_ID, body.is_active);
+            const res = dbService.togglePaymentMethod(request.params.id, merchantId, body.is_active);
             return reply.send({ success: true, data: res });
         }
         catch (e) {
@@ -354,7 +382,8 @@ export async function merchantRoutes(fastify) {
     });
     fastify.delete('/api/v1/merchant/payment-methods/:id', async (request, reply) => {
         try {
-            const res = dbService.deletePaymentMethod(request.params.id, DEMO_MERCHANT_ID);
+            const merchantId = resolveMerchantId(request);
+            const res = dbService.deletePaymentMethod(request.params.id, merchantId);
             return reply.send({ success: true, data: res, message: 'Payment method removed' });
         }
         catch (e) {
