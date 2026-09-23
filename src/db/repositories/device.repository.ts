@@ -72,12 +72,14 @@ export class DeviceRepository {
     const supabase = getSupabaseClient();
 
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.merchantId);
-    if (supabase && isSupabaseConfigured() && isUuid) {
+    const targetMerchantId = isUuid ? params.merchantId : '00000000-0000-0000-0000-000000000101';
+
+    if (supabase && isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase
           .from('devices')
           .insert({
-            merchant_id: params.merchantId,
+            merchant_id: targetMerchantId,
             device_name: params.deviceName,
             device_token_hash: tokenHash,
             device_model: params.deviceModel || null,
@@ -121,10 +123,18 @@ export class DeviceRepository {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
       const tokenHash = CryptoUtil.hashToken(deviceIdOrToken);
-      await supabase
-        .from('devices')
-        .update({ last_seen_at: new Date().toISOString(), status: 'ONLINE', updated_at: new Date().toISOString() })
-        .or(`id.eq.${deviceIdOrToken},device_token_hash.eq.${tokenHash}`);
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(deviceIdOrToken);
+      try {
+        let query = supabase
+          .from('devices')
+          .update({ last_seen_at: new Date().toISOString(), status: 'ONLINE', updated_at: new Date().toISOString() });
+        if (isUuid) {
+          query = query.or(`id.eq.${deviceIdOrToken},device_token_hash.eq.${tokenHash}`);
+        } else {
+          query = query.eq('device_token_hash', tokenHash);
+        }
+        await query;
+      } catch (_) {}
     }
 
     dbService.updateDeviceHeartbeat(deviceIdOrToken, telemetry);
@@ -133,13 +143,38 @@ export class DeviceRepository {
   public static async listByMerchant(merchantId: string): Promise<DeviceEntity[]> {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
-      const { data, error } = await supabase
-        .from('devices')
-        .select('*')
-        .eq('merchant_id', merchantId)
-        .order('created_at', { ascending: false });
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(merchantId);
+      const targetMerchantId = isUuid ? merchantId : '00000000-0000-0000-0000-000000000101';
 
-      if (!error && data) return data as DeviceEntity[];
+      try {
+        const { data, error } = await supabase
+          .from('devices')
+          .select('*')
+          .eq('merchant_id', targetMerchantId)
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          return data.map((d: any) => ({
+            id: d.id,
+            merchant_id: merchantId,
+            device_name: d.device_name,
+            device_token_hash: d.device_token_hash,
+            status: d.status as any,
+            last_seen: d.last_seen_at,
+            last_seen_at: d.last_seen_at,
+            sim_number: d.sim_number || '017•••••••',
+            device_model: d.device_model || null,
+            android_version: d.android_version || null,
+            battery_level: d.battery_level !== undefined ? d.battery_level : null,
+            battery_temp: d.battery_temp !== undefined ? d.battery_temp : null,
+            is_charging: d.is_charging === 1 || d.is_charging === true,
+            charger_type: d.charger_type || null,
+            free_ram_mb: d.free_ram_mb || null,
+            sim_slots: typeof d.sim_slots === 'string' ? (() => { try { return JSON.parse(d.sim_slots); } catch (_) { return null; } })() : (d.sim_slots || null),
+            sms_count: d.sms_count || 0,
+          })) as DeviceEntity[];
+        }
+      } catch (_) {}
     }
 
     const localDevices = dbService.getAllDevices(merchantId);
@@ -167,13 +202,17 @@ export class DeviceRepository {
   public static async delete(id: string, merchantId: string): Promise<boolean> {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
-      const { error } = await supabase
-        .from('devices')
-        .delete()
-        .eq('id', id)
-        .eq('merchant_id', merchantId);
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(merchantId);
+      const targetMerchantId = isUuid ? merchantId : '00000000-0000-0000-0000-000000000101';
+      try {
+        const { error } = await supabase
+          .from('devices')
+          .delete()
+          .eq('id', id)
+          .eq('merchant_id', targetMerchantId);
 
-      return !error;
+        if (!error) return true;
+      } catch (_) {}
     }
 
     dbService.deleteDevice(id, merchantId);

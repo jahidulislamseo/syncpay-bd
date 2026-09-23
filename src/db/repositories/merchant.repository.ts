@@ -25,16 +25,20 @@ export class MerchantRepository {
   public static async findById(id: string): Promise<MerchantEntity | null> {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured()) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const targetId = isUuid ? id : '00000000-0000-0000-0000-000000000101';
+
       const { data, error } = await supabase
         .from('merchants')
         .select('*')
-        .eq('id', id)
-        .single();
+        .eq('id', targetId)
+        .maybeSingle();
 
       if (!error && data) {
         const local = dbService.getMerchantById(id);
         return {
           ...data,
+          id: id,
           brand_slug: (data as any).brand_slug || (local as any)?.brand_slug || null,
           custom_domain: (data as any).custom_domain || (local as any)?.custom_domain || null,
           has_custom_domain: (data as any).has_custom_domain !== undefined ? (data as any).has_custom_domain : ((local as any)?.has_custom_domain || 0),
@@ -257,7 +261,10 @@ export class MerchantRepository {
       if (params.has_custom_domain !== undefined) payload.has_custom_domain = Boolean(params.has_custom_domain);
       if (params.brand_logo_url !== undefined) payload.brand_logo_url = params.brand_logo_url ? params.brand_logo_url.trim() : null;
 
-      const { error } = await supabase.from('merchants').update(payload).eq('id', id);
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const targetId = isUuid ? id : '00000000-0000-0000-0000-000000000101';
+
+      const { error } = await supabase.from('merchants').update(payload).eq('id', targetId);
       if (error) {
         console.error('Failed to update Supabase merchant branding:', error);
       }

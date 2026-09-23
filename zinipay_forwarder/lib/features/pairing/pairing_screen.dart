@@ -69,10 +69,10 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       final json = jsonDecode(raw);
       if (json is Map) {
         if (json['merchant_id'] != null) _merchantIdCtrl.text = json['merchant_id'].toString();
-        final name = json['business_name'] ?? json['device_name'];
+        final name = json['merchant_name'] ?? json['business_name'] ?? json['device_name'];
         _businessNameCtrl.text = (name != null && name.toString().isNotEmpty)
             ? name.toString()
-            : 'TECNO KM5 (Forwarder)';
+            : 'SyncPay Merchant Store';
         if (json['device_token'] != null) _tokenCtrl.text = json['device_token'].toString();
         if (json['backend_url'] != null) _backendUrlCtrl.text = json['backend_url'].toString();
 

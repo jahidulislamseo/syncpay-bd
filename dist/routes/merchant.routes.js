@@ -251,9 +251,19 @@ export async function merchantRoutes(fastify) {
         if (payloadMerchantId === LEGACY_UUID_MERCHANT_ID || payloadMerchantId === FALLBACK_MERCHANT_ID) {
             payloadMerchantId = DEMO_17DIGIT_MERCHANT_ID;
         }
+        let merchantBusinessName = 'SyncPay Merchant Store';
+        try {
+            const merchant = await MerchantRepository.findById(payloadMerchantId);
+            if (merchant?.business_name) {
+                merchantBusinessName = merchant.business_name;
+            }
+        }
+        catch (_) { }
         const pairingPayload = {
             backend_url: serverUrl,
             merchant_id: payloadMerchantId,
+            merchant_name: merchantBusinessName,
+            business_name: merchantBusinessName,
             device_id: dev?.id || deviceId,
             device_token: token,
             device_name: dev?.device_name || 'SyncPay Device',

@@ -316,6 +316,21 @@ export const components = {
         </div>
       </div>
 
+      ${(!devices || devices.length === 0) ? `
+        <div class="card-panel" style="text-align: center; padding: 48px 24px; border-radius: 12px; border: 1px dashed var(--border);">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(99, 102, 241, 0.1); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <h4 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px 0;">কোনো ডিভাইস কানেক্ট করা নেই</h4>
+          <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px auto; line-height: 1.5;">
+            আপনার ফোনে <strong>SyncPay Forwarder APK</strong> ইনস্টল করুন এবং নিচের বাটনে ক্লিক করে QR কোড স্ক্যান করে ডিভাইস যুক্ত করুন।
+          </p>
+          <button class="btn btn-primary-action" onclick="window.payflowApp.showAddDeviceModal()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>📱 Connect Device / QR Code</span>
+          </button>
+        </div>
+      ` : `
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:20px;">
         ${devices.map(d => {
           const isOnline = d.status === 'ONLINE';
@@ -450,9 +465,9 @@ export const components = {
               </button>
             </div>
           </div>
-          `;
         }).join('')}
       </div>
+      `}
     `;
   },
 
