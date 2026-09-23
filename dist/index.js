@@ -108,9 +108,6 @@ server.get('/', async (_req, reply) => {
     }
     return reply.type('text/html').sendFile('index.html');
 });
-server.head('/', async (_req, reply) => {
-    return reply.type('text/html; charset=utf-8').header('content-length', Buffer.byteLength(indexHtmlContent)).send('');
-});
 server.get('/login', async (_req, reply) => {
     return reply.type('text/html').sendFile('login.html');
 });
