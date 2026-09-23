@@ -18,8 +18,6 @@ export default async function handler(req, res) {
   try {
     const server = await getServer();
 
-    // In Vercel rewrites, destination rewrite rewrites req.url to /api/index.js
-    // Extract genuine requested URI from x-matched-path header
     let targetUrl = req.headers['x-matched-path'] || req.url || '/';
     if (targetUrl === '/api/index.js' || targetUrl.startsWith('/api/index.js?')) {
       targetUrl = req.headers['x-matched-path'] || '/';
@@ -43,11 +41,18 @@ export default async function handler(req, res) {
 
     res.statusCode = response.statusCode;
     for (const [key, value] of Object.entries(response.headers)) {
-      if (value !== undefined && !HOP_BY_HOP.has(key.toLowerCase())) {
+      if (value !== undefined && !HOP_BY_HOP.has(key.toLowerCase()) && key.toLowerCase() !== 'content-length') {
         res.setHeader(key, value);
       }
     }
-    res.end(response.rawPayload);
+
+    const raw = response.rawPayload;
+    if (raw && raw.length > 0) {
+      res.setHeader('content-length', Buffer.byteLength(raw));
+      res.end(raw);
+    } else {
+      res.end();
+    }
   } catch (err) {
     console.error('Vercel API Gateway Error:', err);
     if (!res.headersSent) {
