@@ -200,7 +200,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
     return reply.send({
       success: true,
       app_name: 'SyncPay Agent',
-      package_name: 'com.zinipay.payflow_agent',
+      package_name: 'dev.jahidulislam.syncpay',
       developer: 'Jahidul Islam',
       developer_url: 'https://jahidulislam.dev',
       latest_version: '1.1.0',
