@@ -1,7 +1,7 @@
 // SyncPay BD — Production Dashboard Master Application Controller
-import { i18n } from './i18n.js?v=1.2.0';
-import { api } from './api.js?v=1.2.0';
-import { components } from './components.js?v=1.2.0';
+import { i18n } from './i18n.js?v=1.2.1';
+import { api } from './api.js?v=1.2.1';
+import { components } from './components.js?v=1.2.1';
 import { auth } from './auth.js';
 
 class PayFlowDashboardApp {
@@ -170,8 +170,9 @@ class PayFlowDashboardApp {
         this.refreshDevices();
       }
     }
+  }
 
-    showLockedView(viewName, planKey) {
+  showLockedView(viewName, planKey) {
       const planInfo = auth.getPlan(planKey);
       const allPlans = auth.getAllPlans();
       const nextPlan = planKey === 'starter' ? 'growth' : 'enterprise';
