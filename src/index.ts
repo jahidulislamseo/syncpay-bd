@@ -69,81 +69,86 @@ server.get('/health', async () => {
   return { status: 'OK', timestamp: new Date().toISOString(), system: 'SyncPay BD Gateway', domain: 'syncpaybd.site' };
 });
 
-// Serve Static Frontend only in standalone Node.js environment (Vercel CDN serves static assets directly)
-if (!process.env.VERCEL) {
-  await server.register(fastifyStatic, {
-    root: path.resolve(__dirname, '../public'),
-    prefix: '/',
-  });
+import fs from 'node:fs';
 
-  // Canonical Non-WWW & Clean URL Hook: Redirect any www.* or *.html request (301 Permanent Redirect)
-  server.addHook('onRequest', async (req, reply) => {
-    // 1. Enforce Non-WWW Canonical Domain (e.g. www.syncpaybd.site -> syncpaybd.site)
-    const host = req.headers.host;
-    if (host && /^www\./i.test(host)) {
-      const nonWwwHost = host.replace(/^www\./i, '');
-      const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
-      return reply.code(301).redirect(`${proto}://${nonWwwHost}${req.raw.url || req.url}`);
+const publicDir = fs.existsSync(path.resolve(__dirname, '../public'))
+  ? path.resolve(__dirname, '../public')
+  : fs.existsSync(path.resolve(__dirname, 'public'))
+    ? path.resolve(__dirname, 'public')
+    : path.resolve(process.cwd(), 'public');
+
+await server.register(fastifyStatic, {
+  root: publicDir,
+  prefix: '/',
+});
+
+// Canonical Non-WWW & Clean URL Hook: Redirect any www.* or *.html request (301 Permanent Redirect)
+server.addHook('onRequest', async (req, reply) => {
+  // 1. Enforce Non-WWW Canonical Domain (e.g. www.syncpaybd.site -> syncpaybd.site)
+  const host = req.headers.host;
+  if (host && /^www\./i.test(host)) {
+    const nonWwwHost = host.replace(/^www\./i, '');
+    const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
+    return reply.code(301).redirect(`${proto}://${nonWwwHost}${req.raw.url || req.url}`);
+  }
+
+  // 2. Enforce Extensionless Clean URLs (e.g. /dashboard.html -> /dashboard)
+  const rawUrl = req.raw.url || req.url || '';
+  const [pathname, search] = rawUrl.split('?');
+  if (pathname && pathname.endsWith('.html')) {
+    let cleanPath = pathname.slice(0, -5);
+    if (cleanPath === '/index') {
+      cleanPath = '/';
     }
+    const target = cleanPath + (search ? `?${search}` : '');
+    return reply.code(301).redirect(target);
+  }
+});
 
-    // 2. Enforce Extensionless Clean URLs (e.g. /dashboard.html -> /dashboard)
-    const rawUrl = req.raw.url || req.url || '';
-    const [pathname, search] = rawUrl.split('?');
-    if (pathname && pathname.endsWith('.html')) {
-      let cleanPath = pathname.slice(0, -5);
-      if (cleanPath === '/index') {
-        cleanPath = '/';
-      }
-      const target = cleanPath + (search ? `?${search}` : '');
-      return reply.code(301).redirect(target);
-    }
-  });
+// Dashboard & App clean routes (serve HTML directly without extension in URL)
+server.get('/login', async (_req, reply) => {
+  return reply.type('text/html').sendFile('login.html');
+});
 
-  // Dashboard & App clean routes (serve HTML directly without extension in URL)
-  server.get('/login', async (_req, reply) => {
-    return reply.type('text/html').sendFile('login.html');
-  });
+server.get('/dashboard', async (_req, reply) => {
+  return reply.type('text/html').sendFile('dashboard.html');
+});
 
-  server.get('/dashboard', async (_req, reply) => {
-    return reply.type('text/html').sendFile('dashboard.html');
-  });
+server.get('/admin', async (_req, reply) => {
+  return reply.type('text/html').sendFile('admin.html');
+});
 
-  server.get('/admin', async (_req, reply) => {
-    return reply.type('text/html').sendFile('admin.html');
-  });
+server.get('/checkout', async (_req, reply) => {
+  return reply.type('text/html').sendFile('checkout.html');
+});
 
-  server.get('/checkout', async (_req, reply) => {
-    return reply.type('text/html').sendFile('checkout.html');
-  });
+server.get('/checkout/:slug', async (_req, reply) => {
+  return reply.type('text/html').sendFile('checkout.html');
+});
 
-  server.get('/checkout/:slug', async (_req, reply) => {
-    return reply.type('text/html').sendFile('checkout.html');
-  });
+server.get('/pay/:slug', async (_req, reply) => {
+  return reply.type('text/html').sendFile('checkout.html');
+});
 
-  server.get('/pay/:slug', async (_req, reply) => {
-    return reply.type('text/html').sendFile('checkout.html');
-  });
+server.get('/download', async (_req, reply) => {
+  return reply.type('text/html').sendFile('download.html');
+});
 
-  server.get('/download', async (_req, reply) => {
-    return reply.type('text/html').sendFile('download.html');
-  });
+server.get('/app', async (_req, reply) => {
+  return reply.type('text/html').sendFile('download.html');
+});
 
-  server.get('/app', async (_req, reply) => {
-    return reply.type('text/html').sendFile('download.html');
-  });
+server.get('/docs/api', async (_req, reply) => {
+  return reply.type('text/html').sendFile('docs/api.html');
+});
 
-  server.get('/docs/api', async (_req, reply) => {
-    return reply.type('text/html').sendFile('docs/api.html');
-  });
+server.get('/docs/trx-verification', async (_req, reply) => {
+  return reply.type('text/html').sendFile('docs/trx-verification.html');
+});
 
-  server.get('/docs/trx-verification', async (_req, reply) => {
-    return reply.type('text/html').sendFile('docs/trx-verification.html');
-  });
-
-  server.get('/docs/webhook', async (_req, reply) => {
-    return reply.type('text/html').sendFile('docs/webhook.html');
-  });
-}
+server.get('/docs/webhook', async (_req, reply) => {
+  return reply.type('text/html').sendFile('docs/webhook.html');
+});
 
 const PORT = Number(process.env.PORT) || 4000;
 const HOST = '0.0.0.0';
