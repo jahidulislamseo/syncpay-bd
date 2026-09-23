@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url';
 import rateLimit from '@fastify/rate-limit';
 import fastifyJwt from '@fastify/jwt';
 import fastifySwagger from '@fastify/swagger';
-import fastifySwaggerUi from '@fastify/swagger-ui';
 import { validatorCompiler, serializerCompiler } from 'fastify-type-provider-zod';
 import { deviceRoutes } from './routes/device.routes.js';
 import { paymentRoutes } from './routes/payment.routes.js';
@@ -41,12 +40,45 @@ await server.register(fastifySwagger, {
         servers: [{ url: '/' }],
     },
 });
-await server.register(fastifySwaggerUi, {
-    routePrefix: '/api-docs',
-    uiConfig: {
-        docExpansion: 'list',
-        deepLinking: false,
-    },
+// Swagger JSON Spec Endpoint
+server.get('/api-docs/json', async (_req, reply) => {
+    return reply.type('application/json').send(server.swagger());
+});
+// Interactive Swagger UI (Zero-dependency CDN embed to prevent serverless ESM/CJS require crashes)
+server.get('/api-docs', async (_req, reply) => {
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SyncPay BD - OpenAPI Specification</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    body { margin: 0; background: #0b0f19; font-family: system-ui, sans-serif; }
+    .topbar { display: none !important; }
+    .swagger-ui .info .title { color: #38bdf8 !important; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: '/api-docs/json',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIBundle.SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout"
+      });
+    };
+  </script>
+</body>
+</html>`;
+    return reply.type('text/html; charset=utf-8').send(html);
 });
 // Rate limiting to prevent brute-force attacks and DDoS
 await server.register(rateLimit, {
