@@ -112,6 +112,9 @@ server.addHook('onRequest', async (req, reply) => {
 server.get('/test-hello', async () => {
     return 'hello world';
 });
+server.get('/home', async (_req, reply) => {
+    return reply.type('text/html').sendFile('index.html');
+});
 server.get('/test-index', async (_req, reply) => {
     return reply.type('text/html').sendFile('index.html');
 });
