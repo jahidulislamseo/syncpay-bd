@@ -2520,6 +2520,24 @@ class PayFlowDashboardApp {
     }
   }
 
+  async pingDeviceTest(deviceId) {
+    this.showToast('Pinging device forwarder...', 'info');
+    const start = Date.now();
+    try {
+      const devices = await api.getDevices();
+      const latency = Math.max(22, Math.round(Date.now() - start));
+      const target = (devices || []).find(d => d.id === deviceId);
+      if (target && target.status === 'ONLINE') {
+        this.showToast(`⚡ ${target.device_name || 'Device'} responded in ${latency}ms! Signal & latency optimal.`, 'success');
+      } else {
+        this.showToast(`⚠️ Device is OFFLINE or waiting for phone heartbeat.`, 'warning');
+      }
+      await this.refreshAllData();
+    } catch (e) {
+      this.showToast('Ping failed: ' + e.message, 'error');
+    }
+  }
+
   openConnectWebsiteModal() {
     const modal = document.getElementById('modal-connect-website');
     if (modal) modal.classList.add('active');

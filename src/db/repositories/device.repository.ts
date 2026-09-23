@@ -12,6 +12,15 @@ export interface DeviceEntity {
   mfs_provider?: string | null;
   status: 'ONLINE' | 'OFFLINE' | 'SUSPENDED';
   last_seen_at?: string | null;
+  last_seen?: string | null;
+  sim_number?: string | null;
+  battery_level?: number | null;
+  battery_temp?: number | null;
+  is_charging?: boolean | null;
+  charger_type?: string | null;
+  free_ram_mb?: number | null;
+  sim_slots?: any;
+  sms_count?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -134,13 +143,24 @@ export class DeviceRepository {
     }
 
     const localDevices = dbService.getAllDevices(merchantId);
-    return localDevices.map((d) => ({
+    return localDevices.map((d: any) => ({
       id: d.id,
       merchant_id: d.merchant_id,
       device_name: d.device_name,
-      device_token_hash: CryptoUtil.hashToken(d.device_token),
+      device_token_hash: CryptoUtil.hashToken(d.device_token || d.id),
       status: d.status as any,
+      last_seen: d.last_seen,
       last_seen_at: d.last_seen,
+      sim_number: d.sim_number,
+      device_model: d.device_model || null,
+      android_version: d.android_version || null,
+      battery_level: d.battery_level !== undefined ? d.battery_level : null,
+      battery_temp: d.battery_temp !== undefined ? d.battery_temp : null,
+      is_charging: d.is_charging === 1 || d.is_charging === true,
+      charger_type: d.charger_type || null,
+      free_ram_mb: d.free_ram_mb || null,
+      sim_slots: typeof d.sim_slots === 'string' ? (() => { try { return JSON.parse(d.sim_slots); } catch (_) { return null; } })() : (d.sim_slots || null),
+      sms_count: d.sms_count || 0,
     }));
   }
 
