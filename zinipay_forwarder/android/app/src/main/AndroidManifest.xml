@@ -58,8 +58,7 @@
         <!-- BroadcastReceiver — intercepts all incoming SMS at Priority 999 -->
         <receiver
             android:name=".SmsListenerReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
+            android:exported="true">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>

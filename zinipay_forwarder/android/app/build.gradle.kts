@@ -28,7 +28,11 @@ android {
     }
 
     signingConfigs {
-        getByName("debug") {
+        create("release") {
+            keyAlias = "syncpay"
+            keyPassword = "syncpay2026"
+            storeFile = file("release.jks")
+            storePassword = "syncpay2026"
             enableV1Signing = true
             enableV2Signing = true
         }
@@ -38,7 +42,7 @@ android {
         release {
             isMinifyEnabled = false
             isShrinkResources = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
