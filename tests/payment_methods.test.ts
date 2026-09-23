@@ -138,4 +138,15 @@ describe('Payment Methods Suite: Zero-Prefill & Dynamic Merchant Control', () =>
     const afterDelete = db.getPaymentMethods(id17, false) as any[];
     assert.equal(afterDelete.length, 0, 'Should delete channel for 17-digit merchant ID');
   });
+
+  it('should guarantee zero pre-seeded devices and completely clean device slate', () => {
+    const devices = db.getAllDevices(merchantId);
+    assert.equal(devices.length, 0, 'Merchant should start with 0 devices, no fake pre-seeded phones');
+
+    const devPhone = db.getDeviceByToken('dev_phone_1');
+    assert.equal(devPhone, undefined, 'dev_phone_1 must be completely purged');
+
+    const devToken = db.getDeviceByToken('token_phone_primary');
+    assert.equal(devToken, undefined, 'token_phone_primary must be completely purged');
+  });
 });

@@ -330,14 +330,6 @@ export class DatabaseService {
         PRAGMA foreign_keys = ON;
       `);
         }
-        // Seed default receiving device
-        const checkDevice = this.db.prepare('SELECT id FROM devices WHERE id = ? OR device_token = ?');
-        if (!checkDevice.get('dev_phone_1', 'token_phone_primary')) {
-            this.db.prepare(`
-        INSERT OR IGNORE INTO devices (id, merchant_id, device_token, device_name, sim_number)
-        VALUES ('dev_phone_1', 'm_demo_101', 'token_phone_primary', 'TECNO KM5 (SyncPay Forwarder)', '017•••••••')
-      `).run();
-        }
         // Seed 17-digit merchant & legacy aliases
         if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('01711000000260923')) {
             this.db.prepare(`
@@ -357,12 +349,8 @@ export class DatabaseService {
         VALUES ('00000000-0000-0000-0000-000000000999', 'SyncPay BD Sandbox (UUID)', 'sandbox_test_8f4c9a2e7b31_uuid', 'https://merchant.com/api/syncpay/webhook')
       `).run();
         }
-        if (!this.db.prepare('SELECT id FROM devices WHERE id = ? OR device_token = ?').get('00000000-0000-0000-0000-000000000001', 'token_phone_primary_uuid')) {
-            this.db.prepare(`
-        INSERT OR IGNORE INTO devices (id, merchant_id, device_token, device_name, sim_number)
-        VALUES ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'token_phone_primary_uuid', 'TECNO KM5 (SyncPay Forwarder)', '017•••••••')
-      `).run();
-        }
+        // Purge legacy pre-seeded mock devices so merchants start with a 100% clean slate
+        this.db.prepare("DELETE FROM devices WHERE id IN ('dev_phone_1', '00000000-0000-0000-0000-000000000001') OR device_token LIKE 'token_phone_primary%'").run();
         // Purge legacy pre-seeded mock payment channels so merchants start with a 100% clean slate
         this.db.prepare("DELETE FROM payment_methods WHERE id LIKE 'pm_%_m_demo_101' OR id LIKE 'pm_%_00000000-0000-0000-0000-000000000101' OR id LIKE 'pm_%_01711000000260923'").run();
     }

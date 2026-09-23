@@ -40,8 +40,8 @@ class PayFlowDashboardApp {
     }
     this.updateSidebarUser();
 
-    // Check and show Demo Mode Strip if explicitly exploring demo merchant
-    const isDemoMode = (this.session && (this.session.isDemo === true || this.session.merchantId === 'm_demo_101' || this.session.merchantId === '01711000000260923' || this.session.email === 'demo@syncpaybd.site')) || window.location.search.includes('demo=true');
+    // Check and show Demo Mode Strip ONLY when explicitly exploring via URL (?demo=true)
+    const isDemoMode = new URLSearchParams(window.location.search).get('demo') === 'true';
     this.isDemoMode = isDemoMode;
     const demoStrip = document.getElementById('demo-mode-strip');
     if (demoStrip && isDemoMode) {
@@ -1843,11 +1843,11 @@ class PayFlowDashboardApp {
     if (!slot) return;
 
     const session = auth.getSession() || {
-      name: 'Demo Merchant',
-      business: 'Demo Merchant Store',
-      email: 'demo@syncpaybd.site',
-      plan: 'growth',
-      apiKey: 'live_sk_demo_99410abc',
+      name: 'Merchant Account',
+      business: 'My Business Store',
+      email: '',
+      plan: 'starter',
+      apiKey: '',
     };
     const plan = auth.getPlan(session.plan);
 
@@ -1945,7 +1945,7 @@ class PayFlowDashboardApp {
             </div>
             <div style="padding:14px; background:var(--bg-subtle); border-radius:8px; border:1px solid var(--border);">
               <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Merchant ID</div>
-              <div class="mono" style="font-size:14px; font-weight:700; margin-top:4px; color:var(--primary);">${session.merchantId || 'm_demo_101'}</div>
+              <div class="mono" style="font-size:14px; font-weight:700; margin-top:4px; color:var(--primary);">${session.merchantId || '--'}</div>
             </div>
           </div>
         </div>
@@ -2311,10 +2311,16 @@ class PayFlowDashboardApp {
 
     const modal = document.getElementById('modal-add-device');
     if (!modal) return;
+    if (!this.devices || this.devices.length === 0) {
+      this.switchDeviceModalTab('form');
+      modal.classList.add('active');
+      return;
+    }
+
     this.switchDeviceModalTab('qr');
     modal.classList.add('active');
 
-    const primaryDeviceId = (this.devices && this.devices[0] && this.devices[0].id) || 'dev_phone_1';
+    const primaryDeviceId = this.devices[0].id;
     const qrSlot = document.getElementById('add-device-qr-image-slot');
     if (qrSlot) {
       qrSlot.innerHTML = `<div style="padding:40px; color:var(--text-muted); font-size:13px;">Generating QR Code...</div>`;

@@ -220,7 +220,7 @@ export async function merchantRoutes(fastify) {
                 fastify.log.warn(`dbService.getAllDevices error: ${e.message}`);
             }
         }
-        const token = dev ? dev.device_token || dev.id : (deviceId === 'dev_phone_1' ? 'token_phone_primary' : deviceId);
+        const token = dev ? dev.device_token || dev.id : deviceId;
         const host = request.headers.host || 'syncpaybd.site';
         const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
         const protocol = request.headers['x-forwarded-proto'] || (isLocal ? 'http' : 'https');
@@ -234,7 +234,7 @@ export async function merchantRoutes(fastify) {
             merchant_id: payloadMerchantId,
             device_id: deviceId,
             device_token: token,
-            device_name: dev?.device_name || 'TECNO KM5 (SyncPay Forwarder)',
+            device_name: dev?.device_name || 'SyncPay Device',
         };
         try {
             const qrDataUrl = await QRCode.toDataURL(JSON.stringify(pairingPayload), {

@@ -147,11 +147,10 @@ export class ApiClient {
       }
     } catch (e) {}
 
-    // Only return simulated device when explicitly exploring in Demo Mode
+    // Only return simulated device when explicitly exploring in Demo Mode via URL ?demo=true
     let isDemo = false;
     try {
-      const session = JSON.parse(localStorage.getItem('syncpay_session') || '{}');
-      isDemo = session.isDemo || session.merchantId === 'm_demo_101' || window.location.search.includes('demo=true');
+      isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
     } catch (err) {}
 
     if (isDemo) {
