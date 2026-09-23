@@ -160,17 +160,7 @@ export class DeviceRepository {
           .eq('merchant_id', targetMerchantId)
           .order('created_at', { ascending: false });
 
-        let deviceList = (!error && data && data.length > 0) ? data : [];
-        if (deviceList.length === 0 && targetMerchantId !== '00000000-0000-0000-0000-000000000101') {
-          const { data: fallbackData } = await supabase
-            .from('devices')
-            .select('*')
-            .eq('merchant_id', '00000000-0000-0000-0000-000000000101')
-            .order('created_at', { ascending: false });
-          if (fallbackData && fallbackData.length > 0) {
-            deviceList = fallbackData;
-          }
-        }
+        const deviceList = (!error && data && data.length > 0) ? data : [];
 
         if (deviceList.length > 0) {
           return deviceList.map((d: any) => {

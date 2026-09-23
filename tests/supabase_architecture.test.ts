@@ -27,6 +27,16 @@ describe('Supabase PostgreSQL Architecture & Migration Test Suite', { concurrenc
   });
 
   after(async () => {
+    const supabase = getSupabaseClient();
+    if (supabase && isSupabaseConfigured()) {
+      try {
+        await supabase.from('devices').delete().eq('merchant_id', testTenantA);
+        await supabase.from('transactions').delete().eq('merchant_id', testTenantA);
+        await supabase.from('invoices').delete().eq('merchant_id', testTenantA);
+        await supabase.from('invoices').delete().eq('merchant_id', testTenantB);
+        await supabase.from('merchants').delete().like('email', 'merchant_%@example.com');
+      } catch (_) {}
+    }
     await app.close();
   });
 
