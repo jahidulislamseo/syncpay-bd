@@ -2682,6 +2682,9 @@ class PayFlowDashboardApp {
     if (fileInput) fileInput.value = '';
     this.updateQrPreview('');
 
+    const advDetails = document.getElementById('pm-advanced-details');
+    if (advDetails) advDetails.removeAttribute('open');
+
     this.onPaymentTypeChange(true);
     const modal = document.getElementById('modal-payment-method');
     if (modal) modal.classList.add('active');
