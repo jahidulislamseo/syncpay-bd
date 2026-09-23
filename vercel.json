@@ -1,31 +1,33 @@
 {
   "version": 2,
-  "outputDirectory": "public",
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.syncpaybd.site" }],
-      "destination": "https://syncpaybd.site/$1",
-      "permanent": true
-    }
+  "builds": [
+    { "src": "api/index.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
   ],
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index.js" },
-    { "source": "/api",        "destination": "/api/index.js" },
-    { "source": "/health",     "destination": "/api/index.js" },
-    { "source": "/login",                   "destination": "/login.html" },
-    { "source": "/dashboard",               "destination": "/dashboard.html" },
-    { "source": "/admin",                   "destination": "/admin.html" },
-    { "source": "/checkout",                "destination": "/checkout.html" },
-    { "source": "/checkout/:slug*",         "destination": "/checkout.html" },
-    { "source": "/pay/:slug*",              "destination": "/checkout.html" },
-    { "source": "/app",                     "destination": "/download.html" },
-    { "source": "/download",               "destination": "/download.html" },
-    { "source": "/docs/api",               "destination": "/docs/api.html" },
-    { "source": "/docs/trx-verification",  "destination": "/docs/trx-verification.html" },
-    { "source": "/docs/webhook",           "destination": "/docs/webhook.html" }
+  "routes": [
+    {
+      "src": "/(.*)",
+      "has": [{ "type": "host", "value": "www.syncpaybd.site" }],
+      "status": 308,
+      "headers": { "Location": "https://syncpaybd.site/$1" }
+    },
+    { "src": "/api/(.*)",             "dest": "/api/index.js" },
+    { "src": "/api",                  "dest": "/api/index.js" },
+    { "src": "/login",                "dest": "/public/login.html" },
+    { "src": "/dashboard",            "dest": "/public/dashboard.html" },
+    { "src": "/admin",                "dest": "/public/admin.html" },
+    { "src": "/checkout",             "dest": "/public/checkout.html" },
+    { "src": "/checkout/(.*)",        "dest": "/public/checkout.html" },
+    { "src": "/pay/(.*)",             "dest": "/public/checkout.html" },
+    { "src": "/app",                  "dest": "/public/download.html" },
+    { "src": "/download",             "dest": "/public/download.html" },
+    { "src": "/docs/api",             "dest": "/public/docs/api.html" },
+    { "src": "/docs/trx-verification","dest": "/public/docs/trx-verification.html" },
+    { "src": "/docs/webhook",         "dest": "/public/docs/webhook.html" },
+    { "src": "/(.*)",                 "dest": "/public/$1" }
   ]
 }
+
 
