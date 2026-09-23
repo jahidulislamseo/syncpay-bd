@@ -1,7 +1,7 @@
 // SyncPay BD — Production Dashboard Master Application Controller
-import { i18n } from './i18n.js?v=1.2.2';
-import { api } from './api.js?v=1.2.2';
-import { components } from './components.js?v=1.2.2';
+import { i18n } from './i18n.js?v=1.2.3';
+import { api } from './api.js?v=1.2.3';
+import { components } from './components.js?v=1.2.3';
 import { auth } from './auth.js';
 
 class PayFlowDashboardApp {
@@ -2389,9 +2389,12 @@ class PayFlowDashboardApp {
           } catch (_) { }
         }
 
-        // If still no device in memory, use 'primary' to auto-provision on server
-        const targetId = primaryDeviceId || 'primary';
-        const res = await api.getDeviceQr(targetId);
+        if (!primaryDeviceId) {
+          this.switchDeviceModalTab('form');
+          return;
+        }
+
+        const res = await api.getDeviceQr(primaryDeviceId);
 
         if (res && res.success) {
           if (qrSlot) {
@@ -2435,9 +2438,14 @@ class PayFlowDashboardApp {
       const modal = document.getElementById('modal-add-device');
       if (!modal) return;
 
-      this.switchDeviceModalTab('qr');
-      modal.classList.add('active');
-      await this.loadAddDeviceQr();
+      if (this.devices && this.devices.length > 0) {
+        this.switchDeviceModalTab('qr');
+        modal.classList.add('active');
+        await this.loadAddDeviceQr();
+      } else {
+        this.switchDeviceModalTab('form');
+        modal.classList.add('active');
+      }
     }
 
   async submitAddDevice() {

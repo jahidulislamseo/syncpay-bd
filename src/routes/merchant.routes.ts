@@ -246,34 +246,15 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       } else {
         dev = devices.find(d => d.id === deviceId);
       }
-
-      // If no device exists yet for this merchant, auto-provision one on the fly
-      if (!dev && (deviceId === 'primary' || deviceId === 'auto' || deviceId === 'default' || devices.length === 0)) {
-        try {
-          const reg = await DeviceService.registerDevice({
-            merchantId,
-            deviceName: 'SyncPay Phone 1',
-          });
-          dev = reg.device;
-          if (reg.token) {
-            (dev as any).device_token = reg.token;
-          }
-          deviceId = dev.id;
-        } catch (regErr: any) {
-          fastify.log.warn(`Auto-provisioning device notice: ${regErr.message}`);
-        }
-      }
     } catch (e: any) {
       fastify.log.warn(`DeviceService.listMerchantDevices error: ${e.message}`);
     }
 
-    if (!dev && (merchantId === DEMO_MERCHANT_ID || merchantId === FALLBACK_MERCHANT_ID)) {
-      try {
-        const fallback = dbService.getAllDevices(FALLBACK_MERCHANT_ID);
-        dev = fallback.find((d: any) => d.id === deviceId) || fallback[0];
-      } catch (e: any) {
-        fastify.log.warn(`dbService.getAllDevices error: ${e.message}`);
-      }
+    if (!dev) {
+      return reply.status(404).send({
+        success: false,
+        error: 'No registered device found. Please register a device first.',
+      });
     }
 
     const token = dev ? (dev as any).device_token || dev.id : deviceId;
